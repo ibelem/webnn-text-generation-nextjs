@@ -1,13 +1,34 @@
-import { generateDummyPassword } from './db/utils';
 
-export const isProductionEnvironment = process.env.NODE_ENV === 'production';
-export const isDevelopmentEnvironment = process.env.NODE_ENV === 'development';
-export const isTestEnvironment = Boolean(
-  process.env.PLAYWRIGHT_TEST_BASE_URL ||
-    process.env.PLAYWRIGHT ||
-    process.env.CI_PLAYWRIGHT,
-);
+import type { ModelType, BackendType } from "../lib/types"
 
-export const guestRegex = /^guest-\d+$/;
+export const MODELS: Array<{
+  id: ModelType;
+  model: string;
+  dataType: string;
+  name: string;
+  desc: string;
+}> = [
+  {
+    id: "phi-3_5-mini" as ModelType,
+    model: "onnx-community/Phi-3.5-mini-instruct-onnx-web",
+    dataType: "q4f16",
+    name: "Phi-3.5 Mini",
+    desc: "Small language model",
+  },
+  {
+    id: "phi-4-mini" as ModelType,
+    model: "webnn/Phi-4-mini-instruct-onnx-transformers_js",
+    dataType: "q4f16",
+    name: "Phi-4 Mini",
+    desc: "Small language model",
+  },
+];
 
-export const DUMMY_PASSWORD = generateDummyPassword();
+export const BACKENDS: Array<{
+  id: BackendType;
+  name: string;
+}> = [
+  { id: "webgpu" as BackendType, name: "WebGPU" },
+  { id: "webnn-gpu" as BackendType, name: "WebNN GPU" },
+  { id: "webnn-npu" as BackendType, name: "WebNN NPU" },
+];
