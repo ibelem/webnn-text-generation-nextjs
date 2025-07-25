@@ -15,13 +15,13 @@ export const MODELS: Array<{
     name: "Phi-3.5 Mini",
     desc: "Small language model",
   },
-  {
-    id: "phi-4-mini" as ModelType,
-    model: "webnn/Phi-4-mini-instruct-onnx-transformers_js",
-    dataType: "q4f16",
-    name: "Phi-4 Mini",
-    desc: "Small language model",
-  },
+  // {
+  //   id: "phi-4-mini" as ModelType,
+  //   model: "webnn/Phi-4-mini-instruct-onnx-transformers_js",
+  //   dataType: "q4f16",
+  //   name: "Phi-4 Mini",
+  //   desc: "Small language model",
+  // },
 ];
 
 export const BACKENDS: Array<{
