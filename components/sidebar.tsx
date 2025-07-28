@@ -18,10 +18,18 @@ interface SidebarProps {
   setSelectedBackend: (backend: BackendType) => void;
   progressItems: ProgressProps[];
   setProgressItems?: React.Dispatch<React.SetStateAction<ProgressProps[]>>;
-  workerRef: React.RefObject<Worker | null>; // Add worker ref prop
+  workerRef: React.RefObject<Worker | null>;
 }
 
-export function Sidebar({ selectedModel, setSelectedModel, selectedBackend, setSelectedBackend, progressItems, setProgressItems, workerRef }: SidebarProps) {
+export function Sidebar({
+  selectedModel,
+  setSelectedModel,
+  selectedBackend,
+  setSelectedBackend,
+  progressItems,
+  setProgressItems,
+  workerRef,
+}: SidebarProps) {
   // Track model load state: { [modelId]: "not_loaded" | "loading" | "loaded" }
   const [modelLoadState, setModelLoadState] = React.useState<Record<string, "not_loaded" | "loading" | "warm" | "loaded">>({});
 
@@ -31,42 +39,50 @@ export function Sidebar({ selectedModel, setSelectedModel, selectedBackend, setS
     const currentWorker = workerRef.current;
 
     function onWorkerMessage(e: MessageEvent) {
-      const { status, model_id, data, file, progress, total, percentage } = e.data;
-      if (!model_id) return;
+      const { status, model_id, data, file, progress, total } = e.data;
+      if (!model_id && status !== "initiate" && status !== "progress" && status !== "done") return;
 
       if (status === "loading") {
         setModelLoadState((prev) => ({ ...prev, [model_id]: "loading" }));
         if (data) {
-          setProgressItems?.([{ text: data, percentage: percentage || 0 }]);
+          setProgressItems?.([{ text: data, progress: 0 }]);
         }
-      } else if (status === "progress") {
-        setProgressItems?.((prev) =>
-          (prev || []).map((item) =>
-            item.file === file
-              ? { ...item, progress, total, percentage }
-              : item
-          )
-        );
-      } else if (status === "loaded" || status === "ready") {
-        setModelLoadState((prev) => ({ ...prev, [model_id]: "loaded" }));
-        setProgressItems?.([]); // Only clear progress when all files are loaded
-      } else if (status === "reset") {
-        setModelLoadState((prev) => ({ ...prev, [model_id]: "not_loaded" }));
-        setProgressItems?.([]);
       } else if (status === "initiate") {
+        // File download started
         setProgressItems?.((prev) => [
           ...(prev || []),
           {
             file,
-            progress: progress ?? 0,
+            progress: 0,
             total,
             text: file,
           }
         ]);
+      } else if (status === "progress") {
+        setProgressItems?.((prev) =>
+          (prev || []).map((item) =>
+            item.file === file
+              ? {
+                  ...item,
+                  progress: typeof progress === "number" ? progress / 100 : 0, // Use fraction for Progress
+                  total,
+                }
+              : item
+          )
+        );
       } else if (status === "done") {
-        setProgressItems?.((prev) => (prev || []).filter((item) => item.file !== file));
+        // File download completed
+        setProgressItems?.((prev) =>
+          (prev || []).filter((item) => item.file !== file)
+        );
+      } else if (status === "loaded" || status === "ready") {
+        setModelLoadState((prev) => ({ ...prev, [model_id]: "loaded" }));
+        setProgressItems?.([]); // Clear all progress when model is ready
       } else if (status === "warm") {
         setModelLoadState((prev) => ({ ...prev, [model_id]: "warm" }));
+      } else if (status === "reset") {
+        setModelLoadState((prev) => ({ ...prev, [model_id]: "not_loaded" }));
+        setProgressItems?.([]);
       }
     }
 
@@ -182,27 +198,15 @@ export function Sidebar({ selectedModel, setSelectedModel, selectedBackend, setS
         </div>
         {/* Progress bar UI (show only if loading/progress is needed) */}
         <div className="my-2">
-              {progressItems && progressItems.length > 0 && progressItems
-  .filter(item => {
-    // Only show files that are not done
-    if (typeof item.progress === "number" && item.progress >= 1) return false;
-    if (typeof item.percentage === "number" && item.percentage >= 100) return false;
-    return true;
-  })
-  .map((item, i) => (
-    <Progress
-      key={item.file || i}
-      text={item.file || item.text}
-      percentage={
-        typeof item.percentage === "number"
-          ? item.percentage
-          : typeof item.progress === "number"
-          ? item.progress * 100
-          : 0
-      }
-      total={item.total}
-    />
-  ))}
+              {progressItems && progressItems.length > 0 &&
+          progressItems.map((item, i) => (
+            <Progress
+              key={item.file || i}
+              text={item.file || item.text}
+              progress={item.progress}
+              total={item.total}
+            />
+          ))}
         </div>
       </div>
     </div>
