@@ -32,11 +32,19 @@ export default function Page({ params }: { params: Promise<{ model: string; back
   // Sidebar open state
   const [isSidebarOpen, setIsSidebarOpen] = useState(true);
 
+  // Reasoning feature toggle
+  const [reasonEnabled, setReasonEnabled] = useState(false);
+
   // Initialize worker once
   useEffect(() => {
     if (typeof window === "undefined") return
     if (!workerRef.current) {
-      workerRef.current = new Worker("/model-worker.bundle.js", { type: "module" })
+      const workerPath =
+        process.env.NODE_ENV === "development"
+          ? new URL("../../../lib/model-worker.js", import.meta.url)
+          : "/model-worker.bundle.js";
+
+      workerRef.current = new Worker(workerPath, { type: "module" })
       window.chatWorkerRef = workerRef
       setWorkerReady(true) // <-- Set ready here!
     }
@@ -77,6 +85,8 @@ export default function Page({ params }: { params: Promise<{ model: string; back
               progressItems={progressItems}
               setProgressItems={setProgressItems}
               workerRef={workerRef}
+              reasonEnabled={reasonEnabled}
+              setReasonEnabled={setReasonEnabled}
             />
           </div>
         ) : (
@@ -94,6 +104,8 @@ export default function Page({ params }: { params: Promise<{ model: string; back
           selectedBackend={selectedBackend}
           setProgressItems={setProgressItems}
           workerRef={workerRef}
+          reasonEnabled={reasonEnabled}
+          setReasonEnabled={setReasonEnabled}
         />
       </div>
     </div>

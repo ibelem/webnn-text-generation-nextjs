@@ -25,10 +25,21 @@ interface ChatInterfaceProps {
   selectedModel: ModelType;
   selectedBackend: BackendType;
   setProgressItems?: React.Dispatch<React.SetStateAction<ProgressProps[]>>;
-  workerRef: React.RefObject<Worker | null>; // Add worker ref prop
+  workerRef: React.RefObject<Worker | null>;
+  reasonEnabled: boolean;
+  setReasonEnabled: (enabled: boolean) => void;
 }
 
-export function ChatInterface({ isSidebarOpen, setIsSidebarOpen, selectedModel, selectedBackend, setProgressItems, workerRef }: ChatInterfaceProps) {
+export function ChatInterface({
+  isSidebarOpen,
+  setIsSidebarOpen,
+  selectedModel,
+  selectedBackend,
+  setProgressItems,
+  workerRef,
+  reasonEnabled, // eslint-disable-next-line @typescript-eslint/no-unused-vars
+  setReasonEnabled,
+}: ChatInterfaceProps) {
   const [input, setInput] = useState("");
   const [messages, setMessages] = useState<Message[]>([]);
   const [isTyping, setIsTyping] = useState(false);
@@ -131,10 +142,12 @@ export function ChatInterface({ isSidebarOpen, setIsSidebarOpen, selectedModel, 
 
     setMessages((prev) => [...prev, userMessage]);
 
-    // Use passed workerRef instead of local one
     workerRef.current?.postMessage({
       type: "generate",
-      data: nextMessages, // ✅ Send array, not string!
+      data: {
+        messages: nextMessages,
+        reasonEnabled,
+      },
     });
     setIsTyping(true);
     setInput("");
@@ -174,7 +187,7 @@ export function ChatInterface({ isSidebarOpen, setIsSidebarOpen, selectedModel, 
               <h3 className="text-xl font-medium mb-2">How can I help you today?</h3>
               <p className="max-w-md text-sm">Ask me anything or try one of these examples:</p>
               <div className="grid grid-cols-1 gap-2 mt-4 w-full max-w-md">
-                {["Explain transformer model", "Write a poem about AI", "What is WebNN API"].map((example) => (
+                {["Are you Phi or Qwen?", "Explain transformer model", "What is WebNN API"].map((example) => (
                   <Button
                     key={example}
                     variant="outline"
@@ -201,7 +214,9 @@ export function ChatInterface({ isSidebarOpen, setIsSidebarOpen, selectedModel, 
               className="flex items-center space-x-2 p-4 rounded-lg bg-white shadow-sm w-fit"
             >
               <Loader2 className="h-4 w-4 animate-spin text-blue-500" />
-              <span className="text-sm text-gray-600">thinking ...</span>
+              <span className="text-sm text-gray-600">
+                {reasonEnabled ? "thinking (reasoning enabled) ..." : "thinking ..."}
+              </span>
             </motion.div>
           )}
           <div ref={messagesEndRef} />

@@ -19,6 +19,8 @@ interface SidebarProps {
   progressItems: ProgressProps[];
   setProgressItems?: React.Dispatch<React.SetStateAction<ProgressProps[]>>;
   workerRef: React.RefObject<Worker | null>;
+  reasonEnabled: boolean;
+  setReasonEnabled: (enabled: boolean) => void;
 }
 
 export function Sidebar({
@@ -29,6 +31,8 @@ export function Sidebar({
   progressItems,
   setProgressItems,
   workerRef,
+  reasonEnabled,
+  setReasonEnabled,
 }: SidebarProps) {
   // Track model load state: { [modelId]: "not_loaded" | "loading" | "loaded" }
   const [modelLoadState, setModelLoadState] = React.useState<Record<string, "not_loaded" | "loading" | "warm" | "loaded">>({});
@@ -191,11 +195,27 @@ export function Sidebar({
               {MODELS.find((m) => m.id === selectedModel)?.name || selectedModel}
             </span>
           </div>
-          <div className="flex items-center justify-between">
+          <div className="flex items-center justify-between mb-2">
             <span className="text-gray-500">Backend</span>
             <span className="font-medium">{selectedBackend}</span>
           </div>
+          {/* Reasoning toggle UI */}
+          <div className="flex items-center justify-between">
+            <span className="text-gray-500">Reasoning</span>
+            <label className="flex items-center cursor-pointer">
+              <input
+                type="checkbox"
+                checked={reasonEnabled}
+                onChange={e => setReasonEnabled(e.target.checked)}
+                className="mr-2"
+              />
+              <span className="font-medium">
+                Enable <span className="font-medium">Thinking</span>
+              </span>
+            </label>
+          </div>
         </div>
+
         {/* Progress bar UI (show only if loading/progress is needed) */}
         <div className="my-2">
               {progressItems && progressItems.length > 0 &&

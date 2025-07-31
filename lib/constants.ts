@@ -1,4 +1,3 @@
-
 import type { ModelType, BackendType } from "../lib/types"
 
 export const MODELS: Array<{
@@ -7,6 +6,7 @@ export const MODELS: Array<{
   dataType: string;
   name: string;
   desc: string;
+  useExternalDataFormat?: boolean; // <-- Add this line
 }> = [
   {
     id: "phi-3_5-mini" as ModelType,
@@ -14,6 +14,15 @@ export const MODELS: Array<{
     dataType: "q4f16",
     name: "Phi-3.5 Mini",
     desc: "Small language model",
+    useExternalDataFormat: true, // <-- Set for Phi
+  },
+  {
+    id: "qwen3-0_6b" as ModelType,
+    model: "onnx-community/Qwen3-0.6B-ONNX",
+    dataType: "q4f16",
+    name: "Qwen3 0.6B",
+    desc: "Large language model",
+    useExternalDataFormat: false, // <-- Set for Qwen
   },
   // {
   //   id: "phi-4-mini" as ModelType,
