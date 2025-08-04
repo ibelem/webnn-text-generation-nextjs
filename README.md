@@ -2,6 +2,12 @@
 
 WebGPU / WebNN Text Generation Demo by using Next.js. 
 
+## Enabled Models 
+
+- Phi-3.5 mini
+- Qwen3
+- SmolLM3
+
 ## Getting Started
 
 Run the development server:
