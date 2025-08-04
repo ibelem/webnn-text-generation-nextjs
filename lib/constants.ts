@@ -6,6 +6,8 @@ export const MODELS: Array<{
   dataType: string;
   name: string;
   desc: string;
+  parameter: string;
+  size: string;
   useExternalDataFormat?: boolean; // <-- Add this line
 }> = [
   {
@@ -13,16 +15,30 @@ export const MODELS: Array<{
     model: "onnx-community/Phi-3.5-mini-instruct-onnx-web",
     dataType: "q4f16",
     name: "Phi-3.5 Mini",
-    desc: "Small language model",
+    desc: "SLM",
+    parameter: "3.8B",
+    size: "2.15GB",
     useExternalDataFormat: true, // <-- Set for Phi
   },
   {
     id: "qwen3-0_6b" as ModelType,
     model: "onnx-community/Qwen3-0.6B-ONNX",
     dataType: "q4f16",
-    name: "Qwen3 0.6B",
-    desc: "Large language model",
+    name: "Qwen3",
+    desc: "LLM",
+    parameter: "0.6B",
+    size: "543MB",
     useExternalDataFormat: false, // <-- Set for Qwen
+  },
+    {
+    id: "smollm3-3b" as ModelType,
+    model: "HuggingFaceTB/SmolLM3-3B-ONNX",
+    dataType: "q4f16",
+    name: "SmolLM3",
+    desc: "LLM",
+    parameter: "3.0B",
+    size: "1.97GB",      
+    useExternalDataFormat: true,
   },
   // {
   //   id: "phi-4-mini" as ModelType,

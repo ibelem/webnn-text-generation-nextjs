@@ -234,7 +234,7 @@ export function Sidebar({
 }
 
 interface ModelOptionProps {
-  model: { id: ModelType; name: string; desc: string };
+  model: { id: ModelType; name: string; desc: string, parameter: string, size: string };
   isSelected: boolean;
   onClick: () => void;
   loadState: "not_loaded" | "loading" | "warm" | "loaded";
@@ -255,8 +255,12 @@ function ModelOption({ model, isSelected, onClick, loadState, onLoad }: ModelOpt
     >
       <div className={`p-2 rounded-md mr-3 ${isSelected ? "bg-gray-100" : "bg-gray-50"}`}><Icon className="h-4 w-4" /></div>
       <div className="flex-1">
-        <div className="font-medium">{model.name}</div>
-        <div className="text-xs text-gray-500">{model.desc}</div>
+        <div className="font-medium mt-[-7px]">{model.name}</div>
+        <div className="text-xs text-gray-500 mt-[-1px]">
+          <span className="bg-gray-100 text-[11px] py-[1px] px-1 rounded-sm">{model.desc}</span>
+          <span className="bg-gray-100 text-[11px] py-[1px] px-1 rounded-sm mr-1 ml-1">{model.parameter}</span>
+          <span className="bg-gray-100 text-[11px] py-[1px] px-1 rounded-sm">{model.size}</span>
+        </div>
       </div>
       {/* Load/Reload Button */}
       <div className="ml-2 text-xs">

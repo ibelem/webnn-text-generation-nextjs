@@ -187,11 +187,11 @@ export function ChatInterface({
               <h3 className="text-xl font-medium mb-2">How can I help you today?</h3>
               <p className="max-w-md text-sm">Ask me anything or try one of these examples:</p>
               <div className="grid grid-cols-1 gap-2 mt-4 w-full max-w-md">
-                {["Are you Phi or Qwen?", "Explain transformer model", "What is WebNN API"].map((example) => (
+                {["What are your model name and parameter count? Are you GPT, Claude, Phi, Gemini, Qwen, LLama, DeepSeek or another model?", "Explain transformer model", "What is WebNN API"].map((example) => (
                   <Button
                     key={example}
                     variant="outline"
-                    className="justify-start text-left py-5 bg-white border-gray-200 hover:bg-gray-100 hover:cursor-pointer"
+                    className="justify-start text-left py-5 whitespace-normal font-normal bg-white border-gray-200 hover:bg-gray-100 hover:cursor-pointer"
                     onClick={() => {
                       setInput(example)
                     }}
@@ -306,14 +306,14 @@ function MessageBubble({ message }: MessageBubbleProps) {
             <div>{new Date(message.timestamp).toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })}</div>
             <div className="col-span-5 justify-self-end">
               {isUser ? "" : (
-                <span className="self-center bg-gradient-to-br from-pink-500 to-pink-600 hover:from-pink-600 hover:to-pink-700 text-xs text-white rounded-sm px-1">
+                <span className="self-center bg-gradient-to-br from-pink-500 to-pink-600 hover:from-pink-600 hover:to-pink-700 text-xs text-white rounded-sm px-2 py-[1px]">
                   {message.numTokens && message.tps
                     ? `Generated ${message.numTokens} tokens in ${(message.numTokens / message.tps).toFixed(2)} seconds`
                     : ""}
                 </span>
               )}
               {isUser ? "" : (
-                <span className="self-center ml-2 bg-gradient-to-br from-pink-500 to-pink-600 hover:from-pink-600 hover:to-pink-700 text-xs text-white rounded-sm px-1">
+                <span className="self-center ml-2 bg-gradient-to-br from-pink-500 to-pink-600 hover:from-pink-600 hover:to-pink-700 text-xs text-white rounded-sm px-2 py-[1px]">
                   {message.tps ? `${message.tps.toFixed(2)} tokens/sec` : ""}
                 </span>
               )}
