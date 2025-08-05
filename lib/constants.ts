@@ -8,7 +8,13 @@ export const MODELS: Array<{
   desc: string;
   parameter: string;
   size: string;
-  useExternalDataFormat?: boolean; // <-- Add this line
+  useExternalDataFormat?: boolean;
+  maxNewTokens?: number;
+  doSample?: boolean;
+  topK?: number;
+  temperature?: number;
+  systemPrompt?: string;
+  thinkingTagSupport?: boolean;
 }> = [
   {
     id: "phi-3_5-mini" as ModelType,
@@ -18,7 +24,29 @@ export const MODELS: Array<{
     desc: "SLM",
     parameter: "3.8B",
     size: "2.15GB",
-    useExternalDataFormat: true, // <-- Set for Phi
+    useExternalDataFormat: true,
+    maxNewTokens: 1024,
+    doSample: true,
+    topK: 3,
+    temperature: 0.2,
+    systemPrompt: "",
+    thinkingTagSupport: false,
+  },
+  {
+    id: "smollm3-3b" as ModelType,
+    model: "HuggingFaceTB/SmolLM3-3B-ONNX",
+    dataType: "q4f16",
+    name: "SmolLM3",
+    desc: "LLM",
+    parameter: "3.0B",
+    size: "1.97GB",
+    useExternalDataFormat: true,
+    maxNewTokens: 1024,
+    doSample: false,
+    topK: 20,
+    temperature: 0.7,
+    systemPrompt: "You are SmolLM, a language model created by Hugging Face.",
+    thinkingTagSupport: false,
   },
   {
     id: "qwen3-0_6b" as ModelType,
@@ -28,25 +56,30 @@ export const MODELS: Array<{
     desc: "LLM",
     parameter: "0.6B",
     size: "543MB",
-    useExternalDataFormat: false, // <-- Set for Qwen
+    useExternalDataFormat: false,
+    maxNewTokens: 512,
+    doSample: false,
+    topK: 20,
+    temperature: 0.7,
+    systemPrompt: "",
+    thinkingTagSupport: true,
   },
-    {
-    id: "smollm3-3b" as ModelType,
-    model: "HuggingFaceTB/SmolLM3-3B-ONNX",
+  {
+    id: "deepseek-r1-distill-qweb-1_5b" as ModelType,
+    model: "onnx-community/DeepSeek-R1-Distill-Qwen-1.5B-ONNX",
     dataType: "q4f16",
-    name: "SmolLM3",
+    name: "DeepSeek R1 Distill",
     desc: "LLM",
-    parameter: "3.0B",
-    size: "1.97GB",      
-    useExternalDataFormat: true,
+    parameter: "1.5B",
+    size: "1.27GB",
+    useExternalDataFormat: false,
+    maxNewTokens: 512,
+    doSample: false,
+    topK: 20,
+    temperature: 0.7,
+    systemPrompt: "You are DeepSeek R1 Distill Qwen.",
+    thinkingTagSupport: false,
   },
-  // {
-  //   id: "phi-4-mini" as ModelType,
-  //   model: "webnn/Phi-4-mini-instruct-onnx-transformers_js",
-  //   dataType: "q4f16",
-  //   name: "Phi-4 Mini",
-  //   desc: "Small language model",
-  // },
 ];
 
 export const BACKENDS: Array<{

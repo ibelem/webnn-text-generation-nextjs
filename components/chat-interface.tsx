@@ -187,7 +187,7 @@ export function ChatInterface({
               <h3 className="text-xl font-medium mb-2">How can I help you today?</h3>
               <p className="max-w-md text-sm">Ask me anything or try one of these examples:</p>
               <div className="grid grid-cols-1 gap-2 mt-4 w-full max-w-md">
-                {["What are your model name and parameter count? Are you GPT, Claude, Phi, Gemini, Qwen, LLama, DeepSeek or another model?", "Explain transformer model", "What is WebNN API"].map((example) => (
+                {["What are your model name and parameter count? Are you GPT, Claude, Phi, Gemini, Qwen, LLama, DeepSeek or another model?", "Explain transformer model", "唐诗《登鹳雀楼》中“欲穷千里目”的下一句和上一句分别是什么？"].map((example) => (
                   <Button
                     key={example}
                     variant="outline"
@@ -301,7 +301,14 @@ function MessageBubble({ message }: MessageBubbleProps) {
             : "bg-white border border-gray-200 shadow-sm"
             }`}
         >
-          <div className="text-xs whitespace-pre-wrap">{message.content}</div>
+          {isUser ? (
+            <div className="text-xs whitespace-pre-wrap">{message.content}</div>
+          ) : (
+            <div
+              className="text-xs whitespace-pre-wrap"
+              dangerouslySetInnerHTML={{ __html: message.content }}
+            />
+          )}
           <div className={`text-xs grid grid-cols-6 gap-4 mt-2 ${isUser ? "opacity-70" : "text-gray-500"}`}>
             <div>{new Date(message.timestamp).toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })}</div>
             <div className="col-span-5 justify-self-end">

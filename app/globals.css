@@ -101,3 +101,11 @@ body {
       box-shadow: var(--tw-inset-shadow), var(--tw-inset-ring-shadow), var(--tw-ring-offset-shadow), var(--tw-ring-shadow), var(--tw-shadow);
     }
   }
+
+.think {
+  color: gray;
+  border-left: 1px solid #eee;
+  padding: 0 0 1rem 0.5rem;
+  font-style: italic;
+  margin-bottom: -0.5rem;
+}

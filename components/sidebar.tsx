@@ -195,25 +195,27 @@ export function Sidebar({
               {MODELS.find((m) => m.id === selectedModel)?.name || selectedModel}
             </span>
           </div>
-          <div className="flex items-center justify-between mb-2">
+          <div className="flex items-center justify-between">
             <span className="text-gray-500">Backend</span>
             <span className="font-medium">{selectedBackend}</span>
           </div>
-          {/* Reasoning toggle UI */}
-          <div className="flex items-center justify-between">
-            <span className="text-gray-500">Reasoning</span>
-            <label className="flex items-center cursor-pointer">
-              <input
-                type="checkbox"
-                checked={reasonEnabled}
-                onChange={e => setReasonEnabled(e.target.checked)}
-                className="mr-2"
-              />
-              <span className="font-medium">
-                Enable <span className="font-medium">Thinking</span>
-              </span>
-            </label>
-          </div>
+          {/* Reasoning toggle UI: only show if thinkingTagSupport is true */}
+          {MODELS.find((m) => m.id === selectedModel)?.thinkingTagSupport && (
+            <div className="flex items-center justify-between mt-2">
+              <span className="text-gray-500">Reasoning</span>
+              <label className="flex items-center cursor-pointer">
+                <input
+                  type="checkbox"
+                  checked={reasonEnabled}
+                  onChange={e => setReasonEnabled(e.target.checked)}
+                  className="mr-2"
+                />
+                <span className="font-medium">
+                  Enable <span className="font-medium">Thinking</span>
+                </span>
+              </label>
+            </div>
+          )}
         </div>
 
         {/* Progress bar UI (show only if loading/progress is needed) */}
@@ -255,8 +257,8 @@ function ModelOption({ model, isSelected, onClick, loadState, onLoad }: ModelOpt
     >
       <div className={`p-2 rounded-md mr-3 ${isSelected ? "bg-gray-100" : "bg-gray-50"}`}><Icon className="h-4 w-4" /></div>
       <div className="flex-1">
-        <div className="font-medium mt-[-7px]">{model.name}</div>
-        <div className="text-xs text-gray-500 mt-[-1px]">
+        <div className="font-medium text-sm mt-[-5px]">{model.name}</div>
+        <div className="text-xs text-gray-500">
           <span className="bg-gray-100 text-[11px] py-[1px] px-1 rounded-sm">{model.desc}</span>
           <span className="bg-gray-100 text-[11px] py-[1px] px-1 rounded-sm mr-1 ml-1">{model.parameter}</span>
           <span className="bg-gray-100 text-[11px] py-[1px] px-1 rounded-sm">{model.size}</span>
