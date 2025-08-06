@@ -5,6 +5,7 @@ export const MODELS: Array<{
   model: string;
   dataType: string;
   name: string;
+  producer: string;
   desc: string;
   parameter: string;
   size: string;
@@ -21,6 +22,7 @@ export const MODELS: Array<{
     model: "onnx-community/Phi-3.5-mini-instruct-onnx-web",
     dataType: "q4f16",
     name: "Phi-3.5 Mini",
+    producer: "Microsoft",
     desc: "SLM",
     parameter: "3.8B",
     size: "2.15GB",
@@ -37,6 +39,7 @@ export const MODELS: Array<{
     model: "HuggingFaceTB/SmolLM3-3B-ONNX",
     dataType: "q4f16",
     name: "SmolLM3",
+    producer: "Hugging Face",
     desc: "LLM",
     parameter: "3.0B",
     size: "1.97GB",
@@ -53,6 +56,7 @@ export const MODELS: Array<{
     model: "onnx-community/Qwen3-0.6B-ONNX",
     dataType: "q4f16",
     name: "Qwen3",
+    producer: "Alibaba Cloud",
     desc: "LLM",
     parameter: "0.6B",
     size: "543MB",
@@ -69,6 +73,7 @@ export const MODELS: Array<{
     model: "onnx-community/DeepSeek-R1-Distill-Qwen-1.5B-ONNX",
     dataType: "q4f16",
     name: "DeepSeek R1 Distill",
+    producer: "DS",
     desc: "LLM",
     parameter: "1.5B",
     size: "1.27GB",
@@ -79,6 +84,23 @@ export const MODELS: Array<{
     temperature: 0.2,
     systemPrompt: "You are DeepSeek R1 Distill Qwen.",
     thinkingTagSupport: true,
+  },
+  {
+    id: "lfm2_350m" as ModelType,
+    model: "onnx-community/LFM2-350M-ONNX",
+    dataType: "q4",
+    name: "LFM2",
+    producer: "Liquid AI",
+    desc: "Compact LLM",
+    parameter: "350M",
+    size: "458MB",
+    useExternalDataFormat: true,
+    maxNewTokens: 512,
+    doSample: false,
+    topK: 20,
+    temperature: 0.3,
+    systemPrompt: "",
+    thinkingTagSupport: false,
   },
 ];
 

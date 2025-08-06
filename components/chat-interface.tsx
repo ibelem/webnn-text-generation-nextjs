@@ -279,11 +279,11 @@ export function ChatInterface({
           </div>
         </form>
         <div className="text-[11px] flex justify-center my-3 text-gray-500">
-          <div className="mr-2"><span className="text-[10px] border border-gray-200 border-solid rounded-sm px-1 pb-1">enter</span> continue the conversation</div>
+          <div className="mr-2"><span className="text-[10px] border border-gray-200 border-solid rounded-sm px-1 pb-[2px]">enter</span> continue the conversation</div>
           ·
           <div className="ml-2">
-            <span className="text-[10px] border border-gray-200 border-solid rounded-sm px-1 pb-1 self-center">ctrl</span>
-            <span className="ml-1 text-[10px] border border-gray-200 border-solid rounded-sm px-1 pb-1 self-center">enter</span> clears the chat history and start a new conversation</div>
+            <span className="text-[10px] border border-gray-200 border-solid rounded-sm px-1 pb-[2px] self-center">ctrl</span>
+            <span className="ml-1 text-[10px] border border-gray-200 border-solid rounded-sm px-1 pb-[2px] self-center">enter</span> clears the chat history and start a new conversation</div>
         </div>
       </div>
     </>

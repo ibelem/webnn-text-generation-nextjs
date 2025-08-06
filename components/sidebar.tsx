@@ -239,7 +239,7 @@ export function Sidebar({
 }
 
 interface ModelOptionProps {
-  model: { id: ModelType; name: string; desc: string, parameter: string, size: string };
+  model: { id: ModelType; name: string; producer:string, desc: string, parameter: string, size: string };
   isSelected: boolean;
   onClick: () => void;
   loadState: "not_loaded" | "loading" | "warm" | "loaded" | "ready";
@@ -260,7 +260,7 @@ function ModelOption({ model, isSelected, onClick, loadState, onLoad }: ModelOpt
     >
       <div className={`p-2 rounded-md mr-3 ${isSelected ? "bg-gray-100" : "bg-gray-50"}`}><Icon className="h-4 w-4" /></div>
       <div className="flex-1">
-        <div className="font-medium text-sm mt-[-5px]">{model.name}</div>
+        <div className="flex font-medium text-md items-center">{model.name} <span className="ml-1 text-[10px] font-normal border border-solid border-gray-300 px-[4px] rounded-sm">{model.producer}</span></div>
         <div className="text-xs text-gray-500">
           <span className="bg-gray-100 text-[11px] py-[1px] px-1 rounded-sm">{model.desc}</span>
           <span className="bg-gray-100 text-[11px] py-[1px] px-1 rounded-sm mr-1 ml-1">{model.parameter}</span>
