@@ -35,6 +35,9 @@ export default function Page({ params }: { params: Promise<{ model: string; back
   // Reasoning feature toggle
   const [reasonEnabled, setReasonEnabled] = useState(false);
 
+  // Model load state
+  const [modelLoadState, setModelLoadState] = useState<Record<string, "not_loaded" | "loading" | "warm" | "loaded" | "ready">>({});
+
   // Initialize worker once
   useEffect(() => {
     if (typeof window === "undefined") return
@@ -87,6 +90,8 @@ export default function Page({ params }: { params: Promise<{ model: string; back
               workerRef={workerRef}
               reasonEnabled={reasonEnabled}
               setReasonEnabled={setReasonEnabled}
+              modelLoadState={modelLoadState}
+              setModelLoadState={setModelLoadState}
             />
           </div>
         ) : (
@@ -106,6 +111,7 @@ export default function Page({ params }: { params: Promise<{ model: string; back
           workerRef={workerRef}
           reasonEnabled={reasonEnabled}
           setReasonEnabled={setReasonEnabled}
+          modelLoadState={modelLoadState}
         />
       </div>
     </div>

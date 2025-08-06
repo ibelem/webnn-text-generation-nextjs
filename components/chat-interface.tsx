@@ -28,6 +28,7 @@ interface ChatInterfaceProps {
   workerRef: React.RefObject<Worker | null>;
   reasonEnabled: boolean;
   setReasonEnabled: (enabled: boolean) => void;
+  modelLoadState: Record<string, "not_loaded" | "loading" | "warm" | "loaded" | "ready">;
 }
 
 export function ChatInterface({
@@ -39,11 +40,13 @@ export function ChatInterface({
   workerRef,
   reasonEnabled, // eslint-disable-next-line @typescript-eslint/no-unused-vars
   setReasonEnabled,
+   modelLoadState,
 }: ChatInterfaceProps) {
   const [input, setInput] = useState("");
   const [messages, setMessages] = useState<Message[]>([]);
   const [isTyping, setIsTyping] = useState(false);
   const messagesEndRef = useRef<HTMLDivElement>(null);
+  const anyModelReady = Object.values(modelLoadState).includes("ready");
 
   // ❌ REMOVED: setConfig is now handled globally in page.tsx
   // useEffect(() => {
@@ -83,7 +86,7 @@ export function ChatInterface({
     const onMessage = (e: MessageEvent) => {
       switch (e.data.status) {
         case "update": {
-          const { output, tps, numTokens } = e.data;
+          const { output, tps, numTokens, state } = e.data;
           setIsTyping(false);
           setMessages((prev) => {
             if (prev.length === 0) return prev;
@@ -95,6 +98,7 @@ export function ChatInterface({
                 content: last.content + output,
                 tps,
                 numTokens,
+                state
               };
             } else {
               cloned.push({
@@ -104,6 +108,7 @@ export function ChatInterface({
                 timestamp: new Date(),
                 tps,
                 numTokens,
+                state
               });
             }
             return cloned;
@@ -183,18 +188,19 @@ export function ChatInterface({
               animate={{ opacity: 1 }}
               className="flex flex-col items-center justify-center h-full text-center text-gray-500"
             >
-              <Sparkles className="h-12 w-12 mb-4 text-blue-500 opacity-80" />
-              <h3 className="text-xl font-medium mb-2">How can I help you today?</h3>
+              <Sparkles className={`h-12 w-12 mb-4 ${anyModelReady ? 'text-blue-500' : ''} opacity-80`} />
+              <h3 className={`text-xl font-medium mb-2 ${anyModelReady ? 'text-blue-500' : ''}`}>
+                How can I help you today?
+              </h3>
               <p className="max-w-md text-sm">Ask me anything or try one of these examples:</p>
               <div className="grid grid-cols-1 gap-2 mt-4 w-full max-w-md">
-                {["What are your model name and parameter count? Are you GPT, Claude, Phi, Gemini, Qwen, LLama, DeepSeek or another model?", "Explain transformer model", "唐诗《登鹳雀楼》中“欲穷千里目”的下一句和上一句分别是什么？"].map((example) => (
+                {["What are your model name and parameter count?", "A triangle has three sides with lengths in the ratio 2:3:4. Find the length of each side If the perimeter is 36cm.", "Explain the concept of 'inflation' in economics in just two sentences, using a simple analogy involving a pizza."].map((example) => (
                   <Button
                     key={example}
                     variant="outline"
-                    className="justify-start text-left py-5 whitespace-normal font-normal bg-white border-gray-200 hover:bg-gray-100 hover:cursor-pointer"
-                    onClick={() => {
-                      setInput(example)
-                    }}
+                    className="justify-start text-left py-6 whitespace-normal font-normal bg-white border-gray-200 hover:bg-gray-100 hover:cursor-pointer"
+                    onClick={() => setInput(example)}
+                    disabled={!anyModelReady}
                   >
                     {example}
                   </Button>
@@ -215,7 +221,17 @@ export function ChatInterface({
             >
               <Loader2 className="h-4 w-4 animate-spin text-blue-500" />
               <span className="text-sm text-gray-600">
-                {reasonEnabled ? "thinking (reasoning enabled) ..." : "thinking ..."}
+                {(() => {
+                  const lastAssistant = messages.slice().reverse().find(m => m.role === "assistant");
+                  if (lastAssistant?.state === "thinking") {
+                    return reasonEnabled ? "thinking (reasoning enabled) ..." : "thinking ...";
+                  }
+                  if (lastAssistant?.state === "answering") {
+                    return reasonEnabled ? "answering (reasoning enabled) ..." : "answering ...";
+                  }
+                  // fallback
+                  return reasonEnabled ? "thinking (reasoning enabled) ..." : "thinking ...";
+                })()}
               </span>
             </motion.div>
           )}
@@ -231,6 +247,7 @@ export function ChatInterface({
             value={input}
             onChange={(e) => setInput(e.target.value)}
             placeholder="Type your message..."
+            disabled={!anyModelReady}
             className="flex self-start border px-2 py-2 text-md placeholder:text-muted-foreground disabled:opacity-50 md:text-sm min-h-[80px] max-h-[calc(30dvh)] overflow-hidden resize-none rounded-md bg-muted dark:border-zinc-700"
             onKeyDown={(e) => {
               if (e.key === 'Enter' && (e.ctrlKey || e.metaKey)) {
@@ -255,7 +272,7 @@ export function ChatInterface({
               id="chat-send-btn"
               type="submit"
               disabled={!input.trim() || isTyping}
-              className="flex-shrink-0 w-8 h-8 rounded-full flex items-center justify-center bg-gradient-to-br from-blue-500 to-indigo-600 hover:from-blue-600 hover:to-indigo-700 hover:cursor-pointer text-white"
+              className="flex-shrink-0 w-8 h-8 rounded-full flex items-center justify-center border hover:border-blue-600 hover:cursor-pointer hover:text-blue-600"
             >
               <ArrowUp className="h-4 w-4" />
             </Button>
@@ -290,14 +307,14 @@ function MessageBubble({ message }: MessageBubbleProps) {
     >
       <div className={`flex items-start max-w-[80%] space-x-2 ${isUser ? "flex-row-reverse space-x-reverse" : ""}`}>
         <div
-          className={`flex-shrink-0 w-8 h-8 rounded-full flex items-center justify-center bg-gradient-to-br from-blue-500 to-indigo-600 hover:from-blue-600 hover:to-indigo-700 hover:cursor-pointer`}
+          className={`flex-shrink-0 w-8 h-8 rounded-full flex items-center border border-solid border-gray-200 justify-center hover:border-blue-500 hover:cursor-pointer`}
         >
-          {isUser ? <User className="h-4 w-4 text-white" /> : <Bot className="h-4 w-4 text-white" />}
+          {isUser ? <User className="h-4 w-4 text-gray-500 hover:text-blue-600" /> : <Bot className="h-4 w-4 text-gray-500 hover:text-blue-600" />}
         </div>
 
         <div
           className={`p-3 rounded-lg ${isUser
-            ? "bg-gradient-to-br from-gray-50 to-gray-100 border border-blue-200 hover:cursor-pointer shadow-sm"
+            ? "hover:bg-gradient-to-br hover:from-gray-50 hover:to-gray-100 border border-blue-200 hover:cursor-pointer shadow-sm"
             : "bg-white border border-gray-200 shadow-sm"
             }`}
         >
@@ -308,7 +325,8 @@ function MessageBubble({ message }: MessageBubbleProps) {
               className="text-xs whitespace-pre-wrap"
               dangerouslySetInnerHTML={{ __html: message.content }}
             />
-          )}
+          )
+          }
           <div className={`text-xs grid grid-cols-6 gap-4 mt-2 ${isUser ? "opacity-70" : "text-gray-500"}`}>
             <div>{new Date(message.timestamp).toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })}</div>
             <div className="col-span-5 justify-self-end">

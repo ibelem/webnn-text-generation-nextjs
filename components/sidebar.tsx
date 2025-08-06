@@ -21,6 +21,8 @@ interface SidebarProps {
   workerRef: React.RefObject<Worker | null>;
   reasonEnabled: boolean;
   setReasonEnabled: (enabled: boolean) => void;
+  modelLoadState: Record<string, "not_loaded" | "loading" | "warm" | "loaded" | "ready">;
+  setModelLoadState: React.Dispatch<React.SetStateAction<Record<string, "not_loaded" | "loading" | "warm" | "loaded" | "ready" >>>;
 }
 
 export function Sidebar({
@@ -33,10 +35,9 @@ export function Sidebar({
   workerRef,
   reasonEnabled,
   setReasonEnabled,
+  modelLoadState,
+  setModelLoadState,
 }: SidebarProps) {
-  // Track model load state: { [modelId]: "not_loaded" | "loading" | "loaded" }
-  const [modelLoadState, setModelLoadState] = React.useState<Record<string, "not_loaded" | "loading" | "warm" | "loaded">>({});
-
   // Listen for worker "ready", "loading", "reset" events to update modelLoadState and progress
   React.useEffect(() => {
     if (!workerRef.current) return;
@@ -79,11 +80,13 @@ export function Sidebar({
         setProgressItems?.((prev) =>
           (prev || []).filter((item) => item.file !== file)
         );
-      } else if (status === "loaded" || status === "ready") {
-        setModelLoadState((prev) => ({ ...prev, [model_id]: "loaded" }));
-        setProgressItems?.([]); // Clear all progress when model is ready
       } else if (status === "warm") {
         setModelLoadState((prev) => ({ ...prev, [model_id]: "warm" }));
+      } else if (status === "loaded") {
+        setModelLoadState((prev) => ({ ...prev, [model_id]: "loaded" }));
+      } else if (status === "ready") {
+        setModelLoadState((prev) => ({ ...prev, [model_id]: "ready" }));
+        setProgressItems?.([]); // Clear all progress when model is ready
       } else if (status === "reset") {
         setModelLoadState((prev) => ({ ...prev, [model_id]: "not_loaded" }));
         setProgressItems?.([]);
@@ -94,7 +97,7 @@ export function Sidebar({
     return () => {
       currentWorker.removeEventListener("message", onWorkerMessage);
     };
-  }, [setProgressItems, workerRef]);
+  }, [setProgressItems, setModelLoadState, workerRef]);
 
   // Handler for load/reload button
   const handleLoadModel = (modelId: string) => {
@@ -119,13 +122,13 @@ export function Sidebar({
   return (
     <div className="h-full flex flex-col bg-white p-4">
       <div className="flex items-center justify-between mb-6">
-        <div className="flex items-center space-x-2">
+        <div className="flex items-center">
           <Image
-            src="/webgpu-logo.svg"
+            src="/webgpu-logo-h.svg"
             alt="WebGPU Logo"
-            width={36}
-            height={36}
-            className=""
+            width={100}
+            height={30}
+            className="mb-[-6px]"
           />
           <Image
             src="/webnn-logo.svg"
@@ -239,7 +242,7 @@ interface ModelOptionProps {
   model: { id: ModelType; name: string; desc: string, parameter: string, size: string };
   isSelected: boolean;
   onClick: () => void;
-  loadState: "not_loaded" | "loading" | "warm" | "loaded";
+  loadState: "not_loaded" | "loading" | "warm" | "loaded" | "ready";
   onLoad: () => void;
 }
 
@@ -267,12 +270,12 @@ function ModelOption({ model, isSelected, onClick, loadState, onLoad }: ModelOpt
       {/* Load/Reload Button */}
       <div className="ml-2 text-xs">
         {loadState === "loading" ? (
-          <Button variant="secondary" size="sm" disabled className="font-normal text-xs">
+          <Button variant="secondary" size="sm" disabled className="shadow-none font-normal text-xs">
             <Loader2 className="h-4 w-4 animate-spin mr-1" />
             Loading
           </Button>
         ) : loadState === "warm" ? (
-          <Button variant="secondary" size="sm" disabled className="font-normal text-xs">
+          <Button variant="secondary" size="sm" disabled className="shadow-none font-normal text-xs">
             <Cog className="h-4 w-4 animate-spin mr-1" />
             Warming up
           </Button>
@@ -281,7 +284,7 @@ function ModelOption({ model, isSelected, onClick, loadState, onLoad }: ModelOpt
             title={loadState === "not_loaded" ? "Download model and configuration files" : "Re-download model files (files already downloaded)" }
             variant={loadState === "not_loaded" ? "default" : "secondary"}
             size="sm"
-            className={loadState === "not_loaded" ? "bg-blue-500 text-white text-xs hover:cursor-pointer" : "bg-gray-200 text-gray-600 text-xs hover:cursor-pointer"}
+            className={loadState === "not_loaded" ? "shadow-none border border-solid border-gray-50 text-xs hover:cursor-pointer" : "shadow-none text-gray-600 text-xs hover:cursor-pointer"}
             onClick={(e) => {
               e.stopPropagation();
               onLoad();
@@ -290,7 +293,6 @@ function ModelOption({ model, isSelected, onClick, loadState, onLoad }: ModelOpt
             {loadState === "not_loaded" ? (
               <>
                 <Download className="h-4 w-4" />
-                Load
               </>
             ) : (
               <>

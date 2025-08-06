@@ -73,12 +73,12 @@ export const MODELS: Array<{
     parameter: "1.5B",
     size: "1.27GB",
     useExternalDataFormat: false,
-    maxNewTokens: 512,
+    maxNewTokens: 2048,
     doSample: false,
-    topK: 20,
-    temperature: 0.7,
+    topK: 3,
+    temperature: 0.2,
     systemPrompt: "You are DeepSeek R1 Distill Qwen.",
-    thinkingTagSupport: false,
+    thinkingTagSupport: true,
   },
 ];
 

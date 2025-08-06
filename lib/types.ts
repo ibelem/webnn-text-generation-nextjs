@@ -8,4 +8,5 @@ export interface Message {
   timestamp: Date,
   tps?: number;
   numTokens?: number;
+  state?: string
 }
