@@ -102,6 +102,23 @@ export const MODELS: Array<{
     systemPrompt: "",
     thinkingTagSupport: false,
   },
+  {
+    id: "llama_3-2_1b" as ModelType,
+    model: "onnx-community/Llama-3.2-1B-Instruct-q4f16",
+    dataType: "q4f16",
+    name: "Llama 3.2",
+    producer: "Meta",
+    desc: "LLM",
+    parameter: "1B",
+    size: "1.15GB",
+    useExternalDataFormat: false,
+    maxNewTokens: 1024,
+    doSample: false,
+    topK: 3,
+    temperature: 0.2,
+    systemPrompt: "You are a helpful assistant.",
+    thinkingTagSupport: false,
+  },
 ];
 
 export const BACKENDS: Array<{
