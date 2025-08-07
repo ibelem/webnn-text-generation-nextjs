@@ -6,7 +6,7 @@ import type { ModelType, BackendType } from "@/lib/types"
 import Image from 'next/image';
 import { Button } from "@/components/ui/button"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
-import { Sparkles, Settings, Gpu, Microchip, Loader2, Download, Cog, RefreshCcw } from "lucide-react"
+import { Sparkles, Gpu, Microchip, Loader2, Download, Cog, RefreshCcw } from "lucide-react"
 import { MODELS, BACKENDS } from "../lib/constants"
 import { Progress } from "@/components/progress"
 import type { ProgressProps } from "@/components/progress"
@@ -121,31 +121,26 @@ export function Sidebar({
   // Pass modelLoadState and handler to ModelOption
   return (
     <div className="h-full flex flex-col bg-white p-4">
-      <div className="flex items-center justify-between mb-6">
-        <div className="flex items-center">
-          <Image
-            src="/webgpu-logo-h.svg"
-            alt="WebGPU Logo"
-            width={100}
-            height={30}
-            className="mb-[-6px]"
-          />
-          <Image
-            src="/webnn-logo.svg"
-            alt="WebNN Logo"
-            width={140}
-            height={40}
-            className=""
-            style={{ width: '140px', height: '40px' }}
-            priority
-          />
-        </div>
-        <Button variant="ghost" size="icon">
-          <Settings className="h-5 w-5" />
-        </Button>
+      <div className="grid grid-cols-2 items-center mb-4">
+        <Image
+          src="/webgpu-logo-h.svg"
+          alt="WebGPU Logo"
+          width={106}
+          height={32}
+          className="mb-[-6px]"
+        />
+        <Image
+          src="/webnn-logo.svg"
+          alt="WebNN Logo"
+          width={140}
+          height={40}
+          className="justify-self-end"
+          style={{ width: '140px', height: '40px' }}
+          priority
+        />
       </div>
 
-      <Tabs defaultValue="models" className="flex-1">
+      <Tabs defaultValue="models" className="flex-1 gap-0">
         <TabsList className="grid grid-cols-2 px-2 gap-x-2 mb-2 h-[auto] w-full rounded-md bg-gray-100 border border-gray-200 shadow-xs">
 
           <TabsTrigger className="flex-1 px-3 py-2 rounded-md text-sm font-medium transition-colors
@@ -162,7 +157,7 @@ export function Sidebar({
           </TabsTrigger>
         </TabsList>
 
-        <TabsContent value="models" className="space-y-2">
+        <TabsContent value="models" className="space-y-1 max-h-[65vh] overflow-y-auto overflow-x-hidden">
           {MODELS.map((model) => (
             <ModelOption
               key={model.id}
@@ -175,7 +170,7 @@ export function Sidebar({
           ))}
         </TabsContent>
 
-        <TabsContent value="backends" className="space-y-2">
+        <TabsContent value="backends" className="space-y-1">
           {BACKENDS.map((backend) => (
             <BackendOption
               key={backend.id}
@@ -187,9 +182,9 @@ export function Sidebar({
         </TabsContent>
       </Tabs>
 
-      <div className="mt-auto pt-4 border-t border-gray-200">
+      <div className="mt-auto pt-2 border-t border-gray-200">
         <div className="flex items-center justify-between mb-2">
-          <div className="text-xs text-gray-500">Current Configuration</div>
+          <div className="text-xs text-gray-500 ml-3">Current Configuration</div>
         </div>
         <div className="bg-gray-100 rounded-md p-3 text-sm mb-2">
           <div className="flex items-center justify-between mb-2">
@@ -254,7 +249,7 @@ function ModelOption({ model, isSelected, onClick, loadState, onLoad }: ModelOpt
     <motion.div
       whileHover={{ scale: 1.02 }}
       whileTap={{ scale: 0.98 }}
-      className={`flex items-center p-3 rounded-md cursor-pointer transition-all duration-200 ${isSelected ? "bg-gradient-to-r from-gray-50 to-gray-100 border border-blue-200" : "hover:bg-gray-100"
+      className={`flex items-center p-3 rounded-md hover:rounded-md cursor-pointer transition-all duration-200 ${isSelected ? "bg-gradient-to-r from-gray-50 to-gray-100 border border-blue-200" : "hover:bg-gray-100"
         }`}
       onClick={onClick}
     >
@@ -270,14 +265,14 @@ function ModelOption({ model, isSelected, onClick, loadState, onLoad }: ModelOpt
       {/* Load/Reload Button */}
       <div className="ml-2 text-xs">
         {loadState === "loading" ? (
-          <Button variant="secondary" size="sm" disabled className="shadow-none font-normal text-xs">
-            <Loader2 className="h-4 w-4 animate-spin mr-1" />
-            Loading
+          <Button variant="secondary" size="sm" disabled className="shadow-none font-normal text-[10px] !flex-col items-center mr-[-9px]">
+            <Loader2 className="h-4 w-4 animate-spin" />
+            <span>Loading</span>
           </Button>
         ) : loadState === "warm" ? (
-          <Button variant="secondary" size="sm" disabled className="shadow-none font-normal text-xs">
-            <Cog className="h-4 w-4 animate-spin mr-1" />
-            Warming up
+          <Button variant="secondary" size="sm" disabled className="shadow-none font-normal text-[10px] !flex-col items-center mr-[-9px]">
+            <Cog className="h-4 w-4 animate-spin" />
+            <span>Warming up</span>
           </Button>
         ) : (
           <Button
