@@ -8,5 +8,6 @@ export interface Message {
   timestamp: Date,
   tps?: number;
   numTokens?: number;
+  ttft?: number; // time to first token in ms
   state?: string
 }

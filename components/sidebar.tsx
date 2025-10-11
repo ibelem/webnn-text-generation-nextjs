@@ -38,13 +38,15 @@ export function Sidebar({
   modelLoadState,
   setModelLoadState,
 }: SidebarProps) {
+  const [compilationTime, setCompilationTime] = React.useState<number | null>(null);
+
   // Listen for worker "ready", "loading", "reset" events to update modelLoadState and progress
   React.useEffect(() => {
     if (!workerRef.current) return;
     const currentWorker = workerRef.current;
 
     function onWorkerMessage(e: MessageEvent) {
-      const { status, model_id, data, file, progress, total } = e.data;
+      const { status, model_id, data, file, progress, total, compilationTime } = e.data;
       if (!model_id && status !== "initiate" && status !== "progress" && status !== "done") return;
 
       if (status === "loading") {
@@ -82,6 +84,9 @@ export function Sidebar({
         );
       } else if (status === "warm") {
         setModelLoadState((prev) => ({ ...prev, [model_id]: "warm" }));
+        if (typeof compilationTime === "number") {
+          setCompilationTime(compilationTime);
+        }
       } else if (status === "loaded") {
         setModelLoadState((prev) => ({ ...prev, [model_id]: "loaded" }));
       } else if (status === "ready") {
@@ -185,6 +190,9 @@ export function Sidebar({
       <div className="mt-auto pt-2 border-t border-gray-200">
         <div className="flex items-center justify-between mb-2">
           <div className="text-xs text-gray-500 ml-3">Current Configuration</div>
+          <div id="compilation-time" className="text-xs text-pink-600">
+            {compilationTime !== null ? `Compilation: ${compilationTime.toFixed(2)} ms` : ""}
+          </div>
         </div>
         <div className="bg-gray-100 rounded-md p-3 text-sm mb-2">
           <div className="flex items-center justify-between mb-2">

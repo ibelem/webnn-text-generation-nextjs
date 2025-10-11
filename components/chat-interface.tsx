@@ -86,7 +86,7 @@ export function ChatInterface({
     const onMessage = (e: MessageEvent) => {
       switch (e.data.status) {
         case "update": {
-          const { output, tps, numTokens, state } = e.data;
+          const { output, tps, numTokens, ttft, state } = e.data;
           setIsTyping(false);
           setMessages((prev) => {
             if (prev.length === 0) return prev;
@@ -98,6 +98,7 @@ export function ChatInterface({
                 content: last.content + output,
                 tps,
                 numTokens,
+                ttft,
                 state
               };
             } else {
@@ -108,6 +109,7 @@ export function ChatInterface({
                 timestamp: new Date(),
                 tps,
                 numTokens,
+                ttft,
                 state
               });
             }
@@ -331,14 +333,19 @@ function MessageBubble({ message }: MessageBubbleProps) {
             <div>{new Date(message.timestamp).toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })}</div>
             <div className="col-span-5 justify-self-end">
               {isUser ? "" : (
-                <span className="self-center bg-gradient-to-br from-pink-500 to-pink-600 hover:from-pink-600 hover:to-pink-700 text-xs text-white rounded-sm px-2 py-[1px]">
+                <span className="self-center bg-gradient-to-br from-pink-500 to-pink-600 hover:from-pink-600 hover:to-pink-700 text-xs text-white rounded-sm px-2 py-[1px]" title="Time to first token">
+                  {message.ttft ? `TTFT: ${message.ttft.toFixed(2)} ms` : ""}
+                </span>
+              )}
+              {isUser ? "" : (
+                <span className="self-center ml-2 bg-gradient-to-br from-pink-500 to-pink-600 hover:from-pink-600 hover:to-pink-700 text-xs text-white rounded-sm px-2 py-[1px]">
                   {message.numTokens && message.tps
                     ? `Generated ${message.numTokens} tokens in ${(message.numTokens / message.tps).toFixed(2)} seconds`
                     : ""}
                 </span>
               )}
               {isUser ? "" : (
-                <span className="self-center ml-2 bg-gradient-to-br from-pink-500 to-pink-600 hover:from-pink-600 hover:to-pink-700 text-xs text-white rounded-sm px-2 py-[1px]">
+                <span className="self-center ml-2 bg-gradient-to-br from-pink-500 to-pink-600 hover:from-pink-600 hover:to-pink-700 text-xs text-white rounded-sm px-2 py-[1px]" title="Tokens per second">
                   {message.tps ? `${message.tps.toFixed(2)} tokens/sec` : ""}
                 </span>
               )}
