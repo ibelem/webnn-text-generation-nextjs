@@ -35,6 +35,9 @@ export const MODELS: Array<{
     thinkingTagSupport: false,
   },
   // {
+  //   // https://github.com/huggingface/transformers.js/issues/1239
+  //   // Works on WebGPU EP in Node.js binding
+  //   // Crashes when using JSEP
   //   id: "gemma_3_1b_it_gqa" as ModelType,
   //   model: "onnx-community/gemma-3-1b-it-ONNX-GQA",
   //   dataType: "q4",
