@@ -106,6 +106,7 @@ export function Sidebar({
 
   // Handler for load/reload button
   const handleLoadModel = (modelId: string) => {
+    setCompilationTime(null);
     setModelLoadState((prev) => ({ ...prev, [modelId]: "loading" }));
     
     // First set the config for this model
