@@ -34,6 +34,23 @@ export const MODELS: Array<{
     systemPrompt: "",
     thinkingTagSupport: false,
   },
+    {
+    id: "phi-4-mini" as ModelType,
+    model: "onnx-community/Phi-4-mini-instruct-ONNX-GQA",
+    dataType: "q4f16",
+    name: "Phi-4 Mini",
+    producer: "Microsoft",
+    desc: "SLM",
+    parameter: "3.8B",
+    size: "2.85GB",
+    useExternalDataFormat: true,
+    maxNewTokens: 1024,
+    doSample: true,
+    topK: 3,
+    temperature: 0.2,
+    systemPrompt: "",
+    thinkingTagSupport: false,
+  },
   // {
   //   // https://github.com/huggingface/transformers.js/issues/1239
   //   // Works on WebGPU EP in Node.js binding
