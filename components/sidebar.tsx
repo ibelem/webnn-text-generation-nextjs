@@ -5,6 +5,7 @@ import { motion } from "framer-motion"
 import type { ModelType, BackendType } from "@/lib/types"
 import Image from 'next/image';
 import { Button } from "@/components/ui/button"
+import { Textarea } from "@/components/ui/textarea"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { Sparkles, Gpu, Microchip, Loader2, Download, Cog, RefreshCcw } from "lucide-react"
 import { MODELS, BACKENDS } from "../lib/constants"
@@ -23,6 +24,8 @@ interface SidebarProps {
   setReasonEnabled: (enabled: boolean) => void;
   writingAssistantEnabled: boolean;
   setWritingAssistantEnabled: (enabled: boolean) => void;
+  writingAssistantPrompt: string;
+  setWritingAssistantPrompt: (prompt: string) => void;
   modelLoadState: Record<string, "not_loaded" | "loading" | "warm" | "loaded" | "ready">;
   setModelLoadState: React.Dispatch<React.SetStateAction<Record<string, "not_loaded" | "loading" | "warm" | "loaded" | "ready" >>>;
 }
@@ -39,6 +42,8 @@ export function Sidebar({
   setReasonEnabled,
   writingAssistantEnabled,
   setWritingAssistantEnabled,
+  writingAssistantPrompt,
+  setWritingAssistantPrompt,
   modelLoadState,
   setModelLoadState,
 }: SidebarProps) {
@@ -238,6 +243,17 @@ export function Sidebar({
               </span>
             </label>
           </div>
+          {writingAssistantEnabled && (
+            <div className="mt-2">
+              <div className="text-xs text-gray-500 mb-1">System Prompt</div>
+              <Textarea
+                value={writingAssistantPrompt}
+                onChange={(e) => setWritingAssistantPrompt(e.target.value)}
+                className="text-xs min-h-[150px] bg-white"
+                placeholder="Enter system prompt..."
+              />
+            </div>
+          )}
         </div>
 
         {/* Progress bar UI (show only if loading/progress is needed) */}

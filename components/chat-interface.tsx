@@ -29,6 +29,7 @@ interface ChatInterfaceProps {
   reasonEnabled: boolean;
   setReasonEnabled: (enabled: boolean) => void;
   writingAssistantEnabled: boolean;
+  writingAssistantPrompt: string;
   modelLoadState: Record<string, "not_loaded" | "loading" | "warm" | "loaded" | "ready">;
 }
 
@@ -42,6 +43,7 @@ export function ChatInterface({
   reasonEnabled, // eslint-disable-next-line @typescript-eslint/no-unused-vars
   setReasonEnabled,
   writingAssistantEnabled,
+  writingAssistantPrompt,
   modelLoadState,
 }: ChatInterfaceProps) {
   const [input, setInput] = useState("");
@@ -144,6 +146,7 @@ export function ChatInterface({
         messages: nextMessages,
         reasonEnabled,
         writingAssistantEnabled,
+        writingAssistantPrompt
       },
     });
     setIsTyping(true);

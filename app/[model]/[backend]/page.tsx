@@ -7,7 +7,7 @@ import { Sidebar } from "@/components/sidebar";
 import { ChatInterface } from "@/components/chat-interface";
 import type { ModelType, BackendType } from "@/lib/types";
 import type { ProgressProps } from "@/components/progress";
-import { MODELS, BACKENDS } from "@/lib/constants";
+import { MODELS, BACKENDS, WRITING_ASSISTANT_PROMPT } from "@/lib/constants";
 import { Loader2 } from "lucide-react";
 
 export default function Page({ params }: { params: Promise<{ model: string; backend: string }> }) {
@@ -40,6 +40,9 @@ export default function Page({ params }: { params: Promise<{ model: string; back
   const [writingAssistantEnabled, setWritingAssistantEnabled] = useState(
     searchParams.get("assistant") === "true"
   );
+
+  // Writing Assistant Prompt
+  const [writingAssistantPrompt, setWritingAssistantPrompt] = useState(WRITING_ASSISTANT_PROMPT);
 
   // Model load state
   const [modelLoadState, setModelLoadState] = useState<Record<string, "not_loaded" | "loading" | "warm" | "loaded" | "ready">>({});
@@ -104,7 +107,10 @@ export default function Page({ params }: { params: Promise<{ model: string; back
               reasonEnabled={reasonEnabled}
               setReasonEnabled={setReasonEnabled}
               writingAssistantEnabled={writingAssistantEnabled}
+          writingAssistantPrompt={writingAssistantPrompt}
               setWritingAssistantEnabled={setWritingAssistantEnabled}
+              writingAssistantPrompt={writingAssistantPrompt}
+              setWritingAssistantPrompt={setWritingAssistantPrompt}
               modelLoadState={modelLoadState}
               setModelLoadState={setModelLoadState}
             />
@@ -127,6 +133,7 @@ export default function Page({ params }: { params: Promise<{ model: string; back
           reasonEnabled={reasonEnabled}
           setReasonEnabled={setReasonEnabled}
           writingAssistantEnabled={writingAssistantEnabled}
+          writingAssistantPrompt={writingAssistantPrompt}
           modelLoadState={modelLoadState}
         />
       </div>
