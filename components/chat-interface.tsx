@@ -28,6 +28,7 @@ interface ChatInterfaceProps {
   workerRef: React.RefObject<Worker | null>;
   reasonEnabled: boolean;
   setReasonEnabled: (enabled: boolean) => void;
+  writingAssistantEnabled: boolean;
   modelLoadState: Record<string, "not_loaded" | "loading" | "warm" | "loaded" | "ready">;
 }
 
@@ -40,26 +41,14 @@ export function ChatInterface({
   workerRef,
   reasonEnabled, // eslint-disable-next-line @typescript-eslint/no-unused-vars
   setReasonEnabled,
-   modelLoadState,
+  writingAssistantEnabled,
+  modelLoadState,
 }: ChatInterfaceProps) {
   const [input, setInput] = useState("");
   const [messages, setMessages] = useState<Message[]>([]);
   const [isTyping, setIsTyping] = useState(false);
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const anyModelReady = Object.values(modelLoadState).includes("ready");
-
-  // ❌ REMOVED: setConfig is now handled globally in page.tsx
-  // useEffect(() => {
-  //   if (!workerRef.current) return;
-  //   const selectedModelObj = MODELS.find((m) => m.id === selectedModel);
-  //   if (!selectedModelObj) return;
-  //   workerRef.current.postMessage({
-  //     type: "setConfig",
-  //     model_id: selectedModel,
-  //     data_type: selectedModelObj.dataType,
-  //     device: selectedBackend,
-  //   });
-  // }, [selectedModel, selectedBackend, workerRef]);
 
   // Expose workerRef and setProgressItems globally for Sidebar reset
   useEffect(() => {
@@ -154,6 +143,7 @@ export function ChatInterface({
       data: {
         messages: nextMessages,
         reasonEnabled,
+        writingAssistantEnabled,
       },
     });
     setIsTyping(true);

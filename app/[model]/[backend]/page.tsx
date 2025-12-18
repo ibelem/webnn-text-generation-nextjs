@@ -1,7 +1,7 @@
 "use client"
 
 import React from "react";
-import { useRouter } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 import { useEffect, useRef, useState } from "react";
 import { Sidebar } from "@/components/sidebar";
 import { ChatInterface } from "@/components/chat-interface";
@@ -12,6 +12,7 @@ import { Loader2 } from "lucide-react";
 
 export default function Page({ params }: { params: Promise<{ model: string; backend: string }> }) {
   const router = useRouter();
+  const searchParams = useSearchParams();
   const { model, backend } = React.use(params);
 
   // Validate params
@@ -34,6 +35,11 @@ export default function Page({ params }: { params: Promise<{ model: string; back
 
   // Reasoning feature toggle
   const [reasonEnabled, setReasonEnabled] = useState(false);
+
+  // Writing Assistant feature toggle
+  const [writingAssistantEnabled, setWritingAssistantEnabled] = useState(
+    searchParams.get("assistant") === "true"
+  );
 
   // Model load state
   const [modelLoadState, setModelLoadState] = useState<Record<string, "not_loaded" | "loading" | "warm" | "loaded" | "ready">>({});
@@ -67,13 +73,20 @@ export default function Page({ params }: { params: Promise<{ model: string; back
 
   // Update URL when selection changes
   useEffect(() => {
-    if (selectedModel !== model || selectedBackend !== backend) {
-      router.replace(`/${selectedModel}/${selectedBackend}`);
+    const params = new URLSearchParams(searchParams.toString());
+    if (writingAssistantEnabled) {
+      params.set("assistant", "true");
+    } else {
+      params.delete("assistant");
     }
-    // eslint-disable-next-line
-  }, [selectedModel, selectedBackend]);
 
-  // ...worker setup code (same as before)...
+    const currentPath = `/${selectedModel}/${selectedBackend}`;
+    const newSearch = params.toString();
+    const newUrl = newSearch ? `${currentPath}?${newSearch}` : currentPath;
+
+    router.replace(newUrl);
+    // eslint-disable-next-line
+  }, [selectedModel, selectedBackend, writingAssistantEnabled]);
 
   return (
     <div className="flex h-screen bg-gray-100">
@@ -90,6 +103,8 @@ export default function Page({ params }: { params: Promise<{ model: string; back
               workerRef={workerRef}
               reasonEnabled={reasonEnabled}
               setReasonEnabled={setReasonEnabled}
+              writingAssistantEnabled={writingAssistantEnabled}
+              setWritingAssistantEnabled={setWritingAssistantEnabled}
               modelLoadState={modelLoadState}
               setModelLoadState={setModelLoadState}
             />
@@ -111,6 +126,7 @@ export default function Page({ params }: { params: Promise<{ model: string; back
           workerRef={workerRef}
           reasonEnabled={reasonEnabled}
           setReasonEnabled={setReasonEnabled}
+          writingAssistantEnabled={writingAssistantEnabled}
           modelLoadState={modelLoadState}
         />
       </div>

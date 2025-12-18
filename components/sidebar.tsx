@@ -21,6 +21,8 @@ interface SidebarProps {
   workerRef: React.RefObject<Worker | null>;
   reasonEnabled: boolean;
   setReasonEnabled: (enabled: boolean) => void;
+  writingAssistantEnabled: boolean;
+  setWritingAssistantEnabled: (enabled: boolean) => void;
   modelLoadState: Record<string, "not_loaded" | "loading" | "warm" | "loaded" | "ready">;
   setModelLoadState: React.Dispatch<React.SetStateAction<Record<string, "not_loaded" | "loading" | "warm" | "loaded" | "ready" >>>;
 }
@@ -35,6 +37,8 @@ export function Sidebar({
   workerRef,
   reasonEnabled,
   setReasonEnabled,
+  writingAssistantEnabled,
+  setWritingAssistantEnabled,
   modelLoadState,
   setModelLoadState,
 }: SidebarProps) {
@@ -149,16 +153,11 @@ export function Sidebar({
 
       <Tabs defaultValue="models" className="flex-1 gap-0">
         <TabsList className="grid grid-cols-2 px-2 gap-x-2 mb-2 h-[auto] w-full rounded-md bg-gray-100 border border-gray-200 shadow-xs">
-
-          <TabsTrigger className="flex-1 px-3 py-2 rounded-md text-sm font-medium transition-colors
-    data-[state=active]:bg-white border-none !shadow-none hover:cursor-pointer
-    data-[state=inactive]:text-gray-500 hover:bg-white/80 focus:outline-none"
+          <TabsTrigger className="flex-1 px-3 py-2 rounded-md text-sm font-medium transition-colors data-[state=active]:bg-white border-none !shadow-none hover:cursor-pointer data-[state=inactive]:text-gray-500 hover:bg-white/80 focus:outline-none"
             value="models"> 
             Models
           </TabsTrigger>
-          <TabsTrigger className="flex-1 px-3 py-2 rounded-md text-sm font-medium transition-colors
-    data-[state=active]:bg-white border-none !shadow-none hover:cursor-pointer
-    data-[state=inactive]:text-gray-500 hover:bg-white/80 focus:outline-none"
+          <TabsTrigger className="flex-1 px-3 py-2 rounded-md text-sm font-medium transition-colors data-[state=active]:bg-white border-none !shadow-none hover:cursor-pointer data-[state=inactive]:text-gray-500 hover:bg-white/80 focus:outline-none"
             value="backends">
             Backends
           </TabsTrigger>
@@ -224,6 +223,21 @@ export function Sidebar({
               </label>
             </div>
           )}
+          {/* Writing Assistant toggle UI */}
+          <div className="flex items-center justify-between mt-2">
+            <span className="text-gray-500">Writing Assistant</span>
+            <label className="flex items-center cursor-pointer">
+              <input
+                type="checkbox"
+                checked={writingAssistantEnabled}
+                onChange={e => setWritingAssistantEnabled(e.target.checked)}
+                className="mr-2"
+              />
+              <span className="font-medium">
+                Enable
+              </span>
+            </label>
+          </div>
         </div>
 
         {/* Progress bar UI (show only if loading/progress is needed) */}
@@ -259,8 +273,7 @@ function ModelOption({ model, isSelected, onClick, loadState, onLoad }: ModelOpt
     <motion.div
       whileHover={{ scale: 1.02 }}
       whileTap={{ scale: 0.98 }}
-      className={`flex items-center p-3 rounded-md hover:rounded-md cursor-pointer transition-all duration-200 ${isSelected ? "bg-gradient-to-r from-gray-50 to-gray-100 border border-blue-200" : "hover:bg-gray-100"
-        }`}
+      className={`flex items-center p-3 rounded-md hover:rounded-md cursor-pointer transition-all duration-200 ${isSelected ? "bg-gradient-to-r from-gray-50 to-gray-100 border border-blue-200" : "hover:bg-gray-100"}`}
       onClick={onClick}
     >
       <div className={`p-2 rounded-md mr-3 ${isSelected ? "bg-gray-100" : "bg-gray-50"}`}><Icon className="h-4 w-4" /></div>
@@ -326,8 +339,7 @@ function BackendOption({ backend, isSelected, onClick }: BackendOptionProps) {
     <motion.div
       whileHover={{ scale: 1.02 }}
       whileTap={{ scale: 0.98 }}
-      className={`flex items-center p-3 rounded-md cursor-pointer transition-all duration-200 ${isSelected ? "bg-gradient-to-r from-gray-50 to-gray-100 border border-blue-200" : "hover:bg-gray-100"
-        }`}
+      className={`flex items-center p-3 rounded-md cursor-pointer transition-all duration-200 ${isSelected ? "bg-gradient-to-r from-gray-50 to-gray-100 border border-blue-200" : "hover:bg-gray-100"}`}
       onClick={onClick}
     >
       <div className={`p-2 rounded-md mr-3 ${isSelected ? "bg-gray-100" : "bg-gray-50"}`}><Icon className="h-4 w-4" /></div>
