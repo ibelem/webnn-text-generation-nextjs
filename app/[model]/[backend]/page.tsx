@@ -107,7 +107,6 @@ export default function Page({ params }: { params: Promise<{ model: string; back
               reasonEnabled={reasonEnabled}
               setReasonEnabled={setReasonEnabled}
               writingAssistantEnabled={writingAssistantEnabled}
-          writingAssistantPrompt={writingAssistantPrompt}
               setWritingAssistantEnabled={setWritingAssistantEnabled}
               writingAssistantPrompt={writingAssistantPrompt}
               setWritingAssistantPrompt={setWritingAssistantPrompt}
