@@ -168,7 +168,7 @@ export function Sidebar({
           </TabsTrigger>
         </TabsList>
 
-        <TabsContent value="models" className="space-y-1 max-h-[65vh] overflow-y-auto overflow-x-hidden">
+        <TabsContent value="models" className="space-y-1 max-h-[50vh] overflow-y-auto overflow-x-hidden">
           {MODELS.map((model) => (
             <ModelOption
               key={model.id}
@@ -200,7 +200,7 @@ export function Sidebar({
             {compilationTime !== null ? `Compilation: ${compilationTime.toFixed(2)} ms` : ""}
           </div>
         </div>
-        <div className="bg-gray-100 rounded-md p-3 text-sm mb-2">
+        <div className="bg-gray-100 rounded-md p-3 text-sm mb-2 max-h-[30vh] overflow-y-auto">
           <div className="flex items-center justify-between mb-2">
             <span className="text-gray-500">Model</span>
             <span className="font-medium">
@@ -245,11 +245,11 @@ export function Sidebar({
           </div>
           {writingAssistantEnabled && (
             <div className="mt-2">
-              <div className="text-xs text-gray-500 mb-1">System Prompt</div>
+              <div className="text-gray-500 mb-1">System Prompt</div>
               <Textarea
                 value={writingAssistantPrompt}
                 onChange={(e) => setWritingAssistantPrompt(e.target.value)}
-                className="text-xs min-h-[150px] bg-white"
+                className="text-xs min-h-[50px] bg-white max-h-[10vh] overflow-y-auto"
                 placeholder="Enter system prompt..."
               />
             </div>
