@@ -30,8 +30,15 @@ export default function Page({ params }: { params: Promise<{ model: string; back
   const [workerReady, setWorkerReady] = useState(false);
   const workerRef = useRef<Worker | null>(null);
 
-  // Sidebar open state
+  // Sidebar open state (starts open, then adjusts based on screen size)
   const [isSidebarOpen, setIsSidebarOpen] = useState(true);
+
+  // Adjust sidebar state based on screen size after mount (avoid hydration mismatch)
+  useEffect(() => {
+    if (typeof window !== 'undefined') {
+      setIsSidebarOpen(window.innerWidth >= 768);
+    }
+  }, []);
 
   // Reasoning feature toggle
   const [reasonEnabled, setReasonEnabled] = useState(false);
@@ -58,7 +65,7 @@ export default function Page({ params }: { params: Promise<{ model: string; back
 
       workerRef.current = new Worker(workerPath, { type: "module" })
       window.chatWorkerRef = workerRef
-      setWorkerReady(true) // <-- Set ready here!
+      setWorkerReady(true)
     }
 
     return () => {
@@ -71,31 +78,53 @@ export default function Page({ params }: { params: Promise<{ model: string; back
   useEffect(() => {
     if (validModel && selectedModel !== model) setSelectedModel(model as ModelType);
     if (validBackend && selectedBackend !== backend) setSelectedBackend(backend as BackendType);
-    // eslint-disable-next-line
-  }, [model, backend]);
+  }, [model, backend, validModel, selectedModel, validBackend, selectedBackend]);
 
   // Update URL when selection changes
   useEffect(() => {
-    const params = new URLSearchParams(searchParams.toString());
-    if (writingAssistantEnabled) {
-      params.set("assistant", "true");
-    } else {
-      params.delete("assistant");
+    // Only update URL if model or backend actually changed from current URL
+    if (model !== selectedModel || backend !== selectedBackend) {
+      const params = new URLSearchParams(searchParams.toString());
+      if (writingAssistantEnabled) {
+        params.set("assistant", "true");
+      } else {
+        params.delete("assistant");
+      }
+
+      const currentPath = `/${selectedModel}/${selectedBackend}`;
+      const newSearch = params.toString();
+      const newUrl = newSearch ? `${currentPath}?${newSearch}` : currentPath;
+
+      router.replace(newUrl);
     }
+  }, [selectedModel, selectedBackend, model, backend, writingAssistantEnabled, router]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
 
-    const currentPath = `/${selectedModel}/${selectedBackend}`;
-    const newSearch = params.toString();
-    const newUrl = newSearch ? `${currentPath}?${newSearch}` : currentPath;
-
-    router.replace(newUrl);
-    // eslint-disable-next-line
-  }, [selectedModel, selectedBackend, writingAssistantEnabled]);
+  // Auto-close sidebar on mobile after model is compiled (loaded state)
+  useEffect(() => {
+    if (typeof window !== 'undefined' && window.innerWidth < 768) {
+      const anyLoaded = Object.values(modelLoadState).includes("loaded") || Object.values(modelLoadState).includes("ready");
+      if (anyLoaded) {
+        const timer = setTimeout(() => {
+          setIsSidebarOpen(false);
+        }, 800);
+        return () => clearTimeout(timer);
+      }
+    }
+  }, [modelLoadState]);
 
   return (
     <div className="flex h-screen bg-gray-100">
       {isSidebarOpen && (
+        <div 
+          className="fixed inset-0 bg-black/50 z-40 md:hidden"
+          onClick={() => setIsSidebarOpen(false)}
+        />
+      )}
+      
+      {isSidebarOpen && (
         workerReady ? (
-          <div className="w-80 border-r border-gray-200 bg-white">
+          <div className="fixed md:relative inset-0 md:inset-auto w-full md:w-80 border-r border-gray-200 bg-white h-full z-50 md:z-auto shadow-2xl md:shadow-none">
             <Sidebar
               selectedModel={selectedModel}
               setSelectedModel={setSelectedModel}
@@ -112,10 +141,11 @@ export default function Page({ params }: { params: Promise<{ model: string; back
               setWritingAssistantPrompt={setWritingAssistantPrompt}
               modelLoadState={modelLoadState}
               setModelLoadState={setModelLoadState}
+              setIsSidebarOpen={setIsSidebarOpen}
             />
           </div>
         ) : (
-          <div className="w-80 flex items-center justify-center">
+          <div className="fixed md:relative inset-0 md:inset-auto w-full md:w-80 flex items-center justify-center bg-white h-full z-50 md:z-auto shadow-2xl md:shadow-none">
             <Loader2 className="h-8 w-8 animate-spin" />
             <span className="ml-2">Initializing Workers...</span>
           </div>

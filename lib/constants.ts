@@ -17,6 +17,28 @@ export const MODELS: Array<{
   systemPrompt?: string;
   thinkingTagSupport?: boolean;
 }> = [
+    {
+    // https://github.com/huggingface/transformers.js/issues/1239
+    // Works on WebGPU EP in Node.js binding
+    // Crashes when using JSEP
+    // https://github.com/huggingface/transformers.js/issues/1469
+    // should fix the issue for fp16 and q4f16 variants
+    id: "gemma_3_1b_it_gqa" as ModelType,
+    model: "onnx-community/gemma-3-1b-it-ONNX-GQA",
+    dataType: "q4f16",
+    name: "Gemma 3",
+    producer: "WIP",
+    desc: "LLM",
+    parameter: "1B",
+    size: "983MB",
+    useExternalDataFormat: false,
+    maxNewTokens: 512,
+    doSample: false,
+    topK: undefined,
+    temperature: undefined,
+    systemPrompt: "You are a helpful assistant.",
+    thinkingTagSupport: false,
+  },
   {
     id: "phi-3_5-mini" as ModelType,
     model: "onnx-community/Phi-3.5-mini-instruct-onnx-web",
@@ -51,43 +73,6 @@ export const MODELS: Array<{
     systemPrompt: "",
     thinkingTagSupport: false,
   },
-  // {
-  //   id: "phi-4-mini-mha" as ModelType,
-  //   model: "onnx-community/Phi-4-mini-instruct-ONNX-MHA",
-  //   dataType: "q4f16",
-  //   name: "Phi-4 Mini MHA",
-  //   producer: "MS",
-  //   desc: "SLM",
-  //   parameter: "3.8B",
-  //   size: "2.85GB",
-  //   useExternalDataFormat: true,
-  //   maxNewTokens: 1024,
-  //   doSample: true,
-  //   topK: 3,
-  //   temperature: 0.2,
-  //   systemPrompt: "",
-  //   thinkingTagSupport: false,
-  // },
-  // {
-  //   // https://github.com/huggingface/transformers.js/issues/1239
-  //   // Works on WebGPU EP in Node.js binding
-  //   // Crashes when using JSEP
-  //   id: "gemma_3_1b_it_gqa" as ModelType,
-  //   model: "onnx-community/gemma-3-1b-it-ONNX-GQA",
-  //   dataType: "q4",
-  //   name: "Gemma 3",
-  //   producer: "Google",
-  //   desc: "LLM",
-  //   parameter: "1B",
-  //   size: "982MB",
-  //   useExternalDataFormat: false,
-  //   maxNewTokens: 512,
-  //   doSample: false,
-  //   topK: undefined,
-  //   temperature: undefined,
-  //   systemPrompt: "You are a helpful assistant.",
-  //   thinkingTagSupport: false,
-  // },
   {
     id: "llama_3-2_1b" as ModelType,
     model: "onnx-community/Llama-3.2-1B-Instruct-q4f16",

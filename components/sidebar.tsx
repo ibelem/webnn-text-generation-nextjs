@@ -7,7 +7,7 @@ import Image from 'next/image';
 import { Button } from "@/components/ui/button"
 import { Textarea } from "@/components/ui/textarea"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
-import { Sparkles, Gpu, Microchip, Loader2, Download, Cog, RefreshCcw } from "lucide-react"
+import { Sparkles, Gpu, Microchip, Loader2, Download, Cog, RefreshCcw, X } from "lucide-react"
 import { MODELS, BACKENDS } from "../lib/constants"
 import { Progress } from "@/components/progress"
 import type { ProgressProps } from "@/components/progress"
@@ -28,6 +28,7 @@ interface SidebarProps {
   setWritingAssistantPrompt: (prompt: string) => void;
   modelLoadState: Record<string, "not_loaded" | "loading" | "warm" | "loaded" | "ready">;
   setModelLoadState: React.Dispatch<React.SetStateAction<Record<string, "not_loaded" | "loading" | "warm" | "loaded" | "ready" >>>;
+  setIsSidebarOpen?: (open: boolean) => void;
 }
 
 export function Sidebar({
@@ -46,8 +47,10 @@ export function Sidebar({
   setWritingAssistantPrompt,
   modelLoadState,
   setModelLoadState,
+  setIsSidebarOpen,
 }: SidebarProps) {
   const [compilationTime, setCompilationTime] = React.useState<number | null>(null);
+  const [remoteHost, setRemoteHost] = React.useState<string>('huggingface.co');
 
   // Listen for worker "ready", "loading", "reset" events to update modelLoadState and progress
   React.useEffect(() => {
@@ -55,9 +58,14 @@ export function Sidebar({
     const currentWorker = workerRef.current;
 
     function onWorkerMessage(e: MessageEvent) {
-      const { status, model_id, data, file, progress, total, compilationTime } = e.data;
-      if (!model_id && status !== "initiate" && status !== "progress" && status !== "done") return;
+      const { status, model_id, data, file, progress, total, compilationTime, remoteHost } = e.data;
+      if (!model_id && status !== "initiate" && status !== "progress" && status !== "done" && status !== "init") return;
 
+
+      if (status === "init" && remoteHost) {
+        setRemoteHost(remoteHost);
+        return;
+      }
       if (status === "loading") {
         setModelLoadState((prev) => ({ ...prev, [model_id]: "loading" }));
         if (data) {
@@ -136,8 +144,21 @@ export function Sidebar({
 
   // Pass modelLoadState and handler to ModelOption
   return (
-    <div className="h-full flex flex-col bg-white p-4">
-      <div className="grid grid-cols-2 items-center mb-4">
+    <div className="h-full flex flex-col bg-white p-2 md:p-4">
+      {/* Mobile close button */}
+      <div className="flex justify-between items-center mb-3 md:hidden">
+        <div className="text-sm font-medium text-gray-700"></div>
+        <Button 
+          variant="ghost" 
+          size="icon"
+          onClick={() => setIsSidebarOpen?.(false)}
+          className="h-8 w-8"
+        >
+          <X className="h-5 w-5" />
+        </Button>
+      </div>
+
+      <div className="grid grid-cols-2 items-center mb-3 md:mb-4">
         <Image
           src="/webgpu-logo-h.svg"
           alt="WebGPU Logo"
@@ -168,7 +189,7 @@ export function Sidebar({
           </TabsTrigger>
         </TabsList>
 
-        <TabsContent value="models" className="space-y-1 max-h-[50vh] overflow-y-auto overflow-x-hidden">
+        <TabsContent value="models" className="space-y-1 max-h-[60vh] overflow-y-auto overflow-x-hidden">
           {MODELS.map((model) => (
             <ModelOption
               key={model.id}
@@ -195,19 +216,19 @@ export function Sidebar({
 
       <div className="mt-auto pt-2 border-t border-gray-200">
         <div className="flex items-center justify-between mb-2">
-          <div className="text-xs text-gray-500 ml-3">Current Configuration</div>
-          <div id="compilation-time" className="text-xs text-pink-600">
+          <div className="text-[10px] md:text-xs text-gray-500 ml-2 md:ml-3">Current Configuration</div>
+          <div id="compilation-time" className="text-[10px] md:text-xs text-pink-600">
             {compilationTime !== null ? `Compilation: ${compilationTime.toFixed(2)} ms` : ""}
           </div>
         </div>
-        <div className="bg-gray-100 rounded-md p-3 text-sm mb-2 max-h-[30vh] overflow-y-auto">
-          <div className="flex items-center justify-between mb-2">
+        <div className="bg-gray-100 rounded-md p-2 md:p-3 text-xs md:text-sm mb-2 max-h-[40vh] overflow-y-auto">
+          <div className="flex items-center justify-between">
             <span className="text-gray-500">Model</span>
             <span className="font-medium">
               {MODELS.find((m) => m.id === selectedModel)?.name || selectedModel}
             </span>
           </div>
-          <div className="flex items-center justify-between">
+          <div className="flex items-center justify-between mt-2">
             <span className="text-gray-500">Backend</span>
             <span className="font-medium">{selectedBackend}</span>
           </div>
@@ -254,6 +275,10 @@ export function Sidebar({
               />
             </div>
           )}
+          <div className="flex items-center justify-between mt-2">
+              <span className="text-gray-500">Model Host</span>
+            <span className="font-medium">{remoteHost}</span>
+            </div>
         </div>
 
         {/* Progress bar UI (show only if loading/progress is needed) */}
@@ -294,7 +319,16 @@ function ModelOption({ model, isSelected, onClick, loadState, onLoad }: ModelOpt
     >
       <div className={`p-2 rounded-md mr-3 ${isSelected ? "bg-gray-100" : "bg-gray-50"}`}><Icon className="h-4 w-4" /></div>
       <div className="flex-1">
-        <div className="flex font-medium text-md items-center hover:text-blue-500">{model.name} <span className="ml-1 text-[10px] font-normal border border-solid px-[4px] rounded-sm uppercase">{model.producer}</span></div>
+        <div className="flex font-medium text-md items-center hover:text-blue-500">
+          {model.name} 
+          <span className={`ml-1 text-[10px] font-normal px-[4px] rounded-sm uppercase ${
+            model.producer === 'WIP' 
+              ? 'bg-orange-500 text-white' 
+              : 'bg-green-600 text-white'
+          }`}>
+            {model.producer}
+          </span>
+        </div>
         <div className="text-xs text-gray-500">
           <span className="bg-gray-100 text-[11px] py-[1px] px-1 rounded-sm">{model.desc}</span>
           <span className="bg-gray-100 text-[11px] py-[1px] px-1 rounded-sm mr-1 ml-1">{model.parameter}</span>

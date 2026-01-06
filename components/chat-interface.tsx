@@ -160,21 +160,21 @@ export function ChatInterface({
   return (
     <>
       {/* Header */}
-      <div className="flex items-center justify-between p-4 border-b border-gray-200 bg-white">
+      <div className="flex items-center justify-between p-2 md:p-4 border-b border-gray-200 bg-white">
         <Button variant="ghost" size="icon" onClick={() => setIsSidebarOpen(!isSidebarOpen)}>
           {isSidebarOpen ? <X className="h-5 w-5" /> : <Menu className="h-5 w-5" />}
         </Button>
-        <div className="flex items-center space-x-2">
-          <Sparkles className="h-4 w-4 text-blue-500" />
-          <span className="font-medium">{selectedModelName}</span>
-          <span className="text-gray-400">•</span>
-          <span className="text-sm text-gray-500">{backendName}</span>
+        <div className="flex items-center space-x-1 md:space-x-2 overflow-hidden">
+          <Sparkles className="h-4 w-4 text-blue-500 flex-shrink-0" />
+          <span className="font-medium text-sm md:text-base truncate">{selectedModelName}</span>
+          <span className="text-gray-400 hidden sm:inline">•</span>
+          <span className="text-xs md:text-sm text-gray-500 hidden sm:inline">{backendName}</span>
         </div>
-        <div className="w-9" /> {/* Empty div for flex spacing */}
+        <div className="w-6 md:w-9" /> {/* Empty div for flex spacing */}
       </div>
 
       {/* Chat messages */}
-      <div className="flex-1 overflow-y-auto p-4 space-y-4 bg-gray-50">
+      <div className="flex-1 overflow-y-auto p-2 md:p-4 space-y-2 md:space-y-4 bg-gray-50">
         <AnimatePresence>
           {messages.length === 0 ? (
             <motion.div
@@ -187,13 +187,13 @@ export function ChatInterface({
               <h3 className={`text-xl font-medium mb-2 ${anyModelReady ? 'text-blue-500' : ''}`}>
                 How can I help you today?
               </h3>
-              <p className="max-w-md text-sm">Ask me anything or try one of these examples:</p>
-              <div className="grid grid-cols-1 gap-2 mt-4 w-full max-w-md">
+              <p className="max-w-md text-xs md:text-sm px-2">Ask me anything or try one of these examples:</p>
+              <div className="grid grid-cols-1 gap-2 mt-3 md:mt-4 w-full max-w-md px-2">
                 {["What are your model name and parameter count?", "A triangle has three sides with lengths in the ratio 2:3:4. Find the length of each side If the perimeter is 36cm.", "Explain the concept of 'inflation' in economics in just two sentences, using a simple analogy involving a pizza."].map((example) => (
                   <Button
                     key={example}
                     variant="outline"
-                    className="justify-start text-left py-6 whitespace-normal font-normal bg-white border-gray-200 hover:bg-gray-100 hover:cursor-pointer"
+                    className="justify-start text-left py-4 md:py-6 text-xs md:text-sm whitespace-normal font-normal bg-white border-gray-200 hover:bg-gray-100 hover:cursor-pointer"
                     onClick={() => setInput(example)}
                     disabled={!anyModelReady}
                   >
@@ -236,14 +236,14 @@ export function ChatInterface({
 
       {/* Input area */}
       <div className="pt-2 px-2 border-t border-gray-200 bg-white">
-        <form onSubmit={handleSubmit} className="min-h-[80px] max-h-[calc(30dvh)] mb-[-34px]">
+        <form onSubmit={handleSubmit} className="min-h-[60px] md:min-h-[80px] max-h-[calc(30dvh)] mb-[-34px]">
           <Textarea
             id="chat-input"
             value={input}
             onChange={(e) => setInput(e.target.value)}
             placeholder="Type your message..."
             disabled={!anyModelReady}
-            className="flex self-start border px-2 py-2 text-md placeholder:text-muted-foreground disabled:opacity-50 md:text-sm min-h-[80px] max-h-[calc(30dvh)] overflow-hidden resize-none rounded-md bg-muted dark:border-zinc-700"
+            className="flex self-start border px-2 py-2 text-sm placeholder:text-muted-foreground disabled:opacity-50 min-h-[60px] md:min-h-[80px] max-h-[calc(30dvh)] overflow-hidden resize-none rounded-md bg-muted dark:border-zinc-700"
             onKeyDown={(e) => {
               if (e.key === 'Enter' && (e.ctrlKey || e.metaKey)) {
                 e.preventDefault();
@@ -273,10 +273,10 @@ export function ChatInterface({
             </Button>
           </div>
         </form>
-        <div className="text-[11px] flex justify-center my-3 text-gray-500">
-          <div className="mr-2"><span className="text-[10px] border border-gray-200 border-solid rounded-sm px-1 pb-[2px]">enter</span> continue the conversation</div>
+        <div className="text-[10px] md:text-[11px] flex-col md:flex-row flex items-center justify-center my-2 md:my-3 text-gray-500 gap-1 md:gap-0">
+          <div className="md:mr-2"><span className="text-[10px] border border-gray-200 border-solid rounded-sm px-1 pb-[2px]">enter</span> continue</div>
           ·
-          <div className="ml-2">
+          <div className="md:ml-2">
             <span className="text-[10px] border border-gray-200 border-solid rounded-sm px-1 pb-[2px] self-center">ctrl</span>
             <span className="ml-1 text-[10px] border border-gray-200 border-solid rounded-sm px-1 pb-[2px] self-center">enter</span> clears the chat history and start a new conversation</div>
         </div>
@@ -300,15 +300,15 @@ function MessageBubble({ message }: MessageBubbleProps) {
       transition={{ duration: 0.3 }}
       className={`flex ${isUser ? "justify-end" : "justify-start"}`}
     >
-      <div className={`flex items-start max-w-[80%] space-x-2 ${isUser ? "flex-row-reverse space-x-reverse" : ""}`}>
+      <div className={`flex items-start max-w-[95%] sm:max-w-[85%] md:max-w-[80%] space-x-2 ${isUser ? "flex-row-reverse space-x-reverse" : ""}`}>
         <div
-          className={`flex-shrink-0 w-8 h-8 rounded-full flex items-center border border-solid border-gray-200 justify-center hover:border-blue-500 hover:cursor-pointer`}
+          className={`flex-shrink-0 w-6 h-6 md:w-8 md:h-8 rounded-full flex items-center border border-solid border-gray-200 justify-center hover:border-blue-500 hover:cursor-pointer`}
         >
-          {isUser ? <User className="h-4 w-4 text-gray-500 hover:text-blue-600" /> : <Bot className="h-4 w-4 text-gray-500 hover:text-blue-600" />}
+          {isUser ? <User className="h-3 w-3 md:h-4 md:w-4 text-gray-500 hover:text-blue-600" /> : <Bot className="h-3 w-3 md:h-4 md:w-4 text-gray-500 hover:text-blue-600" />}
         </div>
 
         <div
-          className={`p-3 rounded-lg ${isUser
+          className={`p-2 md:p-3 text-sm md:text-base rounded-lg ${isUser
             ? "hover:bg-gradient-to-br hover:from-gray-50 hover:to-gray-100 border border-blue-200 hover:cursor-pointer shadow-sm"
             : "bg-white border border-gray-200 shadow-sm"
             }`}
