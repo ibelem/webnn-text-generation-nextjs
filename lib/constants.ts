@@ -28,7 +28,7 @@ export const MODELS: Array<{
       dataType: "q4f16",
       name: "Gemma 3",
       producer: "Google",
-      desc: "LLM",
+      desc: "SLM",
       parameter: "1B",
       size: "983MB",
       useExternalDataFormat: true,
