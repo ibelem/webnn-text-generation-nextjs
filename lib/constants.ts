@@ -32,7 +32,7 @@ export const MODELS: Array<{
       parameter: "1B",
       size: "983MB",
       useExternalDataFormat: true,
-      maxNewTokens: 512,
+      maxNewTokens: 1024,
       doSample: false,
       topK: undefined,
       temperature: undefined,
