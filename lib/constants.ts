@@ -82,7 +82,7 @@ export const MODELS: Array<{
       desc: "LLM",
       parameter: "1B",
       size: "1.01GB",
-      useExternalDataFormat: false,
+      useExternalDataFormat: true,
       maxNewTokens: 1024,
       doSample: true,
       topK: 3,
