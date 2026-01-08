@@ -155,7 +155,7 @@ export function ChatInterface({
 
   const backendName = BACKENDS.find(b => b.id === selectedBackend)?.name || selectedBackend;
   const selectedModelObj = MODELS.find((m) => m.id === selectedModel);
-  const selectedModelName = selectedModelObj ? selectedModelObj.name : selectedModel;
+  const selectedModelName = selectedModelObj ? `${selectedModelObj.name} ${selectedModelObj.parameter}` : selectedModel;
 
   return (
     <>
