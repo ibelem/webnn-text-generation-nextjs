@@ -146,7 +146,7 @@ export function Sidebar({
   return (
     <div className="h-full flex flex-col bg-white p-2 md:p-4">
       {/* Mobile close button */}
-      <div className="flex justify-between items-center mb-3 md:hidden">
+      <div className="flex justify-between items-center md:hidden">
         <div className="text-sm font-medium text-gray-700"></div>
         <Button 
           variant="ghost" 
