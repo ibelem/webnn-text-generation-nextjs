@@ -39,6 +39,10 @@ yarn-error.log*
 
 # vercel
 .vercel
+.claude
+.gemini
+.github
+.shared
 
 # typescript
 *.tsbuildinfo

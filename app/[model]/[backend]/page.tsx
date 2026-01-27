@@ -117,14 +117,14 @@ export default function Page({ params }: { params: Promise<{ model: string; back
     <div className="flex h-screen bg-gray-100">
       {isSidebarOpen && (
         <div 
-          className="fixed inset-0 bg-black/50 z-40 md:hidden"
+          className="fixed inset-0 bg-black/40 z-40 md:hidden backdrop-blur-sm transition-opacity duration-200"
           onClick={() => setIsSidebarOpen(false)}
         />
       )}
       
       {isSidebarOpen && (
         workerReady ? (
-          <div className="fixed md:relative inset-0 md:inset-auto w-full md:w-80 border-r border-gray-200 bg-white h-full z-50 md:z-auto shadow-2xl md:shadow-none">
+          <div className="fixed md:relative inset-0 md:inset-auto w-[96%] md:w-80 border-r border-gray-200 bg-white h-full z-50 md:z-auto shadow-xl md:shadow-none transition-transform duration-200 ease-out">
             <Sidebar
               selectedModel={selectedModel}
               setSelectedModel={setSelectedModel}
@@ -145,7 +145,7 @@ export default function Page({ params }: { params: Promise<{ model: string; back
             />
           </div>
         ) : (
-          <div className="fixed md:relative inset-0 md:inset-auto w-full md:w-80 flex items-center justify-center bg-white h-full z-50 md:z-auto shadow-2xl md:shadow-none">
+          <div className="fixed md:relative inset-0 md:inset-auto w-[85%] max-w-[320px] md:w-80 flex items-center justify-center bg-white h-full z-50 md:z-auto shadow-xl md:shadow-none">
             <Loader2 className="h-8 w-8 animate-spin" />
             <span className="ml-2">Initializing Workers...</span>
           </div>

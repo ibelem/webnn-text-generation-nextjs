@@ -56,20 +56,33 @@ body {
 
 /* Custom scrollbar */
 ::-webkit-scrollbar {
-  width: 6px;
+  width: 2px;
+  height: 8px;
 }
 
 ::-webkit-scrollbar-track {
-  background: rgba(0, 0, 0, 0.05);
-}
-
-::-webkit-scrollbar-thumb {
-  background: rgba(0, 0, 0, 0.1);
+  background: rgba(0, 0, 0, 0.03);
   border-radius: 10px;
 }
 
+::-webkit-scrollbar-thumb {
+  background: rgba(0, 0, 0, 0.15);
+  border-radius: 10px;
+  transition: background 0.2s ease;
+}
+
 ::-webkit-scrollbar-thumb:hover {
-  background: rgba(0, 0, 0, 0.2);
+  background: rgba(0, 0, 0, 0.25);
+}
+
+/* Smooth scrolling */
+html {
+  scroll-behavior: smooth;
+}
+
+/* Better touch scrolling on mobile */
+* {
+  -webkit-overflow-scrolling: touch;
 }
 
 /* Animations */

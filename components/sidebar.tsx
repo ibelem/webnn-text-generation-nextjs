@@ -144,15 +144,15 @@ export function Sidebar({
 
   // Pass modelLoadState and handler to ModelOption
   return (
-    <div className="h-full flex flex-col bg-white p-2 md:p-4">
+    <div className="h-full flex flex-col bg-white p-3 md:p-4">
       {/* Mobile close button */}
-      <div className="flex justify-between items-center md:hidden">
-        <div className="text-sm font-medium text-gray-700"></div>
+      <div className="flex justify-between items-center md:hidden mb-3">
+        <div className="text-sm font-semibold text-gray-700">Settings</div>
         <Button 
           variant="ghost" 
           size="icon"
           onClick={() => setIsSidebarOpen?.(false)}
-          className="h-8 w-8"
+          className="h-9 w-9 hover:bg-gray-100 transition-colors"
         >
           <X className="h-5 w-5" />
         </Button>
@@ -178,18 +178,18 @@ export function Sidebar({
       </div>
 
       <Tabs defaultValue="models" className="flex-1 gap-0">
-        <TabsList className="grid grid-cols-2 px-2 gap-x-2 mb-2 h-[auto] w-full rounded-md bg-gray-100 border border-gray-200 shadow-xs">
-          <TabsTrigger className="flex-1 px-3 py-2 rounded-md text-sm font-medium transition-colors data-[state=active]:bg-white border-none !shadow-none hover:cursor-pointer data-[state=inactive]:text-gray-500 hover:bg-white/80 focus:outline-none"
+        <TabsList className="grid grid-cols-2 p-1 gap-1 mb-3 h-[auto] w-full rounded-lg bg-gray-100 border border-gray-200">
+          <TabsTrigger className="flex-1 px-3 py-2.5 rounded-md text-xs md:text-sm font-medium transition-all data-[state=active]:bg-white data-[state=active]:shadow-sm border-none hover:cursor-pointer data-[state=inactive]:text-gray-500 hover:bg-white/60 focus:outline-none"
             value="models"> 
             Models
           </TabsTrigger>
-          <TabsTrigger className="flex-1 px-3 py-2 rounded-md text-sm font-medium transition-colors data-[state=active]:bg-white border-none !shadow-none hover:cursor-pointer data-[state=inactive]:text-gray-500 hover:bg-white/80 focus:outline-none"
+          <TabsTrigger className="flex-1 px-3 py-2.5 rounded-md text-xs md:text-sm font-medium transition-all data-[state=active]:bg-white data-[state=active]:shadow-sm border-none hover:cursor-pointer data-[state=inactive]:text-gray-500 hover:bg-white/60 focus:outline-none"
             value="backends">
             Backends
           </TabsTrigger>
         </TabsList>
 
-        <TabsContent value="models" className="space-y-1 max-h-[60vh] overflow-y-auto overflow-x-hidden">
+        <TabsContent value="models" className="space-y-2 max-h-[60vh] overflow-y-auto overflow-x-hidden">
           {MODELS.map((model) => (
             <ModelOption
               key={model.id}
@@ -312,14 +312,14 @@ function ModelOption({ model, isSelected, onClick, loadState, onLoad }: ModelOpt
 
   return (
     <motion.div
-      whileHover={{ scale: 1.02 }}
-      whileTap={{ scale: 0.98 }}
-      className={`flex items-center p-3 rounded-md hover:rounded-md cursor-pointer transition-all duration-200 ${isSelected ? "bg-gradient-to-r from-gray-50 to-gray-100 border border-blue-200" : "hover:bg-gray-100"}`}
+      whileHover={{ scale: 1.01 }}
+      whileTap={{ scale: 0.99 }}
+      className={`flex items-center p-3 md:p-3 rounded-lg cursor-pointer transition-all duration-200 mr-2 min-h-[68px] ${isSelected ? "bg-gradient-to-r from-gray-50 to-gray-100 border border-blue-200 shadow-sm" : "hover:bg-gray-50 border border-transparent"}`}
       onClick={onClick}
     >
-      <div className={`p-2 rounded-md mr-3 ${isSelected ? "bg-gray-100" : "bg-gray-50"}`}><Icon className="h-4 w-4" /></div>
-      <div className="flex-1">
-        <div className="flex font-medium text-md items-center hover:text-blue-500">
+      <div className={`p-2.5 rounded-lg mr-3 flex-shrink-0 ${isSelected ? "bg-white shadow-sm" : "bg-gray-100"}`}><Icon className="h-4 w-4 md:h-5 md:w-5" /></div>
+      <div className="flex-1 min-w-0">
+        <div className="flex font-medium text-sm md:text-md items-center hover:text-blue-500 truncate">
           {model.name} 
           <span className={`ml-1 text-[10px] font-normal px-[4px] rounded-sm uppercase ${
             model.producer === 'WIP' 
@@ -352,7 +352,7 @@ function ModelOption({ model, isSelected, onClick, loadState, onLoad }: ModelOpt
             title={loadState === "not_loaded" ? "Download model and configuration files" : "Re-download model files (files already downloaded)" }
             variant={loadState === "not_loaded" ? "default" : "secondary"}
             size="sm"
-            className={loadState === "not_loaded" ? "shadow-none border border-solid border-gray-50 text-xs hover:cursor-pointer" : "shadow-none text-gray-600 text-xs hover:cursor-pointer"}
+            className={loadState === "not_loaded" ? "shadow-sm hover:shadow transition-shadow text-xs hover:cursor-pointer h-9 w-9" : "shadow-none text-gray-600 text-xs hover:cursor-pointer hover:bg-gray-100 transition-colors h-9 w-9"}
             onClick={(e) => {
               e.stopPropagation();
               onLoad();
@@ -387,15 +387,15 @@ function BackendOption({ backend, isSelected, onClick }: BackendOptionProps) {
   // Add more mappings as needed
   return (
     <motion.div
-      whileHover={{ scale: 1.02 }}
-      whileTap={{ scale: 0.98 }}
-      className={`flex items-center p-3 rounded-md cursor-pointer transition-all duration-200 ${isSelected ? "bg-gradient-to-r from-gray-50 to-gray-100 border border-blue-200" : "hover:bg-gray-100"}`}
+      whileHover={{ scale: 1.01 }}
+      whileTap={{ scale: 0.99 }}
+      className={`flex items-center p-3 md:p-3 rounded-lg cursor-pointer transition-all duration-200 mr-2 min-h-[68px] ${isSelected ? "bg-gradient-to-r from-gray-50 to-gray-100 border border-blue-200 shadow-sm" : "hover:bg-gray-50 border border-transparent"}`}
       onClick={onClick}
     >
-      <div className={`p-2 rounded-md mr-3 ${isSelected ? "bg-gray-100" : "bg-gray-50"}`}><Icon className="h-4 w-4" /></div>
+      <div className={`p-2.5 rounded-lg mr-3 flex-shrink-0 ${isSelected ? "bg-white shadow-sm" : "bg-gray-100"}`}><Icon className="h-4 w-4 md:h-5 md:w-5" /></div>
       <div className="flex-1">
-        <div className="font-medium">{backend.name}</div>
-        <div className="text-xs text-gray-500">Inference backend</div>
+        <div className="font-medium text-sm md:text-base">{backend.name}</div>
+        <div className="text-xs md:text-sm text-gray-500">Inference backend</div>
       </div>
     </motion.div>
   );
