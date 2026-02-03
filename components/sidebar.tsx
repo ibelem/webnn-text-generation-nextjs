@@ -145,19 +145,6 @@ export function Sidebar({
   // Pass modelLoadState and handler to ModelOption
   return (
     <div className="h-full flex flex-col bg-white p-3 md:p-4">
-      {/* Mobile close button */}
-      <div className="flex justify-between items-center md:hidden mb-3">
-        <div className="text-sm font-semibold text-gray-700">Settings</div>
-        <Button 
-          variant="ghost" 
-          size="icon"
-          onClick={() => setIsSidebarOpen?.(false)}
-          className="h-9 w-9 hover:bg-gray-100 transition-colors"
-        >
-          <X className="h-5 w-5" />
-        </Button>
-      </div>
-
       <div className="grid grid-cols-2 items-center mb-3 md:mb-4">
         <Image
           src="/webgpu-logo-h.svg"
@@ -221,7 +208,7 @@ export function Sidebar({
             {compilationTime !== null ? `Compilation: ${compilationTime.toFixed(2)} ms` : ""}
           </div>
         </div>
-        <div className="bg-gray-100 rounded-md p-2 md:p-3 text-xs md:text-sm mb-2 max-h-[40vh] overflow-y-auto">
+        <div className="bg-gray-100 rounded-md p-2 md:p-3 text-xs md:text-sm mb-2 md:max-h-[40vh] md:overflow-y-auto">
           <div className="flex items-center justify-between">
             <span className="text-gray-500">Model</span>
             <span className="font-medium">

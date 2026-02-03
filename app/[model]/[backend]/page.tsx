@@ -114,17 +114,10 @@ export default function Page({ params }: { params: Promise<{ model: string; back
   }, [modelLoadState]);
 
   return (
-    <div className="flex h-screen bg-gray-100">
-      {isSidebarOpen && (
-        <div 
-          className="fixed inset-0 bg-black/40 z-40 md:hidden backdrop-blur-sm transition-opacity duration-200"
-          onClick={() => setIsSidebarOpen(false)}
-        />
-      )}
-      
+    <div className="flex flex-col md:flex-row min-h-screen md:h-screen bg-gray-100">
       {isSidebarOpen && (
         workerReady ? (
-          <div className="fixed md:relative inset-0 md:inset-auto w-[96%] md:w-80 border-r border-gray-200 bg-white h-full z-50 md:z-auto shadow-xl md:shadow-none transition-transform duration-200 ease-out">
+          <div className="w-full md:w-80 border-b md:border-b-0 md:border-r border-gray-200 bg-white md:h-full md:overflow-y-auto">
             <Sidebar
               selectedModel={selectedModel}
               setSelectedModel={setSelectedModel}
@@ -145,13 +138,13 @@ export default function Page({ params }: { params: Promise<{ model: string; back
             />
           </div>
         ) : (
-          <div className="fixed md:relative inset-0 md:inset-auto w-[85%] max-w-[320px] md:w-80 flex items-center justify-center bg-white h-full z-50 md:z-auto shadow-xl md:shadow-none">
+          <div className="w-full md:w-80 flex items-center justify-center bg-white h-20 md:h-full border-b md:border-b-0 md:border-r border-gray-200">
             <Loader2 className="h-8 w-8 animate-spin" />
             <span className="ml-2">Initializing Workers...</span>
           </div>
         )
       )}
-      <div className="flex-1 flex flex-col">
+      <div className="flex-1 flex flex-col min-h-screen md:min-h-0">
         <ChatInterface
           isSidebarOpen={isSidebarOpen}
           setIsSidebarOpen={setIsSidebarOpen}
