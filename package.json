@@ -4,7 +4,7 @@
   "private": true,
   "scripts": {
     "dev": "next dev --turbopack",
-    "build": "esbuild lib/model-worker.js --bundle --platform=browser --outfile=public/model-worker.bundle.js && next build",
+    "build": "esbuild lib/model-worker.js --bundle --platform=browser --format=esm --outfile=public/model-worker.bundle.js && next build",
     "start": "next start",
     "lint": "next lint"
   },
