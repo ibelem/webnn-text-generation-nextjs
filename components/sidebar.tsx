@@ -211,9 +211,14 @@ export function Sidebar({
         <div className="bg-gray-100 rounded-md p-2 md:p-3 text-xs md:text-sm mb-2 md:max-h-[40vh] md:overflow-y-auto">
           <div className="flex items-center justify-between">
             <span className="text-gray-500">Model</span>
-            <span className="font-medium">
-              {MODELS.find((m) => m.id === selectedModel)?.name || selectedModel}
-            </span>
+            <a 
+              href={`https://huggingface.co/${MODELS.find((m) => m.id === selectedModel)?.model || selectedModel}`}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="text-xs text-blue-500 font-medium text-right hover:text-blue-600 hover:underline transition-colors"
+            >
+              {MODELS.find((m) => m.id === selectedModel)?.model || selectedModel}
+            </a>
           </div>
           <div className="flex items-center justify-between mt-2">
             <span className="text-gray-500">Backend</span>
