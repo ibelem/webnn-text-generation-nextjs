@@ -92,10 +92,10 @@ export const MODELS: Array<{
     },
     {
       id: "qwen3-4b" as ModelType,
-      model: "lwanming/Qwen3-4B-ONNX",
+      model: "webgpu/Qwen3-4B-ONNX",
       dataType: "q4f16",
       name: "Qwen3",
-      producer: "WIP",
+      producer: "Ali",
       desc: "LLM",
       parameter: "4.0B",
       size: "2.83GB",
