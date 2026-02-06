@@ -98,7 +98,7 @@ export const MODELS: Array<{
       producer: "Ali",
       desc: "LLM",
       parameter: "4.0B",
-      size: "2.83GB",
+      size: "2.63GB",
       useExternalDataFormat: true,
       maxNewTokens: 1024,
       doSample: true,
