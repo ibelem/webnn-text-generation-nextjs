@@ -176,7 +176,7 @@ export function Sidebar({
           </TabsTrigger>
         </TabsList>
 
-        <TabsContent value="models" className="space-y-2 max-h-[60vh] overflow-y-auto overflow-x-hidden">
+        <TabsContent value="models" className="max-h-[60vh] overflow-y-auto overflow-x-hidden rounded-lg border border-blue-100 ">
           {MODELS.map((model) => (
             <ModelOption
               key={model.id}
@@ -201,7 +201,7 @@ export function Sidebar({
         </TabsContent>
       </Tabs>
 
-      <div className="mt-auto pt-2 border-t border-gray-200">
+      <div className="mt-auto pt-2">
         <div className="flex items-center justify-between mb-2">
           <div className="text-[10px] md:text-xs text-gray-500 ml-2 md:ml-3">Current Configuration</div>
           <div id="compilation-time" className="text-[10px] md:text-xs text-pink-600">
@@ -306,10 +306,10 @@ function ModelOption({ model, isSelected, onClick, loadState, onLoad }: ModelOpt
     <motion.div
       whileHover={{ scale: 1.01 }}
       whileTap={{ scale: 0.99 }}
-      className={`flex items-center p-3 md:p-3 rounded-lg cursor-pointer transition-all duration-200 mr-2 min-h-[68px] ${isSelected ? "bg-gradient-to-r from-gray-50 to-gray-100 border border-blue-200 shadow-sm" : "hover:bg-gray-50 border border-transparent"}`}
+      className={`flex items-center py-2 px-3 md:px-3 md:py-2 cursor-pointer transition-all duration-200 ${isSelected ? "bg-gradient-to-r from-gray-50 to-gray-100" : "hover:bg-gray-50"}`}
       onClick={onClick}
     >
-      <div className={`p-2.5 rounded-lg mr-3 flex-shrink-0 ${isSelected ? "bg-white shadow-sm" : "bg-gray-100"}`}><Icon className="h-4 w-4 md:h-5 md:w-5" /></div>
+      <div className={`p-2.5 rounded-lg mr-3 flex-shrink-0`}><Icon className="h-4 w-4 md:h-5 md:w-5" /></div>
       <div className="flex-1 min-w-0">
         <div className="flex font-medium text-sm md:text-md items-center hover:text-blue-500 truncate">
           {model.name} 
@@ -330,21 +330,21 @@ function ModelOption({ model, isSelected, onClick, loadState, onLoad }: ModelOpt
       {/* Load/Reload Button */}
       <div className="ml-2 text-xs">
         {loadState === "loading" ? (
-          <Button variant="secondary" size="sm" disabled className="shadow-none font-normal text-[10px] !flex-col items-center mr-[-9px]">
+          <Button variant="ghost" size="sm" disabled className="shadow-none font-normal text-[10px] !flex-col items-center mr-[-9px] border-none rounded-none bg-transparent">
             <Loader2 className="h-4 w-4 animate-spin" />
             <span>Loading</span>
           </Button>
         ) : loadState === "warm" ? (
-          <Button variant="secondary" size="sm" disabled className="shadow-none font-normal text-[10px] !flex-col items-center mr-[-9px]">
+          <Button variant="ghost" size="sm" disabled className="shadow-none font-normal text-[10px] !flex-col items-center mr-[-9px] border-none rounded-none bg-transparent">
             <Cog className="h-4 w-4 animate-spin" />
             <span>Warming up</span>
           </Button>
         ) : (
           <Button
             title={loadState === "not_loaded" ? "Download model and configuration files" : "Re-download model files (files already downloaded)" }
-            variant={loadState === "not_loaded" ? "default" : "secondary"}
+            variant={"ghost"}
             size="sm"
-            className={loadState === "not_loaded" ? "shadow-sm hover:shadow transition-shadow text-xs hover:cursor-pointer h-9 w-9" : "shadow-none text-gray-600 text-xs hover:cursor-pointer hover:bg-gray-100 transition-colors h-9 w-9"}
+            className={loadState === "not_loaded" ? "shadow-none hover:shadow-none text-xs hover:cursor-pointer h-9 w-9 border-none rounded-none bg-transparent hover:bg-transparent" : "shadow-none text-gray-600 text-xs hover:cursor-pointer hover:bg-transparent transition-colors h-9 w-9 border-none rounded-none bg-transparent"}
             onClick={(e) => {
               e.stopPropagation();
               onLoad();
