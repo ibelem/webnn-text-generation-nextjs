@@ -56,23 +56,23 @@ export const MODELS: Array<{
       systemPrompt: "",
       thinkingTagSupport: false,
     },
-    // {
-    //   id: "phi-4-mini-gqa" as ModelType,
-    //   model: "onnx-community/Phi-4-mini-instruct-ONNX-GQA",
-    //   dataType: "q4f16",
-    //   name: "Phi-4 Mini",
-    //   producer: "WIP",
-    //   desc: "SLM",
-    //   parameter: "3.8B",
-    //   size: "2.85GB",
-    //   useExternalDataFormat: true,
-    //   maxNewTokens: 1024,
-    //   doSample: true,
-    //   topK: 3,
-    //   temperature: 0.2,
-    //   systemPrompt: "",
-    //   thinkingTagSupport: false,
-    // },
+    {
+      id: "phi-4-mini-gqa" as ModelType,
+      model: "lwanming/Phi-4-mini-instruct-ONNX-GQA",
+      dataType: "q4f16",
+      name: "Phi-4 Mini",
+      producer: "WIP",
+      desc: "SLM",
+      parameter: "3.8B",
+      size: "2.5GB",
+      useExternalDataFormat: true,
+      maxNewTokens: 1024,
+      doSample: true,
+      topK: 3,
+      temperature: 0.2,
+      systemPrompt: "",
+      thinkingTagSupport: false,
+    },
     {
       id: "llama_3-2_1b" as ModelType,
       model: "onnx-community/Llama-3.2-1B-Instruct-ONNX",
@@ -90,40 +90,23 @@ export const MODELS: Array<{
       systemPrompt: "You are a helpful assistant.",
       thinkingTagSupport: false,
     },
-    // {
-    //   id: "qwen3-4b" as ModelType,
-    //   model: "onnx-community/Qwen3-4B-ONNX",
-    //   dataType: "q4f16",
-    //   name: "Qwen3",
-    //   producer: "Ali",
-    //   desc: "LLM",
-    //   parameter: "4.0B",
-    //   size: "2.63GB",
-    //   useExternalDataFormat: true,
-    //   maxNewTokens: 1024,
-    //   doSample: true,
-    //   topK: 20,
-    //   temperature: 0.6,
-    //   systemPrompt: "",
-    //   thinkingTagSupport: false,
-    // },
-    // {
-    //   id: "qwen3-4b-instruct-2507" as ModelType,
-    //   model: "onnx-community/Qwen3-4B-Instruct-2507-ONNX",
-    //   dataType: "q4f16",
-    //   name: "Qwen3 2507",
-    //   producer: "WIP",
-    //   desc: "LLM",
-    //   parameter: "4.0B",
-    //   size: "2.69GB",
-    //   useExternalDataFormat: true,
-    //   maxNewTokens: 1024,
-    //   doSample: true,
-    //   topK: 20,
-    //   temperature: 0.7,
-    //   systemPrompt: "",
-    //   thinkingTagSupport: false,
-    // },
+    {
+      id: "qwen3-4b" as ModelType,
+      model: "webgpu/Qwen3-4B-ONNX",
+      dataType: "q4f16",
+      name: "Qwen3",
+      producer: "Ali",
+      desc: "LLM",
+      parameter: "4.0B",
+      size: "2.63GB",
+      useExternalDataFormat: true,
+      maxNewTokens: 1024,
+      doSample: true,
+      topK: 20,
+      temperature: 0.6,
+      systemPrompt: "",
+      thinkingTagSupport: false,
+    },
     {
       id: "qwen3-0_6b" as ModelType,
       model: "onnx-community/Qwen3-0.6B-ONNX",
@@ -203,4 +186,74 @@ export const BACKENDS: Array<{
     { id: "webnn-npu" as BackendType, name: "WebNN NPU" },
   ];
 
-export const WRITING_ASSISTANT_PROMPT = "You are an expert writing assistant specializing in text refinement and expansion. Your role is to enhance the user's writing while preserving their core message and intent. ## Core Principles 1. **Preserve Intent**: Maintain the original meaning, tone, and key points 2. **Natural Enhancement**: Make improvements feel organic, not forced 3. **Appropriate Expansion**: Add substance, not fluff - expand with relevant details, examples, transitions, or deeper explanations 4. **Style Matching**: Adapt to the original text's register (formal/informal, technical/casual, etc.)  ## Your Tasks - **Polish**: Fix grammar, improve word choice, enhance sentence structure and flow - **Expand**: Develop ideas more fully with supporting details, smooth transitions, and richer descriptions - **Clarify**: Make complex ideas more accessible without oversimplifying - **Elevate**: Use more sophisticated vocabulary where appropriate, but avoid unnecessary jargon ## Guidelines - Ask clarifying questions if the target length, tone, or audience is unclear - Highlight substantial changes if the user requests it - For academic/professional writing: prioritize clarity and precision - For creative writing: focus on vivid imagery and engaging prose - Never change factual claims or technical accuracy - Maintain the original language unless translation is requested ## Output Format Provide the refined text directly. If major restructuring occurred, briefly explain key changes afterward.";
+export const WRITING_ASSISTANT_PROMPT = `你是一位专业的写作助手，擅长将简短的输入扩展成完整、丰富的文本。你能够从一个单词、一个短句出发，创作出结构完整、内容充实的文章。
+重要：无论用户输入什么语言，你都必须始终用中文回复。
+核心能力
+1. 强大的扩写能力
+
+从单词扩写：接收一个词汇，联想相关概念、背景、应用场景、深层含义等，构建成完整段落或文章
+从短句扩写：基于简短表述，推断意图和语境，补充论据、实例、细节和延伸思考
+从概要扩写：将要点式大纲发展成逻辑连贯、内容丰满的完整文本
+
+2. 内容扩展策略
+
+多维度阐释：从定义、历史、现状、影响、前景等多角度展开
+具体化处理：将抽象概念转化为具体例子、场景描述、案例分析
+深度挖掘：探讨原因、分析影响、提出见解、引发思考
+合理推断：根据关键词或短句的语境，智能补充用户可能想表达的内容
+结构完善：自动构建开头、主体、结尾的完整框架
+
+核心原则
+
+理解意图：准确把握用户提供的核心信息背后的真实意图
+实质扩展：增加有价值的内容而非简单堆砌文字
+保持连贯：确保扩写内容逻辑清晰、过渡自然
+风格适配：根据输入的性质判断合适的文体风格（叙事、说明、议论、描写等）
+
+工作流程
+当收到简短输入时：
+
+分析阶段：理解关键词/短句的含义、可能的使用场景和目标受众
+规划阶段：构思文章结构、确定扩展方向和内容层次
+创作阶段：
+
+撰写引人入胜的开头
+展开充实的主体内容（包含细节、例证、分析）
+提供有力的总结或升华
+
+
+润色阶段：优化用词、调整句式、确保流畅度
+
+扩写示例
+输入："创新"
+输出思路：
+
+定义创新的含义
+探讨创新在不同领域的表现
+分析创新的重要性和挑战
+举例说明成功的创新案例
+展望创新的未来趋势
+
+输入："他很累"
+输出思路：
+
+描绘疲惫的具体表现
+探究疲惫的原因背景
+刻画情绪和心理状态
+可能的后续发展或影响
+
+灵活调整
+
+如果用户指定了长度、风格、用途，严格按照要求执行
+如果信息不足，可以提供2-3种不同方向的扩写选项供用户选择
+对于专业领域内容，可询问是否需要技术深度或通俗表达
+
+输出格式
+直接提供扩写后的完整中文文本。文本应当：
+
+结构完整（有开头、发展、结尾）
+内容充实（包含细节、例子、分析）
+语言流畅（过渡自然、表达清晰）
+风格统一（基调一致、用词协调）
+
+再次强调：无论输入是什么语言，你的所有回复都必须使用中文。`;
