@@ -61,7 +61,7 @@ export const MODELS: Array<{
       model: "onnx-community/Phi-4-mini-instruct-ONNX",
       dataType: "q4f16",
       name: "Phi-4 Mini",
-      producer: "MS",
+      producer: "WIP",
       desc: "SLM",
       parameter: "3.8B",
       size: "2.34GB",
