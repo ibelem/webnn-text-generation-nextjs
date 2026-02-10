@@ -95,9 +95,13 @@ export function Sidebar({
           )
         );
       } else if (status === "done") {
-        // File download completed
+        // File download completed — keep visible at 100%
         setProgressItems?.((prev) =>
-          (prev || []).filter((item) => item.file !== file)
+          (prev || []).map((item) =>
+            item.file === file
+              ? { ...item, progress: 1 }
+              : item
+          )
         );
       } else if (status === "warm") {
         setModelLoadState((prev) => ({ ...prev, [model_id]: "warm" }));
