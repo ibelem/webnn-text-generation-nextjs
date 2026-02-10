@@ -16,6 +16,7 @@ import { Textarea } from "@/components/ui/textarea"
 import { ArrowUp, Menu, X, User, Bot, Sparkles, Loader2 } from "lucide-react"
 import { MODELS, BACKENDS } from "../lib/constants"
 import { v4 as uuidv4 } from "uuid"
+import packageJson from "../package.json"
 
 import type { ProgressProps } from "@/components/progress"
 
@@ -282,17 +283,22 @@ export function ChatInterface({
             </Button>
           </div>
         </form>
-        <div className="text-[11px] md:text-xs flex flex-col sm:flex-row items-center justify-center my-3 text-gray-500 gap-2 sm:gap-0">
-          <div className="flex items-center sm:mr-3">
-            <kbd className="text-[10px] md:text-[11px] border border-gray-300 bg-gray-50 rounded px-1.5 py-0.5 font-mono">Enter</kbd>
-            <span className="ml-1.5">to send</span>
+        <div className="my-3">
+          <div className="text-[11px] md:text-xs flex flex-col sm:flex-row items-center justify-center text-gray-500 gap-2 sm:gap-0">
+            <div className="flex items-center sm:mr-3">
+              <kbd className="text-[10px] md:text-[11px] border border-gray-300 bg-gray-50 rounded px-1.5 py-0.5 font-mono">Enter</kbd>
+              <span className="ml-1.5">to send</span>
+            </div>
+            <span className="hidden sm:inline text-gray-300">•</span>
+            <div className="flex items-center sm:ml-3">
+              <kbd className="text-[10px] md:text-[11px] border border-gray-300 bg-gray-50 rounded px-1.5 py-0.5 font-mono">Ctrl</kbd>
+              <span className="mx-1">+</span>
+              <kbd className="text-[10px] md:text-[11px] border border-gray-300 bg-gray-50 rounded px-1.5 py-0.5 font-mono">Enter</kbd>
+              <span className="ml-1.5">to clear chat</span>
+            </div>
           </div>
-          <span className="hidden sm:inline text-gray-300">•</span>
-          <div className="flex items-center sm:ml-3">
-            <kbd className="text-[10px] md:text-[11px] border border-gray-300 bg-gray-50 rounded px-1.5 py-0.5 font-mono">Ctrl</kbd>
-            <span className="mx-1">+</span>
-            <kbd className="text-[10px] md:text-[11px] border border-gray-300 bg-gray-50 rounded px-1.5 py-0.5 font-mono">Enter</kbd>
-            <span className="ml-1.5">to clear chat</span>
+          <div className="mt-1 text-[11px] md:text-xs text-center font-medium text-blue-500">
+            Transformers.js {packageJson.dependencies["@huggingface/transformers"].replace(/^\^/, "")}
           </div>
         </div>
       </div>
