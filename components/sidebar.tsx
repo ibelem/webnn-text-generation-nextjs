@@ -208,6 +208,18 @@ export function Sidebar({
             {compilationTime !== null ? `Compilation: ${compilationTime.toFixed(2)} ms` : ""}
           </div>
         </div>
+        {/* Progress bar UI (show only if loading/progress is needed) */}
+        <div className="my-2">
+              {progressItems && progressItems.length > 0 &&
+          progressItems.map((item, i) => (
+            <Progress
+              key={item.file || i}
+              text={item.file || item.text}
+              progress={item.progress}
+              total={item.total}
+            />
+          ))}
+        </div>
         <div className="bg-gray-100 rounded-md p-2 md:p-3 text-xs md:text-sm mb-2 md:max-h-[40vh] md:overflow-y-auto">
           <div className="flex items-center justify-between">
             <span className="text-gray-500">Model</span>
@@ -271,19 +283,6 @@ export function Sidebar({
               <span className="text-gray-500">Model Host</span>
             <span className="font-medium">{remoteHost}</span>
             </div>
-        </div>
-
-        {/* Progress bar UI (show only if loading/progress is needed) */}
-        <div className="my-2">
-              {progressItems && progressItems.length > 0 &&
-          progressItems.map((item, i) => (
-            <Progress
-              key={item.file || i}
-              text={item.file || item.text}
-              progress={item.progress}
-              total={item.total}
-            />
-          ))}
         </div>
       </div>
     </div>
