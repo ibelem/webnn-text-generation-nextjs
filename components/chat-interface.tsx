@@ -297,8 +297,8 @@ export function ChatInterface({
               <span className="ml-1.5">to clear chat</span>
             </div>
           </div>
-          <div className="mt-1 text-[11px] md:text-xs text-center font-medium text-blue-500">
-            Transformers.js {packageJson.dependencies["@huggingface/transformers"].replace(/^\^/, "")}
+          <div className="mt-1 text-[11px] md:text-xs text-center font-medium text-blue-500 hover:text-blue-600 hover:underline transition-colors">
+            <a href="https://www.npmjs.com/package/@huggingface/transformers?activeTab=versions" target="_blank" rel="noopener noreferrer">Transformers.js {packageJson.dependencies["@huggingface/transformers"].replace(/^\^/, "")}</a>
           </div>
         </div>
       </div>
