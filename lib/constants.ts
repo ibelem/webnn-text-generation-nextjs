@@ -57,7 +57,7 @@ export const MODELS: Array<{
       thinkingTagSupport: false,
     },
     {
-      id: "phi-4-mini-gqa" as ModelType,
+      id: "phi-4-mini-instruct" as ModelType,
       model: "onnx-community/Phi-4-mini-instruct-ONNX",
       dataType: "q4f16",
       name: "Phi-4 Mini",
