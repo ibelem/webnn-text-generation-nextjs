@@ -80,25 +80,35 @@ export default function Page({ params }: { params: Promise<{ model: string; back
     if (validBackend && selectedBackend !== backend) setSelectedBackend(backend as BackendType);
   }, [model, backend, validModel, selectedModel, validBackend, selectedBackend]);
 
-  // Update URL when selection changes
+  // Sync systemPromptEnabled from URL → state (e.g. navigating with ?system_prompt=true)
   useEffect(() => {
-    // Only update URL if model or backend actually changed from current URL
-    if (model !== selectedModel || backend !== selectedBackend) {
-      const params = new URLSearchParams(searchParams.toString());
-      if (systemPromptEnabled) {
-        params.set("system_prompt", "true");
-      } else {
-        params.delete("system_prompt");
-      }
+    const urlValue = searchParams.get("system_prompt") === "true";
+    if (urlValue !== systemPromptEnabled) {
+      setSystemPromptEnabled(urlValue);
+    }
+    // Only react to URL changes, not state changes
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [searchParams]);
 
-      const currentPath = `/${selectedModel}/${selectedBackend}`;
-      const newSearch = params.toString();
-      const newUrl = newSearch ? `${currentPath}?${newSearch}` : currentPath;
+  // Sync state → URL whenever model, backend, or systemPromptEnabled changes
+  useEffect(() => {
+    const params = new URLSearchParams(searchParams.toString());
+    if (systemPromptEnabled) {
+      params.set("system_prompt", "true");
+    } else {
+      params.delete("system_prompt");
+    }
 
+    const currentPath = `/${selectedModel}/${selectedBackend}`;
+    const newSearch = params.toString();
+    const newUrl = newSearch ? `${currentPath}?${newSearch}` : currentPath;
+
+    // Avoid unnecessary navigation
+    const currentUrl = `/${model}/${backend}${window.location.search}`;
+    if (newUrl !== currentUrl) {
       router.replace(newUrl);
     }
-  }, [selectedModel, selectedBackend, model, backend, systemPromptEnabled, router]);
-    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [selectedModel, selectedBackend, model, backend, systemPromptEnabled, searchParams, router]);
 
   // Auto-close sidebar on mobile after model is compiled (loaded state)
   useEffect(() => {
