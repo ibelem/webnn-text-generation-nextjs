@@ -21,7 +21,7 @@ export default function Page({ params }: { params: Promise<{ model: string; back
 
   // Fallback to defaults if invalid
   const [selectedModel, setSelectedModel] = useState<ModelType>(
-    validModel ? (model as ModelType) : "phi-3_5-mini"
+    validModel ? (model as ModelType) : "qwen3-4b"
   );
   const [selectedBackend, setSelectedBackend] = useState<BackendType>(
     validBackend ? (backend as BackendType) : "webgpu"
