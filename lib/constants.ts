@@ -9,7 +9,7 @@ export const MODELS: Array<{
   desc: string;
   parameter: string;
   size: string;
-  useExternalDataFormat?: boolean;
+  useExternalDataFormat?: boolean | number; // true means use external data format for all backends, number means use external data format for backends with index >= that number in BACKENDS
   maxNewTokens?: number;
   doSample?: boolean;
   topK?: number;
@@ -56,16 +56,16 @@ export const MODELS: Array<{
       systemPrompt: "",
       thinkingTagSupport: false,
     },
-        {
+    {
       id: "phi-4-mini-instruct" as ModelType,
       model: "onnx-community/Phi-4-mini-instruct-ONNX",
       dataType: "q4f16",
       name: "Phi-4 Mini",
-      producer: "WIP",
+      producer: "MS",
       desc: "SLM",
       parameter: "3.8B",
       size: "2.34GB",
-      useExternalDataFormat: true,
+      useExternalDataFormat: 2,
       maxNewTokens: 1024,
       doSample: true,
       topK: 3,
