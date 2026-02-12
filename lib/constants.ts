@@ -16,6 +16,7 @@ export const MODELS: Array<{
   temperature?: number;
   systemPrompt?: string;
   thinkingTagSupport?: boolean;
+  useKVCache?: boolean;
 }> = [
     {
       // https://github.com/huggingface/transformers.js/issues/1239
@@ -89,6 +90,7 @@ export const MODELS: Array<{
       temperature: 0.6,
       systemPrompt: "",
       thinkingTagSupport: false,
+      useKVCache: true,
     },
     {
       id: "qwen3-4b" as ModelType,
@@ -106,6 +108,7 @@ export const MODELS: Array<{
       temperature: 0.6,
       systemPrompt: "",
       thinkingTagSupport: false,
+      useKVCache: true,
     },
     {
       id: "qwen3-0_6b" as ModelType,
@@ -123,6 +126,7 @@ export const MODELS: Array<{
       temperature: 0.7,
       systemPrompt: "",
       thinkingTagSupport: true,
+      useKVCache: true,
     },
     {
       id: "deepseek-r1-distill-qweb-1_5b" as ModelType,
