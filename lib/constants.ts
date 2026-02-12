@@ -190,4 +190,4 @@ export const BACKENDS: Array<{
     { id: "webnn-npu" as BackendType, name: "WebNN NPU" },
   ];
 
-export const WRITING_ASSISTANT_PROMPT = ``;
+export const DEFAULT_SYSTEM_PROMPT = ``;

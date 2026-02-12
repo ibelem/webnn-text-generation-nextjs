@@ -22,10 +22,10 @@ interface SidebarProps {
   workerRef: React.RefObject<Worker | null>;
   reasonEnabled: boolean;
   setReasonEnabled: (enabled: boolean) => void;
-  writingAssistantEnabled: boolean;
-  setWritingAssistantEnabled: (enabled: boolean) => void;
-  writingAssistantPrompt: string;
-  setWritingAssistantPrompt: (prompt: string) => void;
+  systemPromptEnabled: boolean;
+  setSystemPromptEnabled: (enabled: boolean) => void;
+  systemPromptText: string;
+  setSystemPromptText: (text: string) => void;
   modelLoadState: Record<string, "not_loaded" | "loading" | "warm" | "loaded" | "ready">;
   setModelLoadState: React.Dispatch<React.SetStateAction<Record<string, "not_loaded" | "loading" | "warm" | "loaded" | "ready" >>>;
   setIsSidebarOpen?: (open: boolean) => void;
@@ -41,10 +41,10 @@ export function Sidebar({
   workerRef,
   reasonEnabled,
   setReasonEnabled,
-  writingAssistantEnabled,
-  setWritingAssistantEnabled,
-  writingAssistantPrompt,
-  setWritingAssistantPrompt,
+  systemPromptEnabled,
+  setSystemPromptEnabled,
+  systemPromptText,
+  setSystemPromptText,
   modelLoadState,
   setModelLoadState,
   setIsSidebarOpen,
@@ -212,18 +212,6 @@ export function Sidebar({
             {compilationTime !== null ? `Compilation: ${compilationTime.toFixed(2)} ms` : ""}
           </div>
         </div>
-        {/* Progress bar UI (show only if loading/progress is needed) */}
-        <div className="my-2">
-              {progressItems && progressItems.length > 0 &&
-          progressItems.map((item, i) => (
-            <Progress
-              key={item.file || i}
-              text={item.file || item.text}
-              progress={item.progress}
-              total={item.total}
-            />
-          ))}
-        </div>
         <div className="bg-gray-100 rounded-md p-2 md:p-3 text-xs md:text-sm mb-2 md:max-h-[40vh] md:overflow-y-auto">
           <div className="flex items-center justify-between">
             <span className="text-gray-500">Model</span>
@@ -257,14 +245,14 @@ export function Sidebar({
               </label>
             </div>
           )}
-          {/* Writing Assistant toggle UI */}
+          {/* System Prompt toggle UI */}
           <div className="flex items-center justify-between mt-2">
-            <span className="text-gray-500">Writing Assistant</span>
+            <span className="text-gray-500">System Prompt</span>
             <label className="flex items-center cursor-pointer">
               <input
                 type="checkbox"
-                checked={writingAssistantEnabled}
-                onChange={e => setWritingAssistantEnabled(e.target.checked)}
+                checked={systemPromptEnabled}
+                onChange={e => setSystemPromptEnabled(e.target.checked)}
                 className="mr-2"
               />
               <span className="font-medium">
@@ -272,14 +260,13 @@ export function Sidebar({
               </span>
             </label>
           </div>
-          {writingAssistantEnabled && (
+          {systemPromptEnabled && (
             <div className="mt-2">
-              <div className="text-gray-500 mb-1">System Prompt</div>
               <Textarea
-                value={writingAssistantPrompt}
-                onChange={(e) => setWritingAssistantPrompt(e.target.value)}
+                value={systemPromptText}
+                onChange={(e) => setSystemPromptText(e.target.value)}
                 className="text-xs min-h-[50px] bg-white max-h-[10vh] overflow-y-auto"
-                placeholder="Enter system prompt..."
+                placeholder="Enter a system prompt to guide the model's behavior..."
               />
             </div>
           )}
@@ -287,6 +274,18 @@ export function Sidebar({
               <span className="text-gray-500">Model Host</span>
             <span className="font-medium">{remoteHost}</span>
             </div>
+        </div>
+        {/* Progress bar UI (show only if loading/progress is needed) */}
+        <div className="my-2">
+              {progressItems && progressItems.length > 0 &&
+          progressItems.map((item, i) => (
+            <Progress
+              key={item.file || i}
+              text={item.file || item.text}
+              progress={item.progress}
+              total={item.total}
+            />
+          ))}
         </div>
       </div>
     </div>

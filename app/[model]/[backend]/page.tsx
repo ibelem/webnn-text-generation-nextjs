@@ -7,7 +7,7 @@ import { Sidebar } from "@/components/sidebar";
 import { ChatInterface } from "@/components/chat-interface";
 import type { ModelType, BackendType } from "@/lib/types";
 import type { ProgressProps } from "@/components/progress";
-import { MODELS, BACKENDS, WRITING_ASSISTANT_PROMPT } from "@/lib/constants";
+import { MODELS, BACKENDS, DEFAULT_SYSTEM_PROMPT } from "@/lib/constants";
 import { Loader2 } from "lucide-react";
 
 export default function Page({ params }: { params: Promise<{ model: string; backend: string }> }) {
@@ -44,12 +44,12 @@ export default function Page({ params }: { params: Promise<{ model: string; back
   const [reasonEnabled, setReasonEnabled] = useState(false);
 
   // Writing Assistant feature toggle
-  const [writingAssistantEnabled, setWritingAssistantEnabled] = useState(
-    searchParams.get("assistant") === "true"
+  const [systemPromptEnabled, setSystemPromptEnabled] = useState(
+    searchParams.get("system_prompt") === "true"
   );
 
-  // Writing Assistant Prompt
-  const [writingAssistantPrompt, setWritingAssistantPrompt] = useState(WRITING_ASSISTANT_PROMPT);
+  // System Prompt text
+  const [systemPromptText, setSystemPromptText] = useState(DEFAULT_SYSTEM_PROMPT);
 
   // Model load state
   const [modelLoadState, setModelLoadState] = useState<Record<string, "not_loaded" | "loading" | "warm" | "loaded" | "ready">>({});
@@ -85,10 +85,10 @@ export default function Page({ params }: { params: Promise<{ model: string; back
     // Only update URL if model or backend actually changed from current URL
     if (model !== selectedModel || backend !== selectedBackend) {
       const params = new URLSearchParams(searchParams.toString());
-      if (writingAssistantEnabled) {
-        params.set("assistant", "true");
+      if (systemPromptEnabled) {
+        params.set("system_prompt", "true");
       } else {
-        params.delete("assistant");
+        params.delete("system_prompt");
       }
 
       const currentPath = `/${selectedModel}/${selectedBackend}`;
@@ -97,7 +97,7 @@ export default function Page({ params }: { params: Promise<{ model: string; back
 
       router.replace(newUrl);
     }
-  }, [selectedModel, selectedBackend, model, backend, writingAssistantEnabled, router]);
+  }, [selectedModel, selectedBackend, model, backend, systemPromptEnabled, router]);
     // eslint-disable-next-line react-hooks/exhaustive-deps
 
   // Auto-close sidebar on mobile after model is compiled (loaded state)
@@ -128,10 +128,10 @@ export default function Page({ params }: { params: Promise<{ model: string; back
               workerRef={workerRef}
               reasonEnabled={reasonEnabled}
               setReasonEnabled={setReasonEnabled}
-              writingAssistantEnabled={writingAssistantEnabled}
-              setWritingAssistantEnabled={setWritingAssistantEnabled}
-              writingAssistantPrompt={writingAssistantPrompt}
-              setWritingAssistantPrompt={setWritingAssistantPrompt}
+              systemPromptEnabled={systemPromptEnabled}
+              setSystemPromptEnabled={setSystemPromptEnabled}
+              systemPromptText={systemPromptText}
+              setSystemPromptText={setSystemPromptText}
               modelLoadState={modelLoadState}
               setModelLoadState={setModelLoadState}
               setIsSidebarOpen={setIsSidebarOpen}
@@ -154,8 +154,8 @@ export default function Page({ params }: { params: Promise<{ model: string; back
           workerRef={workerRef}
           reasonEnabled={reasonEnabled}
           setReasonEnabled={setReasonEnabled}
-          writingAssistantEnabled={writingAssistantEnabled}
-          writingAssistantPrompt={writingAssistantPrompt}
+          systemPromptEnabled={systemPromptEnabled}
+          systemPromptText={systemPromptText}
           modelLoadState={modelLoadState}
         />
       </div>

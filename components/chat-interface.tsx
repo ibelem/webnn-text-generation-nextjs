@@ -29,8 +29,8 @@ interface ChatInterfaceProps {
   workerRef: React.RefObject<Worker | null>;
   reasonEnabled: boolean;
   setReasonEnabled: (enabled: boolean) => void;
-  writingAssistantEnabled: boolean;
-  writingAssistantPrompt: string;
+  systemPromptEnabled: boolean;
+  systemPromptText: string;
   modelLoadState: Record<string, "not_loaded" | "loading" | "warm" | "loaded" | "ready">;
 }
 
@@ -43,8 +43,8 @@ export function ChatInterface({
   workerRef,
   reasonEnabled, // eslint-disable-next-line @typescript-eslint/no-unused-vars
   setReasonEnabled,
-  writingAssistantEnabled,
-  writingAssistantPrompt,
+  systemPromptEnabled,
+  systemPromptText,
   modelLoadState,
 }: ChatInterfaceProps) {
   const [input, setInput] = useState("");
@@ -146,8 +146,8 @@ export function ChatInterface({
       data: {
         messages: nextMessages,
         reasonEnabled,
-        writingAssistantEnabled,
-        writingAssistantPrompt
+        systemPromptEnabled,
+        systemPromptText
       },
     });
     setIsTyping(true);
