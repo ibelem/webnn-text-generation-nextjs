@@ -58,10 +58,8 @@ export default function Page({ params }: { params: Promise<{ model: string; back
   useEffect(() => {
     if (typeof window === "undefined") return
     if (!workerRef.current) {
-      const workerPath =
-        process.env.NODE_ENV === "development"
-          ? new URL("../../../lib/model-worker.js", import.meta.url)
-          : "/model-worker.bundle.js";
+      // Always use the pre-bundled worker (run `npm run build:worker` after changes)
+      const workerPath = "/model-worker.bundle.js";
 
       workerRef.current = new Worker(workerPath, { type: "module" })
       window.chatWorkerRef = workerRef

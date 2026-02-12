@@ -9,7 +9,7 @@ export const MODELS: Array<{
   desc: string;
   parameter: string;
   size: string;
-  useExternalDataFormat?: boolean;
+  useExternalDataFormat?: boolean | number;
   maxNewTokens?: number;
   doSample?: boolean;
   topK?: number;
@@ -65,7 +65,7 @@ export const MODELS: Array<{
       desc: "SLM",
       parameter: "3.8B",
       size: "2.34GB",
-      useExternalDataFormat: true,
+      useExternalDataFormat: 2,
       maxNewTokens: 1024,
       doSample: true,
       topK: 3,

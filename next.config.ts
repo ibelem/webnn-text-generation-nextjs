@@ -5,7 +5,7 @@ const nextConfig: NextConfig = {
     "", // Add your dev server IP and port here
     // Add more origins if needed
   ],
-  // other config options...
+  serverExternalPackages: ["onnxruntime-node", "sharp"],
 };
 
 export default nextConfig;
