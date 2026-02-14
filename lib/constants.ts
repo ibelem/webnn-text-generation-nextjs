@@ -17,6 +17,7 @@ export const MODELS: Array<{
   systemPrompt?: string;
   thinkingTagSupport?: boolean;
   useKVCache?: boolean;
+  usePipeline?: boolean;
 }> = [
     {
       // https://github.com/huggingface/transformers.js/issues/1239
@@ -144,6 +145,24 @@ export const MODELS: Array<{
       temperature: 0.2,
       systemPrompt: "",
       thinkingTagSupport: true,
+    },
+    {
+      id: "gpt-oss-20b" as ModelType,
+      model: "onnx-community/gpt-oss-20b-ONNX",
+      dataType: "q4f16",
+      name: "GPT-OSS",
+      producer: "OpenAI",
+      desc: "MoE LLM",
+      parameter: "20B",
+      size: "11.8GB",
+      useExternalDataFormat: 7,
+      maxNewTokens: 2048,
+      doSample: true,
+      topK: 50,
+      temperature: 1.0,
+      systemPrompt: "You are a helpful assistant.",
+      thinkingTagSupport: true,
+      usePipeline: true,
     },
     {
       id: "lfm2_1_2b" as ModelType,
