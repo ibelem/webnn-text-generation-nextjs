@@ -2,6 +2,7 @@
 
 # dependencies
 /public/webnn-models
+/reference
 /node_modules
 /.pnp
 .pnp.*
