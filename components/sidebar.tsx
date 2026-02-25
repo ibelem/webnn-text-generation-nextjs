@@ -51,6 +51,7 @@ export function Sidebar({
 }: SidebarProps) {
   const [compilationTime, setCompilationTime] = React.useState<number | null>(null);
   const [remoteHost, setRemoteHost] = React.useState<string>('huggingface.co');
+  const [loadError, setLoadError] = React.useState<string | null>(null);
 
   // Listen for worker "ready", "loading", "reset" events to update modelLoadState and progress
   React.useEffect(() => {
@@ -61,12 +62,20 @@ export function Sidebar({
       const { status, model_id, data, file, progress, total, compilationTime, remoteHost } = e.data;
       if (!model_id && status !== "initiate" && status !== "progress" && status !== "done" && status !== "init") return;
 
+      if (status === "error") {
+        console.error(`[Worker] Model load error (${model_id}):`, data);
+        setLoadError(data ?? "Unknown error");
+        setModelLoadState((prev) => ({ ...prev, [model_id]: "not_loaded" }));
+        setProgressItems?.([]);
+        return;
+      }
 
       if (status === "init" && remoteHost) {
         setRemoteHost(remoteHost);
         return;
       }
       if (status === "loading") {
+        setLoadError(null); // clear any previous error
         setModelLoadState((prev) => ({ ...prev, [model_id]: "loading" }));
         if (data) {
           setProgressItems?.([{ text: data, progress: 0 }]);
@@ -206,6 +215,11 @@ export function Sidebar({
       </Tabs>
 
       <div className="mt-auto pt-2">
+        {loadError && (
+          <div className="mb-2 rounded-md bg-red-50 border border-red-200 p-2 text-xs text-red-700 break-words">
+            <span className="font-semibold">Error: </span>{loadError}
+          </div>
+        )}
         <div className="flex items-center justify-between mb-2">
           <div className="text-[10px] md:text-xs text-gray-500 ml-2 md:ml-3">Current Configuration</div>
           <div id="compilation-time" className="text-[10px] md:text-xs text-pink-600">
