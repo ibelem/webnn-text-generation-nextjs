@@ -3,7 +3,7 @@
   "version": "0.1.0",
   "private": true,
   "scripts": {
-    "dev": "next dev --turbopack",
+    "dev": "next dev --turbopack --experimental-https --experimental-https-key ./certs/key.pem --experimental-https-cert ./certs/cert.pem",
     "build": "esbuild lib/model-worker.js --bundle --platform=browser --outfile=public/model-worker.bundle.js && next build",
     "start": "next start",
     "lint": "next lint"

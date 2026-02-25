@@ -2,8 +2,9 @@ import type { NextConfig } from "next";
 
 const nextConfig: NextConfig = {
   allowedDevOrigins: [
-    "", // Add your dev server IP and port here
-    // Add more origins if needed
+    "https://10.239.115.52:3000",
+    "https://10.239.115.77:3000",
+    "https://localhost:3000",
   ],
   // other config options...
 };
