@@ -322,25 +322,25 @@ function ModelOption({ model, isSelected, onClick, loadState, onLoad }: ModelOpt
     <motion.div
       whileHover={{ scale: 1.01 }}
       whileTap={{ scale: 0.99 }}
-      className={`flex items-center py-2 px-3 md:px-3 md:py-2 cursor-pointer transition-all duration-200 ${isSelected ? "bg-gradient-to-r from-gray-50 to-gray-100" : "hover:bg-gray-50"}`}
+      className={`flex items-center py-1 px-3 md:px-3 md:py-1 cursor-pointer transition-all duration-200 ${isSelected ? "bg-gradient-to-r from-gray-50 to-gray-100" : "hover:bg-gray-50"}`}
       onClick={onClick}
     >
-      <div className={`p-2.5 rounded-lg mr-3 flex-shrink-0`}><Icon className="h-4 w-4 md:h-5 md:w-5" /></div>
       <div className="flex-1 min-w-0">
         <div className="flex font-medium text-sm md:text-md items-center hover:text-blue-500 truncate">
+          <div className={`py-1 pr-1 rounded-lg mr-0 flex-shrink-0`}><Icon className="h-2 w-2 md:h-3 md:w-3" /></div>
           {model.name} 
-          <span className={`ml-1 text-[10px] font-normal px-[4px] rounded-sm uppercase ${
+        </div>
+        <div className="text-xs text-gray-500">
+          <span className={`text-[11px] pb-[1px] px-1 rounded-sm uppercase ${
             model.producer === 'WIP' 
               ? 'bg-orange-500 text-white' 
-              : 'bg-green-600 text-white'
+              : 'bg-gray-100'
           }`}>
             {model.producer}
           </span>
-        </div>
-        <div className="text-xs text-gray-500">
-          <span className="bg-gray-100 text-[11px] py-[1px] px-1 rounded-sm">{model.desc}</span>
-          <span className="bg-gray-100 text-[11px] py-[1px] px-1 rounded-sm mr-1 ml-1">{model.parameter}</span>
-          <span className="bg-gray-100 text-[11px] py-[1px] px-1 rounded-sm">{model.size}</span>
+          <span className="bg-gray-100 text-[11px] pb-[1px] px-1 rounded-sm ml-1">{model.desc}</span>
+          <span className="bg-blue-500 text-[11px] pb-[1px] px-1 rounded-sm ml-1 text-white">{model.parameter}</span>
+          <span className="bg-gray-100 text-[11px] pb-[1px] px-1 rounded-sm ml-1">{model.size}</span>
         </div>
       </div>
       {/* Load/Reload Button */}

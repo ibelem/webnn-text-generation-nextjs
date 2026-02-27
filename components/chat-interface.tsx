@@ -359,7 +359,7 @@ function MessageBubble({ message }: MessageBubbleProps) {
                 )}
                 {message.tps && (
                   <span className="bg-gradient-to-br from-pink-500 to-pink-600 hover:from-pink-600 hover:to-pink-700 text-[10px] md:text-xs text-white rounded px-2 py-0.5" title="Tokens per second">
-                    {message.tps.toFixed(2)} tok/s
+                    {message.tps.toFixed(2)} tokens/s
                   </span>
                 )}
               </>
