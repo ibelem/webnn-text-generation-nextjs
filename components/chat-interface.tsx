@@ -16,7 +16,6 @@ import { Textarea } from "@/components/ui/textarea"
 import { ArrowUp, Menu, X, User, Bot, Sparkles, Loader2 } from "lucide-react"
 import { MODELS, BACKENDS } from "../lib/constants"
 import { v4 as uuidv4 } from "uuid"
-import packageJson from "../package.json"
 
 import type { ProgressProps } from "@/components/progress"
 
@@ -298,7 +297,7 @@ export function ChatInterface({
             </div>
           </div>
           <div className="mt-1 text-[11px] md:text-xs text-center font-medium text-blue-500 hover:text-blue-600 hover:underline transition-colors">
-            <a href="https://www.npmjs.com/package/@huggingface/transformers?activeTab=versions" target="_blank" rel="noopener noreferrer">Transformers.js {packageJson.dependencies["@huggingface/transformers"].replace(/^\^/, "")}</a>
+            <a href="https://github.com/huggingface/transformers.js" target="_blank" rel="noopener noreferrer">Transformers.js 4.0 (custom build for qwen3)</a>
           </div>
         </div>
       </div>
