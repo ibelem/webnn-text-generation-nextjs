@@ -183,7 +183,7 @@ export const MODELS: Array<{
     },
     {
       id: "lfm2_5_1_2b" as ModelType,
-      model: "LFM2.5-1.2B-Thinking-ONNX",
+      model: "LiquidAI/LFM2.5-1.2B-Thinking-ONNX",
       dataType: "q4",
       name: "LFM2.5",
       producer: "Liquid AI",
