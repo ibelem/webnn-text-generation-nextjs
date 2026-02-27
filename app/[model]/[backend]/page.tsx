@@ -110,6 +110,26 @@ export default function Page({ params }: { params: Promise<{ model: string; back
     }
   }, [selectedModel, selectedBackend, model, backend, systemPromptEnabled, searchParams, router]);
 
+  // After a cross-model navigation the sidebar stores the target model id in
+  // sessionStorage. Pick it up here once the fresh worker is ready and fire the load.
+  useEffect(() => {
+    if (!workerReady) return;
+    const pendingModelId = sessionStorage.getItem("pendingAutoLoad");
+    if (!pendingModelId || pendingModelId !== selectedModel) return;
+    sessionStorage.removeItem("pendingAutoLoad");
+    const modelObj = MODELS.find((m) => m.id === pendingModelId);
+    if (!modelObj) return;
+    setModelLoadState((prev) => ({ ...prev, [pendingModelId]: "loading" }));
+    workerRef.current?.postMessage({
+      type: "setConfig",
+      model_id: pendingModelId,
+      data_type: modelObj.dataType,
+      device: selectedBackend,
+    });
+    workerRef.current?.postMessage({ type: "load" });
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [workerReady]);
+
   // Auto-close sidebar on mobile after model is compiled (loaded state)
   useEffect(() => {
     if (typeof window !== 'undefined' && window.innerWidth < 768) {

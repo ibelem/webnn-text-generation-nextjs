@@ -136,11 +136,20 @@ export function Sidebar({
 
   // Handler for load/reload button
   const handleLoadModel = (modelId: string) => {
-    setSelectedModel(modelId as ModelType);
     setCompilationTime(null);
+
+    if (modelId !== selectedModel) {
+      // Navigating to a different model causes router.replace → full page remount →
+      // the current worker is terminated and a new one is created. Any messages sent
+      // here would go to the dead worker. Instead, store the intent in sessionStorage
+      // so the new page instance picks it up once its worker is ready.
+      sessionStorage.setItem("pendingAutoLoad", modelId);
+      setSelectedModel(modelId as ModelType);
+      return;
+    }
+
+    // Same model — worker is alive, send directly.
     setModelLoadState((prev) => ({ ...prev, [modelId]: "loading" }));
-    
-    // First set the config for this model
     const selectedModelObj = MODELS.find((m) => m.id === modelId);
     if (selectedModelObj) {
       workerRef.current?.postMessage({
@@ -150,8 +159,6 @@ export function Sidebar({
         device: selectedBackend,
       });
     }
-    
-    // Then load the model
     workerRef.current?.postMessage({ type: "load" });
   };
 
