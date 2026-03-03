@@ -437,8 +437,8 @@ function MessageBubble({ message }: MessageBubbleProps) {
                 <button
                   onClick={handleCopy}
                   className="copy-btn p-1 rounded-md hover:bg-gray-100 transition-colors"
-                  title="Copy response"
-                  aria-label="Copy response"
+                  title="Copy performance data to clipboard"
+                  aria-label="Copy performance data to clipboard"
                 >
                   {copied 
                     ? <Check className="h-3 w-3 text-green-500" /> 
