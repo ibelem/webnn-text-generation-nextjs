@@ -13,7 +13,7 @@ import { motion, AnimatePresence } from "framer-motion"
 import type { ModelType, BackendType, Message } from "../lib/types"
 import { Button } from "@/components/ui/button"
 import { Textarea } from "@/components/ui/textarea"
-import { ArrowUp, Menu, X, User, Bot, Sparkles, Loader2 } from "lucide-react"
+import { ArrowUp, Menu, X, User, Bot, Sparkles, Loader2, Copy, Check } from "lucide-react"
 import { MODELS, BACKENDS } from "../lib/constants"
 import { v4 as uuidv4 } from "uuid"
 import packageJson from "../package.json"
@@ -110,7 +110,22 @@ export function ChatInterface({
           break;
         }
         case "complete": {
+          const { e2e, tpot, numTokens: finalNumTokens, tps: finalTps } = e.data;
           setIsTyping(false);
+          setMessages((prev) => {
+            const cloned = [...prev];
+            const last = cloned.at(-1);
+            if (last && last.role === "assistant") {
+              cloned[cloned.length - 1] = {
+                ...last,
+                e2e,
+                tpot,
+                ...(finalNumTokens !== undefined && { numTokens: finalNumTokens }),
+                ...(finalTps !== undefined && { tps: finalTps }),
+              };
+            }
+            return cloned;
+          });
           break;
         }
         default:
@@ -161,54 +176,68 @@ export function ChatInterface({
   return (
     <>
       {/* Header */}
-      <div className="flex items-center justify-between p-3 md:p-4 border-b border-gray-200 bg-white shadow-sm">
+      <div className="flex items-center justify-between px-3 py-2.5 md:px-4 md:py-3 border-b border-gray-200/80 bg-white/80 backdrop-blur-sm">
         <Button 
           variant="ghost" 
           size="icon" 
           onClick={() => setIsSidebarOpen(!isSidebarOpen)}
-          className="h-9 w-9 md:h-10 md:w-10 flex-shrink-0"
+          className="h-9 w-9 md:h-10 md:w-10 flex-shrink-0 rounded-md hover:bg-gray-100 hover:cursor-pointer transition-colors"
+          aria-label={isSidebarOpen ? "Close sidebar" : "Open sidebar"}
         >
-          {isSidebarOpen ? <X className="h-5 w-5" /> : <Menu className="h-5 w-5" />}
+          {isSidebarOpen ? <X className="h-4 w-4" /> : <Menu className="h-4 w-4" />}
         </Button>
-        <div className="flex items-center space-x-2 overflow-hidden px-2">
-          <Sparkles className="h-4 w-4 md:h-5 md:w-5 text-blue-500 flex-shrink-0" />
-          <div className="flex flex-col sm:flex-row sm:items-center sm:space-x-2 overflow-hidden">
-            <span className="font-medium text-xs sm:text-sm md:text-base truncate">{selectedModelName}</span>
-            <div className="flex items-center space-x-2">
-              <span className="text-gray-400 hidden sm:inline">•</span>
-              <span className="text-[10px] sm:text-xs md:text-sm text-gray-500 truncate">{backendName}</span>
+        <div className="flex items-center gap-2 overflow-hidden px-2">
+          <div className="h-7 w-7 flex items-center justify-center flex-shrink-0">
+            <Sparkles className="h-3.5 w-3.5" />
+          </div>
+          <div className="flex flex-col sm:flex-row sm:items-center sm:gap-2 overflow-hidden">
+            <span className="font-semibold text-xs sm:text-sm md:text-base truncate text-gray-800">{selectedModelName}</span>
+            <div className="flex items-center gap-1.5">
+              <span className="text-gray-300 hidden sm:inline">·</span>
+              <span className="text-[10px] sm:text-xs md:text-sm text-gray-400 truncate">{backendName}</span>
             </div>
           </div>
         </div>
-        <div className="w-9 md:w-10 flex-shrink-0" /> {/* Empty div for flex spacing */}
+        <div className="w-9 md:w-10 flex-shrink-0" />
       </div>
 
       {/* Chat messages */}
-      <div className="flex-1 overflow-y-auto p-2 md:p-4 space-y-2 md:space-y-4 bg-gray-50">
+      <div className="flex-1 overflow-y-auto p-3 md:p-6 space-y-3 md:space-y-4 bg-gradient-to-b from-gray-50 to-white">
         <AnimatePresence>
           {messages.length === 0 ? (
             <motion.div
               key="empty-state"
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              className="flex flex-col items-center justify-center h-full text-center text-gray-500"
+              initial={{ opacity: 0, y: 12 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.5, ease: "easeOut" }}
+              className="flex flex-col items-center justify-center h-full text-center text-gray-400"
             >
-              <Sparkles className={`h-12 w-12 mb-4 ${anyModelReady ? 'text-blue-500' : ''} opacity-80`} />
-              <h3 className={`text-xl font-medium mb-2 ${anyModelReady ? 'text-blue-500' : ''}`}>
+              <div className="rounded-2xl h-16 w-16 bg-gradient-to-br from-blue-500 to-indigo-500 flex items-center justify-center mb-5 shadow-lg shadow-blue-500/20">
+                <Sparkles className="h-8 w-8 text-white" />
+              </div>
+              <h3 className="text-xl md:text-2xl font-semibold mb-2 text-gray-700">
                 How can I help you today?
               </h3>
-              <p className="max-w-md text-xs md:text-sm px-2">Ask me anything or try one of these examples:</p>
-              <div className="grid grid-cols-1 gap-3 mt-4 md:mt-5 w-full max-w-md px-3">
-                {["What are your model name and parameter count?", "A triangle has three sides with lengths in the ratio 2:3:4. Find the length of each side If the perimeter is 36cm.", "Explain the concept of 'inflation' in economics in just two sentences, using a simple analogy involving a pizza."].map((example) => (
-                  <Button
+              <p className="max-w-md text-xs md:text-sm px-2 text-gray-400 mb-6">
+                {anyModelReady ? "Ask me anything or try one of these examples:" : "Load a model from the sidebar to get started"}
+              </p>
+              <div className="grid grid-cols-1 gap-2.5 w-full max-w-md px-3">
+                {["What are your model name and parameter count?", "A triangle has three sides with lengths in the ratio 2:3:4. Find the length of each side If the perimeter is 36cm.", "Explain the concept of 'inflation' in economics in just two sentences, using a simple analogy involving a pizza."].map((example, i) => (
+                  <motion.div
                     key={example}
-                    variant="outline"
-                    className="justify-start text-left py-4 md:py-5 px-4 text-xs md:text-sm whitespace-normal font-normal bg-white border-gray-300 hover:bg-gray-50 hover:border-blue-400 hover:cursor-pointer transition-all min-h-[60px] md:min-h-[70px]"
-                    onClick={() => setInput(example)}
-                    disabled={!anyModelReady}
+                    initial={{ opacity: 0, y: 8 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    transition={{ delay: 0.15 + i * 0.08, duration: 0.35 }}
                   >
-                    {example}
-                  </Button>
+                    <Button
+                      variant="outline"
+                      className="justify-start text-left w-full py-3.5 md:py-4 px-4 text-xs md:text-sm whitespace-normal font-normal bg-white border-gray-200 hover:bg-blue-50/50 hover:border-blue-300 hover:cursor-pointer transition-all rounded-md shadow-sm hover:shadow min-h-[52px] md:min-h-[60px]"
+                      onClick={() => setInput(example)}
+                      disabled={!anyModelReady}
+                    >
+                      {example}
+                    </Button>
+                  </motion.div>
                 ))}
               </div>
             </motion.div>
@@ -222,20 +251,19 @@ export function ChatInterface({
               initial={{ opacity: 0, y: 10 }}
               animate={{ opacity: 1, y: 0 }}
               exit={{ opacity: 0, y: 10 }}
-              className="flex items-center space-x-2 p-4 rounded-lg bg-white shadow-sm w-fit"
+              className="flex items-center gap-2 px-4 py-3 rounded-md bg-white shadow-sm border border-gray-100 w-fit"
             >
-              <Loader2 className="h-4 w-4 animate-spin text-blue-500" />
-              <span className="text-sm text-gray-600">
+              <Loader2 className="h-3.5 w-3.5 animate-spin text-blue-500" />
+              <span className="text-sm text-gray-500">
                 {(() => {
                   const lastAssistant = messages.slice().reverse().find(m => m.role === "assistant");
                   if (lastAssistant?.state === "thinking") {
-                    return reasonEnabled ? "thinking (reasoning enabled) ..." : "thinking ...";
+                    return reasonEnabled ? "Reasoning..." : "Thinking...";
                   }
                   if (lastAssistant?.state === "answering") {
-                    return reasonEnabled ? "answering (reasoning enabled) ..." : "answering ...";
+                    return "Generating response...";
                   }
-                  // fallback
-                  return reasonEnabled ? "thinking (reasoning enabled) ..." : "thinking ...";
+                  return reasonEnabled ? "Reasoning..." : "Thinking...";
                 })()}
               </span>
             </motion.div>
@@ -245,19 +273,18 @@ export function ChatInterface({
       </div>
 
       {/* Input area */}
-      <div className="p-3 md:p-4 border-t border-gray-200 bg-white">
+      <div className="p-3 md:p-4 border-t border-gray-200/60 bg-white">
         <form onSubmit={handleSubmit} className="relative">
           <Textarea
             id="chat-input"
             value={input}
             onChange={(e) => setInput(e.target.value)}
-            placeholder="Type your message..."
+            placeholder={anyModelReady ? "Type your message..." : "Load a model to start chatting..."}
             disabled={!anyModelReady}
-            className="w-full border px-3 py-3 pr-12 text-sm md:text-base placeholder:text-muted-foreground disabled:opacity-50 min-h-[56px] md:min-h-[64px] max-h-[calc(30dvh)] overflow-auto resize-none rounded-lg bg-gray-50 focus:bg-white dark:border-zinc-700 transition-colors"
+            className="w-full border border-gray-200 px-4 py-3 pr-14 text-sm md:text-base placeholder:text-gray-300 disabled:opacity-40 min-h-[52px] md:min-h-[56px] max-h-[calc(30dvh)] overflow-auto resize-none rounded-md bg-gray-50/50 focus:bg-white focus:border-blue-300 transition-all"
             onKeyDown={(e) => {
               if (e.key === 'Enter' && (e.ctrlKey || e.metaKey)) {
                 e.preventDefault();
-                // Send reset message to worker
                 workerRef.current?.postMessage({ type: "reset" });
                 setMessages([]);
                 setInput("");
@@ -272,33 +299,39 @@ export function ChatInterface({
             }}
           />
 
-          <div className="absolute right-2 bottom-2">
+          <div className="absolute right-2.5 bottom-2.5">
             <Button
               id="chat-send-btn"
               type="submit"
               disabled={!input.trim() || isTyping}
-              className="flex-shrink-0 w-9 h-9 md:w-10 md:h-10 rounded-full flex items-center justify-center border hover:border-blue-600 hover:cursor-pointer hover:text-blue-600 transition-colors"
+              className={`flex-shrink-0 w-8 h-8 md:w-9 md:h-9 rounded-md flex items-center justify-center transition-all hover:cursor-pointer ${
+                input.trim() && !isTyping
+                  ? "bg-gradient-to-br from-blue-500 to-indigo-500 text-white shadow-md shadow-blue-500/25 hover:shadow-lg hover:shadow-blue-500/30"
+                  : "bg-gray-100 text-gray-300 border border-gray-200"
+              }`}
             >
-              <ArrowUp className="h-4 w-4 md:h-5 md:w-5" />
+              <ArrowUp className="h-4 w-4" />
             </Button>
           </div>
         </form>
-        <div className="my-3">
-          <div className="text-[11px] md:text-xs flex flex-col sm:flex-row items-center justify-center text-gray-500 gap-2 sm:gap-0">
+        <div className="mt-2.5 mb-1">
+          <div className="text-[11px] md:text-xs flex flex-col sm:flex-row items-center justify-center text-gray-400 gap-1.5 sm:gap-0">
             <div className="flex items-center sm:mr-3">
-              <kbd className="text-[10px] md:text-[11px] border border-gray-300 bg-gray-50 rounded px-1.5 py-0.5 font-mono">Enter</kbd>
-              <span className="ml-1.5">to send</span>
+              <kbd className="text-[10px] md:text-[11px] border border-gray-200 bg-gray-50 rounded-md px-1.5 py-0.5 font-mono text-gray-400">Enter</kbd>
+              <span className="ml-1.5">send</span>
             </div>
-            <span className="hidden sm:inline text-gray-300">•</span>
+            <span className="hidden sm:inline text-gray-200">·</span>
             <div className="flex items-center sm:ml-3">
-              <kbd className="text-[10px] md:text-[11px] border border-gray-300 bg-gray-50 rounded px-1.5 py-0.5 font-mono">Ctrl</kbd>
-              <span className="mx-1">+</span>
-              <kbd className="text-[10px] md:text-[11px] border border-gray-300 bg-gray-50 rounded px-1.5 py-0.5 font-mono">Enter</kbd>
-              <span className="ml-1.5">to clear chat</span>
+              <kbd className="text-[10px] md:text-[11px] border border-gray-200 bg-gray-50 rounded-md px-1.5 py-0.5 font-mono text-gray-400">Ctrl</kbd>
+              <span className="mx-0.5 text-gray-300">+</span>
+              <kbd className="text-[10px] md:text-[11px] border border-gray-200 bg-gray-50 rounded-md px-1.5 py-0.5 font-mono text-gray-400">Enter</kbd>
+              <span className="ml-1.5">clear</span>
             </div>
           </div>
-          <div className="mt-1 text-[11px] md:text-xs text-center font-medium text-blue-500 hover:text-blue-600 hover:underline transition-colors">
-            <a href="https://www.npmjs.com/package/@huggingface/transformers?activeTab=versions" target="_blank" rel="noopener noreferrer">Transformers.js {packageJson.dependencies["@huggingface/transformers"].replace(/^\^/, "")}</a>
+          <div className="mt-1.5 text-[10px] md:text-[11px] text-center text-gray-300 hover:text-blue-500 transition-colors">
+            <a href="https://www.npmjs.com/package/@huggingface/transformers?activeTab=versions" target="_blank" rel="noopener noreferrer">
+              Transformers.js {packageJson.dependencies["@huggingface/transformers"].replace(/^\^/, "")}
+            </a>
           </div>
         </div>
       </div>
@@ -313,55 +346,105 @@ interface MessageBubbleProps {
 
 function MessageBubble({ message }: MessageBubbleProps) {
   const isUser = message.role === "user"
+  const [copied, setCopied] = React.useState(false)
+
+  const handleCopy = async () => {
+    try {
+      const parts: string[] = []
+      if (message.ttft) parts.push(`TTFT ${message.ttft.toFixed(0)}ms`)
+      if (message.e2e) parts.push(`E2E ${(message.e2e / 1000).toFixed(1)}s`)
+      if (message.tpot) parts.push(`TPOT ${message.tpot.toFixed(1)}ms`)
+      if (message.numTokens && message.tps) parts.push(`${message.numTokens} tok / ${(message.numTokens / message.tps).toFixed(1)}s`)
+      if (message.tps) parts.push(`${message.tps.toFixed(1)} tok/s`)
+      const text = parts.length > 0 ? parts.join('; ') : 'No performance data'
+      await navigator.clipboard.writeText(text)
+      setCopied(true)
+      setTimeout(() => setCopied(false), 2000)
+    } catch {
+      // fallback
+    }
+  }
 
   return (
     <motion.div
-      initial={{ opacity: 0, y: 10 }}
+      initial={{ opacity: 0, y: 8 }}
       animate={{ opacity: 1, y: 0 }}
-      transition={{ duration: 0.3 }}
-      className={`flex ${isUser ? "justify-end" : "justify-start"}`}
+      transition={{ duration: 0.25 }}
+      className={`flex message-group ${isUser ? "justify-end" : "justify-start"}`}
     >
-      <div className={`flex items-start max-w-[90%] sm:max-w-[85%] md:max-w-[80%] space-x-2 md:space-x-3 ${isUser ? "flex-row-reverse space-x-reverse" : ""}`}>
+      <div className={`flex items-start max-w-[90%] sm:max-w-[85%] md:max-w-[75%] gap-2 md:gap-3 ${isUser ? "flex-row-reverse" : ""}`}>
         <div
-          className={`flex-shrink-0 w-7 h-7 md:w-8 md:h-8 rounded-full flex items-center border border-solid border-gray-200 justify-center hover:border-blue-500 hover:cursor-pointer transition-colors`}
+          className={`flex-shrink-0 w-7 h-7 md:w-8 md:h-8 rounded-md flex items-center justify-center ${
+            isUser 
+              ? "bg-gradient-to-br from-gray-100 to-gray-200" 
+              : "bg-gradient-to-br from-blue-500 to-indigo-500"
+          }`}
         >
-          {isUser ? <User className="h-3.5 w-3.5 md:h-4 md:w-4 text-gray-500 hover:text-blue-600" /> : <Bot className="h-3.5 w-3.5 md:h-4 md:w-4 text-gray-500 hover:text-blue-600" />}
+          {isUser 
+            ? <User className="h-3.5 w-3.5 md:h-4 md:w-4 text-gray-500" /> 
+            : <Bot className="h-3.5 w-3.5 md:h-4 md:w-4 text-white" />
+          }
         </div>
 
-        <div
-          className={`p-3 md:p-4 text-sm md:text-base rounded-lg ${isUser
-            ? "hover:bg-gradient-to-br hover:from-gray-50 hover:to-gray-100 border border-blue-200 hover:cursor-pointer shadow-sm"
-            : "bg-white border border-gray-200 shadow-sm"
+        <div className="flex flex-col gap-1">
+          <div
+            className={`px-3.5 py-3 md:px-4 md:py-3.5 text-sm md:text-base ${isUser
+              ? "bg-gradient-to-br from-blue-500 to-indigo-500 text-white rounded-bl-md"
+              : "bg-white border border-gray-100 shadow-sm rounded-tr-md"
             }`}
-        >
-          {isUser ? (
-            <div className="text-sm md:text-base whitespace-pre-wrap break-words">{message.content}</div>
-          ) : (
-            <div
-              className="text-sm md:text-base whitespace-pre-wrap break-words"
-              dangerouslySetInnerHTML={{ __html: message.content }}
-            />
-          )
-          }
-          <div className={`text-[10px] md:text-xs flex flex-wrap items-center gap-2 mt-3 ${isUser ? "opacity-70" : "text-gray-500"}`}>
-            <div className="font-medium">{new Date(message.timestamp).toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })}</div>
+          >
+            {isUser ? (
+              <div className="text-sm md:text-base whitespace-pre-wrap break-words leading-relaxed">{message.content}</div>
+            ) : (
+              <div
+                className="text-sm md:text-base whitespace-pre-wrap break-words leading-relaxed text-gray-700"
+                dangerouslySetInnerHTML={{ __html: message.content }}
+              />
+            )}
+          </div>
+
+          <div className={`flex flex-wrap items-center gap-1.5 px-1 ${isUser ? "justify-end" : "justify-start"}`}>
+            <span className="text-[10px] text-gray-300">
+              {new Date(message.timestamp).toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })}
+            </span>
             {!isUser && (
               <>
                 {message.ttft && (
-                  <span className="bg-gradient-to-br from-pink-500 to-pink-600 hover:from-pink-600 hover:to-pink-700 text-[10px] md:text-xs text-white rounded px-2 py-0.5" title="Time to first token">
-                    TTFT: {message.ttft.toFixed(2)}ms
-                  </span>
-                )}
-                {message.numTokens && message.tps && (
-                  <span className="bg-gradient-to-br from-pink-500 to-pink-600 hover:from-pink-600 hover:to-pink-700 text-[10px] md:text-xs text-white rounded px-2 py-0.5" title="Generation time">
-                    {message.numTokens} tokens / {(message.numTokens / message.tps).toFixed(2)}s
+                  <span className="bg-blue-50 text-blue-500 text-[10px] rounded-md px-1.5 py-0.5 font-medium tabular-nums" title={"Time to First Token (TTFT)\nMeasures the time from when a request is submitted to when the very first output token appears. A low TTFT (ideally under 500ms) is crucial for a responsive feel, as it minimizes the initial perceived delay.\nCalculation: Time at arrival of first output token − Time at request submission."}>
+                    Time to First Token (TTFT) {message.ttft.toFixed(2)}ms
                   </span>
                 )}
                 {message.tps && (
-                  <span className="bg-gradient-to-br from-pink-500 to-pink-600 hover:from-pink-600 hover:to-pink-700 text-[10px] md:text-xs text-white rounded px-2 py-0.5" title="Tokens per second">
-                    {message.tps.toFixed(2)} tokens/s
+                  <span className="bg-emerald-50 text-emerald-600 text-[10px] rounded-md px-1.5 py-0.5 font-medium tabular-nums" title={"Tokens Per Second (tok/s)\nThe rate at which output tokens are produced during the decode phase (excluding the time to first token). A higher value means faster, smoother streaming.\nCalculation: (Total output tokens − 1) / (Total generation time − TTFT)."}>
+                    Tokens Per Second (tok/s) {message.tps.toFixed(2)}
                   </span>
                 )}
+                {message.numTokens && message.tps && (
+                  <span className="bg-indigo-50 text-indigo-500 text-[10px] rounded-md px-1.5 py-0.5 font-medium tabular-nums" title={"Throughput (TPS)\nMeasures the overall system capacity in tokens per second. Higher throughput means the model generates text faster and can handle more requests efficiently.\nCalculation: Total number of output tokens generated / Total generation time."}>
+                    Throughput {message.numTokens} tok / {(message.numTokens / message.tps).toFixed(2)}s
+                  </span>
+                )}
+                {message.tpot && (
+                  <span className="bg-violet-100 text-violet-700 text-[10px] rounded-md px-1.5 py-0.5 font-medium tabular-nums" title={"Time Per Output Token (TPOT) aka. Inter-Token Latency (ITL). Measures the average time it takes to generate each subsequent token after the first one. This determines the smoothness and speed of the streaming response.\nCalculation: (Total Latency − TTFT) / (Total Output Tokens − 1)."}>
+                    Time Per Output Token (TPOT) {message.tpot.toFixed(2)}ms
+                  </span>
+                )}
+                {message.e2e && (
+                  <span className="bg-amber-100 text-amber-700 text-[10px] rounded-md px-1.5 py-0.5 font-medium tabular-nums" title={"End-to-End Latency (E2E)\nAKA Total Latency. The total time from sending the request to receiving the final token of the complete response. This is the wall-clock time the user waits for the full answer.\nCalculation: Time at completion of request − Time at request submission."}>
+                    End-to-End Latency (E2E) {message.e2e >= 1000 ? `${(message.e2e / 1000).toFixed(2)}s` : `${message.e2e.toFixed(2)}ms`}
+                  </span>
+                )}
+                <button
+                  onClick={handleCopy}
+                  className="copy-btn p-1 rounded-md hover:bg-gray-100 transition-colors"
+                  title="Copy response"
+                  aria-label="Copy response"
+                >
+                  {copied 
+                    ? <Check className="h-3 w-3 text-green-500" /> 
+                    : <Copy className="h-3 w-3 text-gray-300 hover:text-gray-500" />
+                  }
+                </button>
               </>
             )}
           </div>

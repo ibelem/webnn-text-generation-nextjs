@@ -164,8 +164,8 @@ export function Sidebar({
 
   // Pass modelLoadState and handler to ModelOption
   return (
-    <div className="h-full flex flex-col bg-white p-3 md:p-4">
-      <div className="grid grid-cols-2 items-center mb-3 md:mb-4">
+    <div className="h-full flex flex-col bg-white p-3 md:p-4 sidebar-enter">
+      <div className="grid grid-cols-2 items-center mb-4 md:mb-5 px-1">
         <Image
           src="/webgpu-logo-h.svg"
           alt="WebGPU Logo"
@@ -185,18 +185,18 @@ export function Sidebar({
       </div>
 
       <Tabs defaultValue="models" className="flex-1 gap-0">
-        <TabsList className="grid grid-cols-2 p-1 gap-1 mb-3 h-[auto] w-full rounded-lg bg-gray-100 border border-gray-200">
-          <TabsTrigger className="flex-1 px-3 py-2.5 rounded-md text-xs md:text-sm font-medium transition-all data-[state=active]:bg-white data-[state=active]:shadow-sm border-none hover:cursor-pointer data-[state=inactive]:text-gray-500 hover:bg-white/60 focus:outline-none"
+        <TabsList className="grid grid-cols-2 p-1 gap-1 mb-3 h-[auto] w-full rounded-md bg-gray-100/80 border border-gray-200/60">
+          <TabsTrigger className="flex-1 px-3 py-2.5 rounded-md text-xs md:text-sm font-medium transition-all data-[state=active]:bg-white data-[state=active]:shadow-sm border-none hover:cursor-pointer data-[state=inactive]:text-gray-400 hover:bg-white/60 focus:outline-none"
             value="models"> 
             Models
           </TabsTrigger>
-          <TabsTrigger className="flex-1 px-3 py-2.5 rounded-md text-xs md:text-sm font-medium transition-all data-[state=active]:bg-white data-[state=active]:shadow-sm border-none hover:cursor-pointer data-[state=inactive]:text-gray-500 hover:bg-white/60 focus:outline-none"
+          <TabsTrigger className="flex-1 px-3 py-2.5 rounded-md text-xs md:text-sm font-medium transition-all data-[state=active]:bg-white data-[state=active]:shadow-sm border-none hover:cursor-pointer data-[state=inactive]:text-gray-400 hover:bg-white/60 focus:outline-none"
             value="backends">
             Backends
           </TabsTrigger>
         </TabsList>
 
-        <TabsContent value="models" className="max-h-[60vh] overflow-y-auto overflow-x-hidden rounded-lg border border-blue-100 ">
+        <TabsContent value="models" className="max-h-[60vh] overflow-y-auto overflow-x-hidden rounded-md border border-gray-200/60">
           {MODELS.map((model) => (
             <ModelOption
               key={model.id}
@@ -209,7 +209,7 @@ export function Sidebar({
           ))}
         </TabsContent>
 
-        <TabsContent value="backends" className="space-y-1">
+        <TabsContent value="backends" className="space-y-2">
           {BACKENDS.map((backend) => (
             <BackendOption
               key={backend.id}
@@ -221,93 +221,91 @@ export function Sidebar({
         </TabsContent>
       </Tabs>
 
-      <div className="mt-auto pt-2">
+      <div className="mt-auto pt-3">
         {loadError && (
-          <div className="mb-2 rounded-md bg-red-50 border border-red-200 p-2 text-xs text-red-700 break-words">
-            <span className="font-semibold">Error: </span>{loadError}
+          <div className="mb-3 rounded-md bg-red-50 border border-red-200 p-3 text-xs text-red-700 break-words flex items-start gap-2">
+            <X className="h-3.5 w-3.5 mt-0.5 flex-shrink-0 text-red-500" />
+            <span>{loadError}</span>
           </div>
         )}
-        <div className="flex items-center justify-between mb-2">
-          <div className="text-[10px] md:text-xs text-gray-500 ml-2 md:ml-3">Current Configuration</div>
-          <div id="compilation-time" className="text-[10px] md:text-xs text-pink-600">
-            {compilationTime !== null ? `Compilation: ${compilationTime.toFixed(2)} ms` : ""}
+        <div className="flex items-center justify-between mb-2 px-1">
+          <div className="text-[10px] md:text-xs font-medium text-gray-400 uppercase tracking-wider">Configuration</div>
+          <div id="compilation-time" className="text-[10px] md:text-xs font-medium text-blue-500">
+            {compilationTime !== null ? `${compilationTime.toFixed(0)}ms compile` : ""}
           </div>
         </div>
-        <div className="bg-gray-100 rounded-md p-2 md:p-3 text-xs md:text-sm mb-2 md:max-h-[40vh] md:overflow-y-auto">
+        <div className="bg-gray-50/80 rounded-md p-3 md:p-3.5 text-xs md:text-sm mb-2 md:max-h-[40vh] md:overflow-y-auto border border-gray-100 space-y-2.5">
           <div className="flex items-center justify-between">
-            <span className="text-gray-500">Model</span>
+            <span className="text-gray-400 text-xs">Model</span>
             <a 
               href={`https://huggingface.co/${MODELS.find((m) => m.id === selectedModel)?.model || selectedModel}`}
               target="_blank"
               rel="noopener noreferrer"
-              className="text-xs text-blue-500 font-medium text-right hover:text-blue-600 hover:underline transition-colors"
+              className="text-xs text-blue-500 font-medium text-right hover:text-blue-600 hover:underline transition-colors max-w-[60%] truncate"
             >
               {MODELS.find((m) => m.id === selectedModel)?.model || selectedModel}
             </a>
           </div>
-          <div className="flex items-center justify-between mt-2">
-            <span className="text-gray-500">Backend</span>
-            <span className="font-medium">{selectedBackend}</span>
+          <div className="flex items-center justify-between">
+            <span className="text-gray-400 text-xs">Backend</span>
+            <span className="font-medium text-xs">{BACKENDS.find(b => b.id === selectedBackend)?.name || selectedBackend}</span>
+          </div>
+          <div className="flex items-center justify-between">
+            <span className="text-gray-400 text-xs">Model Host</span>
+            <span className="font-medium text-xs">{remoteHost}</span>
           </div>
           {/* Reasoning toggle UI: only show if thinkingTagSupport is true */}
           {MODELS.find((m) => m.id === selectedModel)?.thinkingTagSupport && (
-            <div className="flex items-center justify-between mt-2">
-              <span className="text-gray-500">Reasoning</span>
-              <label className="flex items-center cursor-pointer">
+            <div className="flex items-center justify-between">
+              <span className="text-gray-400 text-xs">Reasoning</span>
+              <label className="flex items-center gap-2 cursor-pointer select-none">
+                <span className="text-xs font-medium text-gray-600">{reasonEnabled ? "On" : "Off"}</span>
                 <input
                   type="checkbox"
                   checked={reasonEnabled}
                   onChange={e => setReasonEnabled(e.target.checked)}
-                  className="mr-2"
+                  className="toggle-switch"
                 />
-                <span className="font-medium">
-                  Enable <span className="font-medium">Thinking</span>
-                </span>
               </label>
             </div>
           )}
           {/* System Prompt toggle UI */}
-          <div className="flex items-center justify-between mt-2">
-            <span className="text-gray-500">System Prompt</span>
-            <label className="flex items-center cursor-pointer">
+          <div className="flex items-center justify-between">
+            <span className="text-gray-400 text-xs">System Prompt</span>
+            <label className="flex items-center gap-2 cursor-pointer select-none">
+              <span className="text-xs font-medium text-gray-600">{systemPromptEnabled ? "On" : "Off"}</span>
               <input
                 type="checkbox"
                 checked={systemPromptEnabled}
                 onChange={e => setSystemPromptEnabled(e.target.checked)}
-                className="mr-2"
+                className="toggle-switch"
               />
-              <span className="font-medium">
-                Enable
-              </span>
             </label>
           </div>
           {systemPromptEnabled && (
-            <div className="mt-2">
+            <div className="pt-0.5">
               <Textarea
                 value={systemPromptText}
                 onChange={(e) => setSystemPromptText(e.target.value)}
-                className="text-xs min-h-[50px] bg-white max-h-[10vh] overflow-y-auto"
+                className="text-xs min-h-[50px] bg-white max-h-[10vh] overflow-y-auto rounded-md border-gray-200 focus:border-blue-300"
                 placeholder="Enter a system prompt to guide the model's behavior..."
               />
             </div>
           )}
-          <div className="flex items-center justify-between mt-2">
-              <span className="text-gray-500">Model Host</span>
-            <span className="font-medium">{remoteHost}</span>
-            </div>
         </div>
         {/* Progress bar UI (show only if loading/progress is needed) */}
-        <div className="my-2">
-              {progressItems && progressItems.length > 0 &&
-          progressItems.map((item, i) => (
-            <Progress
-              key={item.file || i}
-              text={item.file || item.text}
-              progress={item.progress}
-              total={item.total}
-            />
-          ))}
-        </div>
+        {progressItems && progressItems.length > 0 && (
+          <div className="my-2 space-y-1">
+            {progressItems.map((item, i) => (
+              <Progress
+                key={item.file || i}
+                text={item.file || item.text}
+                progress={item.progress}
+                total={item.total}
+              />
+            ))}
+          </div>
+        )}
       </div>
     </div>
   )
@@ -322,65 +320,58 @@ interface ModelOptionProps {
 }
 
 function ModelOption({ model, isSelected, onClick, loadState, onLoad }: ModelOptionProps) {
-  // Assign icon type based on model id
-  const Icon = Sparkles;
-
   return (
     <motion.div
-      whileHover={{ scale: 1.01 }}
-      whileTap={{ scale: 0.99 }}
-      className={`flex items-center py-1 px-3 md:px-3 md:py-1 cursor-pointer transition-all duration-200 ${isSelected ? "bg-gradient-to-r from-gray-50 to-gray-100" : "hover:bg-gray-50"}`}
+      whileHover={{ scale: 1.005 }}
+      whileTap={{ scale: 0.995 }}
+      className={`flex items-center py-2 px-3 md:px-3 cursor-pointer transition-all duration-200 ${isSelected ? "bg-blue-50/50 border-l-1 border-l-blue-400" : "hover:bg-gray-50/80 border-l-transparent"}`}
       onClick={onClick}
     >
       <div className="flex-1 min-w-0">
-        <div className="flex font-medium text-sm md:text-md items-center hover:text-blue-500 truncate">
-          <div className={`py-1 pr-1 rounded-lg mr-0 flex-shrink-0`}><Icon className="h-2 w-2 md:h-3 md:w-3" /></div>
-          {model.name} 
+        <div className="flex font-medium text-sm md:text-md items-center text-gray-700 truncate">
+          <Sparkles className={`h-3 w-3 mr-1.5 flex-shrink-0 ${isSelected ? 'text-blue-500' : 'text-gray-300'}`} />
+          {model.name}
         </div>
-        <div className="text-xs text-gray-500">
-          <span className={`text-[11px] pb-[1px] px-1 rounded-sm uppercase ${
+        <div className="flex flex-wrap items-center gap-1 mt-1 ml-[18px]">
+          <span className={`text-[10px] leading-tight px-1.5 py-0.5 rounded font-medium ${
             model.producer === 'WIP' 
-              ? 'bg-orange-500 text-white' 
-              : 'bg-gray-100'
+              ? 'bg-amber-100 text-amber-700' 
+              : 'bg-gray-100 text-gray-500'
           }`}>
             {model.producer}
           </span>
-          <span className="bg-gray-100 text-[11px] pb-[1px] px-1 rounded-sm ml-1">{model.desc}</span>
-          <span className="bg-blue-500 text-[11px] pb-[1px] px-1 rounded-sm ml-1 text-white">{model.parameter}</span>
-          <span className="bg-gray-100 text-[11px] pb-[1px] px-1 rounded-sm ml-1">{model.size}</span>
+          <span className="bg-gray-100 text-gray-500 text-[10px] leading-tight px-1.5 py-0.5 rounded">{model.desc}</span>
+          <span className="bg-blue-100 text-blue-600 text-[10px] leading-tight px-1.5 py-0.5 rounded font-medium">{model.parameter}</span>
+          <span className="bg-gray-100 text-gray-500 text-[10px] leading-tight px-1.5 py-0.5 rounded">{model.size}</span>
         </div>
       </div>
       {/* Load/Reload Button */}
-      <div className="ml-2 text-xs">
+      <div className="ml-2 flex-shrink-0">
         {loadState === "loading" ? (
-          <Button variant="ghost" size="sm" disabled className="shadow-none font-normal text-[10px] !flex-col items-center mr-[-9px] border-none rounded-none bg-transparent">
-            <Loader2 className="h-4 w-4 animate-spin" />
-            <span>Loading</span>
-          </Button>
+          <div className="flex flex-col items-center gap-0.5 w-10">
+            <Loader2 className="h-4 w-4 animate-spin text-blue-500" />
+            <span className="text-[9px] text-gray-400">Loading</span>
+          </div>
         ) : loadState === "warm" ? (
-          <Button variant="ghost" size="sm" disabled className="shadow-none font-normal text-[10px] !flex-col items-center mr-[-9px] border-none rounded-none bg-transparent">
-            <Cog className="h-4 w-4 animate-spin" />
-            <span>Warming up</span>
-          </Button>
+          <div className="flex flex-col items-center gap-0.5 w-10">
+            <Cog className="h-4 w-4 animate-spin text-amber-500" />
+            <span className="text-[9px] text-gray-400">Warm up</span>
+          </div>
         ) : (
           <Button
-            title={loadState === "not_loaded" ? "Download model and configuration files" : "Re-download model files (files already downloaded)" }
-            variant={"ghost"}
+            title={loadState === "not_loaded" ? "Download model and configuration files" : "Re-download model files (files already downloaded)"}
+            variant="ghost"
             size="sm"
-            className={loadState === "not_loaded" ? "shadow-none hover:shadow-none text-xs hover:cursor-pointer h-9 w-9 border-none rounded-none bg-transparent hover:bg-transparent" : "shadow-none text-gray-600 text-xs hover:cursor-pointer hover:bg-transparent transition-colors h-9 w-9 border-none rounded-none bg-transparent"}
+            className="h-8 w-8 p-0 rounded-md hover:bg-blue-50 hover:cursor-pointer border-none shadow-none bg-transparent hover:bg-blue-50/80 transition-colors"
             onClick={(e) => {
               e.stopPropagation();
               onLoad();
             }}
           >
             {loadState === "not_loaded" ? (
-              <>
-                <Download className="h-4 w-4" />
-              </>
+              <Download className="h-4 w-4 text-gray-400 hover:text-blue-500" />
             ) : (
-              <>
-                <RefreshCcw className="h-4 w-4" />
-              </>
+              <RefreshCcw className="h-3.5 w-3.5 text-green-500" />
             )}
           </Button>
         )}
@@ -396,22 +387,25 @@ interface BackendOptionProps {
 }
 
 function BackendOption({ backend, isSelected, onClick }: BackendOptionProps) {
-  // Assign icon type based on backend id
   let Icon = Gpu;
   if (backend.id === "webnn-npu") Icon = Microchip;
-  // Add more mappings as needed
   return (
     <motion.div
-      whileHover={{ scale: 1.01 }}
-      whileTap={{ scale: 0.99 }}
-      className={`flex items-center p-3 md:p-3 rounded-lg cursor-pointer transition-all duration-200 mr-2 min-h-[68px] ${isSelected ? "bg-gradient-to-r from-gray-50 to-gray-100 border border-blue-200 shadow-sm" : "hover:bg-gray-50 border border-transparent"}`}
+      whileHover={{ scale: 1.005 }}
+      whileTap={{ scale: 0.995 }}
+      className={`flex items-center p-3 md:p-3.5 rounded-md cursor-pointer transition-all duration-200 ${isSelected ? "bg-blue-50/60 border border-blue-200/60 shadow-sm" : "hover:bg-gray-50 border border-transparent"}`}
       onClick={onClick}
     >
-      <div className={`p-2.5 rounded-lg mr-3 flex-shrink-0 ${isSelected ? "bg-white shadow-sm" : "bg-gray-100"}`}><Icon className="h-4 w-4 md:h-5 md:w-5" /></div>
+      <div className={`p-2.5 rounded-md mr-3 flex-shrink-0 transition-colors ${isSelected ? "bg-white shadow-sm text-blue-500" : "bg-gray-100 text-gray-400"}`}>
+        <Icon className="h-4 w-4 md:h-5 md:w-5" />
+      </div>
       <div className="flex-1">
         <div className="font-medium text-sm md:text-base">{backend.name}</div>
-        <div className="text-xs md:text-sm text-gray-500">Inference backend</div>
+        <div className="text-[11px] md:text-xs text-gray-400">Inference backend</div>
       </div>
+      {isSelected && (
+        <div className="w-2 h-2 rounded-full bg-blue-400 flex-shrink-0" />
+      )}
     </motion.div>
   );
 }

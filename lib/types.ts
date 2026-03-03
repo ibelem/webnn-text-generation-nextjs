@@ -9,5 +9,7 @@ export interface Message {
   tps?: number;
   numTokens?: number;
   ttft?: number; // time to first token in ms
+  e2e?: number; // end-to-end latency in ms
+  tpot?: number; // time per output token (inter-token latency) in ms
   state?: string
 }

@@ -144,10 +144,10 @@ export default function Page({ params }: { params: Promise<{ model: string; back
   }, [modelLoadState]);
 
   return (
-    <div className="flex flex-col md:flex-row min-h-screen md:h-screen bg-gray-100">
+    <div className="flex flex-col md:flex-row min-h-screen md:h-screen bg-gray-50">
       {isSidebarOpen && (
         workerReady ? (
-          <div className="w-full md:w-80 border-b md:border-b-0 md:border-r border-gray-200 bg-white md:h-full md:overflow-y-auto">
+          <div className="w-full md:w-80 border-b md:border-b-0 md:border-r border-gray-200/60 bg-white md:h-full md:overflow-y-auto flex-shrink-0 sidebar-enter">
             <Sidebar
               selectedModel={selectedModel}
               setSelectedModel={setSelectedModel}
@@ -168,13 +168,13 @@ export default function Page({ params }: { params: Promise<{ model: string; back
             />
           </div>
         ) : (
-          <div className="w-full md:w-80 flex items-center justify-center bg-white h-20 md:h-full border-b md:border-b-0 md:border-r border-gray-200">
-            <Loader2 className="h-8 w-8 animate-spin" />
-            <span className="ml-2">Initializing Workers...</span>
+          <div className="w-full md:w-80 flex items-center justify-center bg-white h-20 md:h-full border-b md:border-b-0 md:border-r border-gray-200/60 sidebar-enter">
+            <Loader2 className="h-6 w-6 animate-spin text-blue-500" />
+            <span className="ml-2 text-sm text-gray-400">Initializing...</span>
           </div>
         )
       )}
-      <div className="flex-1 flex flex-col min-h-screen md:min-h-0">
+      <div className="flex-1 flex flex-col min-h-screen md:min-h-0 min-w-0">
         <ChatInterface
           isSidebarOpen={isSidebarOpen}
           setIsSidebarOpen={setIsSidebarOpen}

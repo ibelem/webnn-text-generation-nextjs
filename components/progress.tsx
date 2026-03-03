@@ -17,15 +17,21 @@ export interface ProgressProps {
 export const Progress: React.FC<ProgressProps> = ({ text, total, file, progress }) => {
   const pct = typeof progress === "number" ? progress * 100 : 0;
   const label = file || text || "";
+  // Extract just the filename for display
+  const shortLabel = label.includes('/') ? label.split('/').pop() || label : label;
   return (
-    <div className="w-full bg-gray-100 dark:bg-gray-700 text-left rounded-md overflow-hidden mb-0.5">
+    <div className="w-full bg-gray-100 text-left rounded-md overflow-hidden relative h-5">
       <div
-        className="bg-blue-400 whitespace-nowrap px-2 text-xs transition-all duration-300"
-        style={{ width: `${pct}%` }}
-        title={label}
-      >
-        {label} ({pct.toFixed(2)}%
-        {typeof total === "number" && !isNaN(total) ? ` of ${formatBytes(total)}` : ""})
+        className="bg-gradient-to-r from-blue-400 to-blue-500 h-full transition-all duration-300 ease-out rounded-md"
+        style={{ width: `${Math.max(pct, 1)}%` }}
+      />
+      <div className="absolute inset-0 flex items-center px-2">
+        <span className="text-[10px] font-medium truncate max-w-[70%]" title={label}>
+          {shortLabel}
+        </span>
+        <span className="text-[10px] ml-auto flex-shrink-0 tabular-nums">
+          {pct.toFixed(0)}%{typeof total === "number" && !isNaN(total) ? ` · ${formatBytes(total)}` : ""}
+        </span>
       </div>
     </div>
   );
