@@ -297,7 +297,7 @@ export function ChatInterface({
       </div>
 
       {/* Input area */}
-      <div className="p-3 md:p-4 border-t border-gray-200/60 bg-white">
+      <div className="px-3 pb-3 pt-1 md:px-4 md:pb-4 md:pb-4 md:pt-1 border-t border-gray-200/60 bg-white">
         {/* Attachment bar — shown only for models with vision/video capabilities */}
         <AttachmentBar
           capabilities={modelCapabilities}
@@ -313,7 +313,7 @@ export function ChatInterface({
             onChange={(e) => setInput(e.target.value)}
             placeholder={anyModelReady ? "Type your message..." : "Load a model to start chatting..."}
             disabled={!anyModelReady}
-            className="w-full border border-gray-200 px-4 py-3 pr-14 text-sm md:text-base placeholder:text-gray-300 disabled:opacity-40 min-h-[52px] md:min-h-[56px] max-h-[calc(30dvh)] overflow-auto resize-none rounded-md bg-gray-50/50 focus:bg-white focus:border-blue-300 transition-all"
+            className="w-full border border-gray-200 px-4 py-3 pr-14 text-sm md:text-base placeholder:text-gray-300 disabled:opacity-40 min-h-[52px] md:min-h-[80px] max-h-[calc(30dvh)] overflow-auto resize-none rounded-md bg-gray-50/50 focus:bg-white focus:border-blue-300 transition-all"
             onKeyDown={(e) => {
               if (e.key === 'Enter' && (e.ctrlKey || e.metaKey)) {
                 e.preventDefault();
