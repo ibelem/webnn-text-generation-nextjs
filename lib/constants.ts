@@ -1,9 +1,9 @@
-import type { ModelType, BackendType } from "../lib/types"
+import type { ModelType, BackendType, ModelCapability, ModelClass } from "../lib/types"
 
 export const MODELS: Array<{
   id: ModelType;
   model: string;
-  dataType: string;
+  dataType: string | Record<string, string>;
   name: string;
   producer: string;
   desc: string;
@@ -18,6 +18,10 @@ export const MODELS: Array<{
   thinkingTagSupport?: boolean;
   useKVCache?: boolean;
   usePipeline?: boolean;
+  /** What input modalities the model supports (default: ["text"]) */
+  capabilities?: ModelCapability[];
+  /** Which transformers.js model class to use (default: "causal-lm") */
+  modelClass?: ModelClass;
 }> = [
     {
       // https://github.com/huggingface/transformers.js/issues/1239
@@ -215,6 +219,30 @@ export const MODELS: Array<{
       temperature: 0.7,
       systemPrompt: "",
       thinkingTagSupport: false,
+    },
+    // ── Multimodal (Vision-Language) Models ──────────────────────────────
+    {
+      id: "qwen3_5-0_8b" as ModelType,
+      model: "onnx-community/Qwen3.5-0.8B-ONNX",
+      dataType: {
+        embed_tokens: "q4",
+        vision_encoder: "fp16",
+        decoder_model_merged: "q4",
+      },
+      name: "Qwen3.5",
+      producer: "Ali",
+      desc: "VLM",
+      parameter: "0.8B",
+      size: "814MB",
+      useExternalDataFormat: true,
+      maxNewTokens: 128,
+      doSample: false,
+      topK: 20,
+      temperature: 0.6,
+      systemPrompt: "",
+      thinkingTagSupport: true,
+      capabilities: ["text", "vision", "video"],
+      modelClass: "conditional-generation",
     },
   ];
 

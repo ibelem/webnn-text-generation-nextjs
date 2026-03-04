@@ -5,6 +5,7 @@ import { useRouter, useSearchParams } from "next/navigation";
 import { useEffect, useRef, useState } from "react";
 import { Sidebar } from "@/components/sidebar";
 import { ChatInterface } from "@/components/chat-interface";
+import { LiveVideoPanel } from "@/components/media-input/live-video-panel";
 import type { ModelType, BackendType } from "@/lib/types";
 import type { ProgressProps } from "@/components/progress";
 import { MODELS, BACKENDS, DEFAULT_SYSTEM_PROMPT } from "@/lib/constants";
@@ -143,6 +144,12 @@ export default function Page({ params }: { params: Promise<{ model: string; back
     }
   }, [modelLoadState]);
 
+  // Live video mode — switch to continuous inference UI
+  const isLiveMode = searchParams.get("mode") === "live";
+  // Check if current model supports live video
+  const currentModelObj = MODELS.find((m) => m.id === selectedModel);
+  const supportsLive = currentModelObj?.capabilities?.includes("video") ?? false;
+
   return (
     <div className="flex flex-col md:flex-row min-h-screen md:h-screen bg-gray-50">
       {isSidebarOpen && (
@@ -175,19 +182,31 @@ export default function Page({ params }: { params: Promise<{ model: string; back
         )
       )}
       <div className="flex-1 flex flex-col min-h-screen md:min-h-0 min-w-0">
-        <ChatInterface
-          isSidebarOpen={isSidebarOpen}
-          setIsSidebarOpen={setIsSidebarOpen}
-          selectedModel={selectedModel}
-          selectedBackend={selectedBackend}
-          setProgressItems={setProgressItems}
-          workerRef={workerRef}
-          reasonEnabled={reasonEnabled}
-          setReasonEnabled={setReasonEnabled}
-          systemPromptEnabled={systemPromptEnabled}
-          systemPromptText={systemPromptText}
-          modelLoadState={modelLoadState}
-        />
+        {isLiveMode && supportsLive ? (
+          <LiveVideoPanel
+            isSidebarOpen={isSidebarOpen}
+            setIsSidebarOpen={setIsSidebarOpen}
+            selectedModel={selectedModel}
+            selectedBackend={selectedBackend}
+            workerRef={workerRef}
+            modelLoadState={modelLoadState}
+            setProgressItems={setProgressItems}
+          />
+        ) : (
+          <ChatInterface
+            isSidebarOpen={isSidebarOpen}
+            setIsSidebarOpen={setIsSidebarOpen}
+            selectedModel={selectedModel}
+            selectedBackend={selectedBackend}
+            setProgressItems={setProgressItems}
+            workerRef={workerRef}
+            reasonEnabled={reasonEnabled}
+            setReasonEnabled={setReasonEnabled}
+            systemPromptEnabled={systemPromptEnabled}
+            systemPromptText={systemPromptText}
+            modelLoadState={modelLoadState}
+          />
+        )}
       </div>
     </div>
   );

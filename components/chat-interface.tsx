@@ -10,13 +10,23 @@ declare global {
 
 import React, { useState, useRef, useEffect } from "react"
 import { motion, AnimatePresence } from "framer-motion"
-import type { ModelType, BackendType, Message } from "../lib/types"
+import type { ModelType, BackendType, Message, MessageContentPart } from "../lib/types"
 import { Button } from "@/components/ui/button"
 import { Textarea } from "@/components/ui/textarea"
 import { ArrowUp, Menu, X, User, Bot, Sparkles, Loader2, Copy, Check } from "lucide-react"
 import { MODELS, BACKENDS } from "../lib/constants"
 import { v4 as uuidv4 } from "uuid"
 import packageJson from "../package.json"
+import { AttachmentBar } from "@/components/media-input/attachment-bar"
+
+/** Extract plain text from a Message's content (string or multimodal parts array) */
+function getMessageText(content: string | MessageContentPart[]): string {
+  if (typeof content === "string") return content;
+  return content
+    .filter((p) => p.type === "text")
+    .map((p) => p.text ?? "")
+    .join("");
+}
 
 import type { ProgressProps } from "@/components/progress"
 
@@ -50,8 +60,11 @@ export function ChatInterface({
   const [input, setInput] = useState("");
   const [messages, setMessages] = useState<Message[]>([]);
   const [isTyping, setIsTyping] = useState(false);
+  const [attachedImages, setAttachedImages] = useState<string[]>([]);
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const anyModelReady = Object.values(modelLoadState).includes("ready");
+  const selectedModelObj = MODELS.find((m) => m.id === selectedModel);
+  const modelCapabilities = selectedModelObj?.capabilities ?? ["text"];
 
   // Expose workerRef and setProgressItems globally for Sidebar reset
   useEffect(() => {
@@ -145,10 +158,20 @@ export function ChatInterface({
     e.preventDefault();
     if (!input.trim() || isTyping) return;
 
+    const hasImages = attachedImages.length > 0;
+
+    // Build content: multimodal array if images attached, plain string otherwise
+    const content: string | MessageContentPart[] = hasImages
+      ? [
+          ...attachedImages.map((img) => ({ type: "image" as const, image: img })),
+          { type: "text" as const, text: input.trim() },
+        ]
+      : input.trim();
+
     const userMessage: Message = {
       id: uuidv4(),
       role: "user",
-      content: input.trim(),
+      content,
       timestamp: new Date(),
     };
 
@@ -162,15 +185,16 @@ export function ChatInterface({
         messages: nextMessages,
         reasonEnabled,
         systemPromptEnabled,
-        systemPromptText
+        systemPromptText,
+        images: hasImages ? attachedImages : undefined,
       },
     });
     setIsTyping(true);
     setInput("");
+    setAttachedImages([]);
   };
 
   const backendName = BACKENDS.find(b => b.id === selectedBackend)?.name || selectedBackend;
-  const selectedModelObj = MODELS.find((m) => m.id === selectedModel);
   const selectedModelName = selectedModelObj ? `${selectedModelObj.name} ${selectedModelObj.parameter}` : selectedModel;
 
   return (
@@ -274,7 +298,15 @@ export function ChatInterface({
 
       {/* Input area */}
       <div className="p-3 md:p-4 border-t border-gray-200/60 bg-white">
-        <form onSubmit={handleSubmit} className="relative">
+        {/* Attachment bar — shown only for models with vision/video capabilities */}
+        <AttachmentBar
+          capabilities={modelCapabilities}
+          attachedImages={attachedImages}
+          onImagesAdded={(urls) => setAttachedImages((prev) => [...prev, ...urls])}
+          onImageRemoved={(index) => setAttachedImages((prev) => prev.filter((_, i) => i !== index))}
+          disabled={!anyModelReady}
+        />
+        <form onSubmit={handleSubmit} className="relative mt-1">
           <Textarea
             id="chat-input"
             value={input}
@@ -288,6 +320,7 @@ export function ChatInterface({
                 workerRef.current?.postMessage({ type: "reset" });
                 setMessages([]);
                 setInput("");
+                setAttachedImages([]);
                 setIsTyping(false);
                 return;
               }
@@ -394,11 +427,26 @@ function MessageBubble({ message }: MessageBubbleProps) {
             }`}
           >
             {isUser ? (
-              <div className="text-sm md:text-base whitespace-pre-wrap break-words leading-relaxed">{message.content}</div>
+              <div className="space-y-2">
+                {/* Render image thumbnails for multimodal user messages */}
+                {Array.isArray(message.content) && message.content.some(p => p.type === "image") && (
+                  <div className="flex flex-wrap gap-1.5">
+                    {message.content.filter(p => p.type === "image").map((p, i) => (
+                      <img
+                        key={i}
+                        src={p.image}
+                        alt={`Attached ${i + 1}`}
+                        className="h-20 w-20 md:h-24 md:w-24 object-cover rounded-md border border-white/20"
+                      />
+                    ))}
+                  </div>
+                )}
+                <div className="text-sm md:text-base whitespace-pre-wrap break-words leading-relaxed">{getMessageText(message.content)}</div>
+              </div>
             ) : (
               <div
                 className="text-sm md:text-base whitespace-pre-wrap break-words leading-relaxed text-gray-700"
-                dangerouslySetInnerHTML={{ __html: message.content }}
+                dangerouslySetInnerHTML={{ __html: getMessageText(message.content) }}
               />
             )}
           </div>

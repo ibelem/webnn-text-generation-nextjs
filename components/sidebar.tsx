@@ -333,7 +333,7 @@ function ModelOption({ model, isSelected, onClick, loadState, onLoad }: ModelOpt
           {model.name}
         </div>
         <div className="flex flex-wrap items-center gap-1 mt-1 ml-[18px]">
-          <span className={`text-[10px] leading-tight px-1.5 py-0.5 rounded font-medium ${
+          <span className={`text-[10px] leading-tight px-1.5 py-0.5 rounded ${
             model.producer === 'WIP' 
               ? 'bg-amber-100 text-amber-700' 
               : 'bg-gray-100 text-gray-500'

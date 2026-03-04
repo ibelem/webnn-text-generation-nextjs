@@ -1,0 +1,188 @@
+"use client"
+
+import React, { useRef } from "react"
+import { Button } from "@/components/ui/button"
+import { ImagePlus, Camera, X } from "lucide-react"
+import type { ModelCapability } from "@/lib/types"
+
+interface AttachmentBarProps {
+  /** Model capabilities — controls which buttons are shown */
+  capabilities: ModelCapability[];
+  /** Currently attached image data URLs */
+  attachedImages: string[];
+  /** Callback when images are added (receives data URLs) */
+  onImagesAdded: (dataUrls: string[]) => void;
+  /** Callback to remove an attached image by index */
+  onImageRemoved: (index: number) => void;
+  /** Whether the model is ready for input */
+  disabled?: boolean;
+}
+
+export function AttachmentBar({
+  capabilities,
+  attachedImages,
+  onImagesAdded,
+  onImageRemoved,
+  disabled = false,
+}: AttachmentBarProps) {
+  const fileInputRef = useRef<HTMLInputElement>(null);
+  const hasVision = capabilities.includes("vision") || capabilities.includes("video");
+
+  const handleFileSelect = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const files = e.target.files;
+    if (!files || files.length === 0) return;
+
+    const dataUrls: string[] = [];
+    for (const file of Array.from(files)) {
+      if (!file.type.startsWith("image/")) continue;
+      const dataUrl = await fileToDataUrl(file);
+      dataUrls.push(dataUrl);
+    }
+    if (dataUrls.length > 0) {
+      onImagesAdded(dataUrls);
+    }
+    // Reset input so same file can be selected again
+    e.target.value = "";
+  };
+
+  const handleWebcamCapture = async () => {
+    try {
+      const stream = await navigator.mediaDevices.getUserMedia({ video: true, audio: false });
+      const video = document.createElement("video");
+      video.srcObject = stream;
+      video.setAttribute("playsinline", "true");
+      await video.play();
+
+      // Wait for video to have dimensions
+      await new Promise<void>((resolve) => {
+        const check = () => {
+          if (video.videoWidth > 0 && video.videoHeight > 0) {
+            resolve();
+          } else {
+            requestAnimationFrame(check);
+          }
+        };
+        check();
+      });
+
+      const canvas = document.createElement("canvas");
+      const maxWidth = 800;
+      const scale = Math.min(1, maxWidth / video.videoWidth);
+      canvas.width = Math.round(video.videoWidth * scale);
+      canvas.height = Math.round(video.videoHeight * scale);
+      const ctx = canvas.getContext("2d");
+      if (ctx) {
+        ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
+      }
+
+      // Stop the stream
+      stream.getTracks().forEach((track) => track.stop());
+
+      const dataUrl = canvas.toDataURL("image/jpeg", 0.85);
+      onImagesAdded([dataUrl]);
+    } catch (err) {
+      console.error("Camera capture failed:", err);
+    }
+  };
+
+  const handlePaste = (e: ClipboardEvent) => {
+    if (!hasVision) return;
+    const items = e.clipboardData?.items;
+    if (!items) return;
+
+    const dataUrls: Promise<string>[] = [];
+    for (const item of Array.from(items)) {
+      if (item.type.startsWith("image/")) {
+        const file = item.getAsFile();
+        if (file) {
+          dataUrls.push(fileToDataUrl(file));
+        }
+      }
+    }
+    if (dataUrls.length > 0) {
+      Promise.all(dataUrls).then((urls) => onImagesAdded(urls));
+    }
+  };
+
+  // Listen for paste events on the document
+  React.useEffect(() => {
+    if (!hasVision) return;
+    document.addEventListener("paste", handlePaste);
+    return () => document.removeEventListener("paste", handlePaste);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [hasVision]);
+
+  if (!hasVision) return null;
+
+  return (
+    <div className="flex flex-col gap-2">
+      {/* Image previews */}
+      {attachedImages.length > 0 && (
+        <div className="flex flex-wrap gap-2 px-1">
+          {attachedImages.map((src, i) => (
+            <div key={i} className="relative group">
+              <img
+                src={src}
+                alt={`Attachment ${i + 1}`}
+                className="h-16 w-16 md:h-20 md:w-20 object-cover rounded-lg border border-gray-200 shadow-sm"
+              />
+              <button
+                type="button"
+                onClick={() => onImageRemoved(i)}
+                className="absolute -top-1.5 -right-1.5 bg-gray-800 text-white rounded-full p-0.5 opacity-0 group-hover:opacity-100 transition-opacity shadow-sm"
+                aria-label={`Remove image ${i + 1}`}
+              >
+                <X className="h-3 w-3" />
+              </button>
+            </div>
+          ))}
+        </div>
+      )}
+
+      {/* Action buttons */}
+      <div className="flex items-center gap-1.5">
+        <input
+          ref={fileInputRef}
+          type="file"
+          accept="image/*"
+          multiple
+          className="hidden"
+          onChange={handleFileSelect}
+        />
+        <Button
+          type="button"
+          variant="ghost"
+          size="sm"
+          disabled={disabled}
+          onClick={() => fileInputRef.current?.click()}
+          className="h-8 px-2.5 text-gray-400 hover:text-blue-500 hover:bg-blue-50/50 rounded-md transition-colors"
+          title="Attach image"
+        >
+          <ImagePlus className="h-4 w-4" />
+          <span className="text-xs ml-1 hidden sm:inline">Image</span>
+        </Button>
+        <Button
+          type="button"
+          variant="ghost"
+          size="sm"
+          disabled={disabled}
+          onClick={handleWebcamCapture}
+          className="h-8 px-2.5 text-gray-400 hover:text-blue-500 hover:bg-blue-50/50 rounded-md transition-colors"
+          title="Take photo from camera"
+        >
+          <Camera className="h-4 w-4" />
+          <span className="text-xs ml-1 hidden sm:inline">Camera</span>
+        </Button>
+      </div>
+    </div>
+  );
+}
+
+function fileToDataUrl(file: File): Promise<string> {
+  return new Promise((resolve, reject) => {
+    const reader = new FileReader();
+    reader.onload = () => resolve(reader.result as string);
+    reader.onerror = reject;
+    reader.readAsDataURL(file);
+  });
+}
