@@ -1,8 +1,8 @@
 "use client"
 
-import React, { useRef } from "react"
+import React, { useRef, useState } from "react"
 import { Button } from "@/components/ui/button"
-import { ImagePlus, Camera, X } from "lucide-react"
+import { ImagePlus, Camera, Film, Aperture, X } from "lucide-react"
 import type { ModelCapability } from "@/lib/types"
 
 interface AttachmentBarProps {
@@ -26,7 +26,12 @@ export function AttachmentBar({
   disabled = false,
 }: AttachmentBarProps) {
   const fileInputRef = useRef<HTMLInputElement>(null);
+  const videoFileInputRef = useRef<HTMLInputElement>(null);
+  const videoPreviewRef = useRef<HTMLVideoElement>(null);
   const hasVision = capabilities.includes("vision") || capabilities.includes("video");
+  const hasVideo = capabilities.includes("video");
+
+  const [videoPreview, setVideoPreview] = useState<{ url: string; name: string } | null>(null);
 
   const handleFileSelect = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const files = e.target.files;
@@ -85,6 +90,42 @@ export function AttachmentBar({
     }
   };
 
+  const handleVideoFileSelect = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    // Clean up previous preview
+    if (videoPreview) {
+      URL.revokeObjectURL(videoPreview.url);
+    }
+    const url = URL.createObjectURL(file);
+    setVideoPreview({ url, name: file.name });
+    e.target.value = "";
+  };
+
+  const handleVideoFrameCapture = () => {
+    const video = videoPreviewRef.current;
+    if (!video || video.videoWidth === 0 || video.videoHeight === 0) return;
+
+    const canvas = document.createElement("canvas");
+    const maxWidth = 800;
+    const scale = Math.min(1, maxWidth / video.videoWidth);
+    canvas.width = Math.round(video.videoWidth * scale);
+    canvas.height = Math.round(video.videoHeight * scale);
+    const ctx = canvas.getContext("2d");
+    if (ctx) {
+      ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
+    }
+    const dataUrl = canvas.toDataURL("image/jpeg", 0.85);
+    onImagesAdded([dataUrl]);
+  };
+
+  const closeVideoPreview = () => {
+    if (videoPreview) {
+      URL.revokeObjectURL(videoPreview.url);
+      setVideoPreview(null);
+    }
+  };
+
   const handlePaste = (e: ClipboardEvent) => {
     if (!hasVision) return;
     const items = e.clipboardData?.items;
@@ -111,6 +152,16 @@ export function AttachmentBar({
     return () => document.removeEventListener("paste", handlePaste);
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [hasVision]);
+
+  // Clean up video preview on unmount
+  React.useEffect(() => {
+    return () => {
+      if (videoPreview) {
+        URL.revokeObjectURL(videoPreview.url);
+      }
+    };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   if (!hasVision) return null;
 
@@ -139,6 +190,46 @@ export function AttachmentBar({
         </div>
       )}
 
+      {/* Video preview with frame capture */}
+      {videoPreview && (
+        <div className="flex items-start gap-2 px-1">
+          <div className="relative group">
+            <video
+              ref={videoPreviewRef}
+              src={videoPreview.url}
+              controls
+              playsInline
+              muted
+              className="h-24 w-40 object-cover rounded-lg border border-gray-200 shadow-sm bg-black"
+            />
+            <button
+              type="button"
+              onClick={closeVideoPreview}
+              className="absolute -top-1.5 -right-1.5 bg-gray-800 text-white rounded-full p-0.5 opacity-0 group-hover:opacity-100 transition-opacity shadow-sm"
+              aria-label="Remove video"
+            >
+              <X className="h-3 w-3" />
+            </button>
+          </div>
+          <div className="flex flex-col gap-1.5 justify-center h-24">
+            <span className="text-[10px] text-gray-400 truncate max-w-[120px]" title={videoPreview.name}>
+              {videoPreview.name}
+            </span>
+            <Button
+              type="button"
+              variant="outline"
+              size="sm"
+              onClick={handleVideoFrameCapture}
+              className="h-7 px-2.5 text-[11px] font-semibold text-blue-600 border-blue-200 hover:bg-blue-50 hover:cursor-pointer rounded-md"
+              title="Capture the current video frame as an image"
+            >
+              <Aperture className="h-3.5 w-3.5 mr-1" /> Capture frame
+            </Button>
+            <span className="text-[10px] text-gray-300">Play/scrub then capture</span>
+          </div>
+        </div>
+      )}
+
       {/* Action buttons */}
       <div className="flex items-center gap-1.5">
         <input
@@ -148,6 +239,13 @@ export function AttachmentBar({
           multiple
           className="hidden"
           onChange={handleFileSelect}
+        />
+        <input
+          ref={videoFileInputRef}
+          type="file"
+          accept="video/*"
+          className="hidden"
+          onChange={handleVideoFileSelect}
         />
         <Button
           type="button"
@@ -173,6 +271,20 @@ export function AttachmentBar({
           <Camera className="h-4 w-4" />
           <span className="text-xs ml-1 hidden sm:inline">Camera</span>
         </Button>
+        {hasVideo && (
+          <Button
+            type="button"
+            variant="ghost"
+            size="sm"
+            disabled={disabled}
+            onClick={() => videoFileInputRef.current?.click()}
+            className="h-8 px-2.5 text-gray-400 hover:text-blue-500 hover:bg-blue-50/50 rounded-md transition-colors"
+            title="Upload video and capture a frame"
+          >
+            <Film className="h-4 w-4" />
+            <span className="text-xs ml-1 hidden sm:inline">Video</span>
+          </Button>
+        )}
       </div>
     </div>
   );
