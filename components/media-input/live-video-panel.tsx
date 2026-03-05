@@ -443,7 +443,7 @@ export function LiveVideoPanel({
                   onClick={handleStop}
                   className="w-full sm:w-auto bg-red-500 hover:bg-red-600 text-white font-semibold px-5 py-2 rounded-lg hover:cursor-pointer"
                 >
-                  <Square className="h-4 w-4 mr-1.5" /> Stop
+                  <Square className="h-4 w-4 mr-0.5" /> Stop
                 </Button>
               ) : (
                 <Button
@@ -451,7 +451,7 @@ export function LiveVideoPanel({
                   disabled={!canStart}
                   className="w-full sm:w-auto bg-green-600 hover:bg-green-700 text-white font-semibold px-5 py-2 rounded-lg disabled:opacity-50 disabled:cursor-not-allowed hover:cursor-pointer"
                 >
-                  <Play className="h-4 w-4 mr-1.5" /> Start
+                  <Play className="h-4 w-4 mr-0.5" /> Start
                 </Button>
               )}
             </div>

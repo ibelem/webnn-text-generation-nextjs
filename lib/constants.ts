@@ -9,7 +9,7 @@ export const MODELS: Array<{
   desc: string;
   parameter: string;
   size: string;
-  useExternalDataFormat?: boolean | number; // true means use external data format for all backends, number means use external data format for backends with index >= that number in BACKENDS
+  useExternalDataFormat?: boolean | number | Record<string, number>; // true/1 = single external data chunk for all files, number = chunk count, object = per-file chunk counts
   maxNewTokens?: number;
   doSample?: boolean;
   topK?: number;
@@ -257,7 +257,11 @@ export const MODELS: Array<{
       desc: "VLM",
       parameter: "4B",
       size: "8.60GB",
-      useExternalDataFormat: true,
+      useExternalDataFormat: {
+        vision_encoder: 1,
+        embed_tokens: 1,
+        "decoder_model_merged_q4.onnx": 2,
+      },
       maxNewTokens: 1024,
       doSample: false,
       topK: 20,
