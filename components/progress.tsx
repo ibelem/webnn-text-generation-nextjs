@@ -20,16 +20,16 @@ export const Progress: React.FC<ProgressProps> = ({ text, total, file, progress 
   // Extract just the filename for display
   const shortLabel = label.includes('/') ? label.split('/').pop() || label : label;
   return (
-    <div className="w-full bg-gray-100 text-left rounded-md overflow-hidden relative h-5">
+    <div className="w-full bg-gray-100 text-left rounded-md overflow-hidden relative h-3 mt-[-3px]">
       <div
-        className="bg-gradient-to-r from-blue-400 to-blue-500 h-full transition-all duration-300 ease-out rounded-md"
+        className="bg-gradient-to-br from-blue-500 to-indigo-500 h-full transition-all duration-300 ease-out"
         style={{ width: `${Math.max(pct, 1)}%` }}
       />
       <div className="absolute inset-0 flex items-center px-2">
-        <span className="text-[10px] font-medium truncate max-w-[70%]" title={label}>
+        <span className="text-[10px] truncate max-w-[70%] text-white" title={label}>
           {shortLabel}
         </span>
-        <span className="text-[10px] ml-auto flex-shrink-0 tabular-nums">
+        <span className="text-[10px] ml-auto flex-shrink-0 tabular-nums text-white">
           {pct.toFixed(0)}%{typeof total === "number" && !isNaN(total) ? ` · ${formatBytes(total)}` : ""}
         </span>
       </div>
