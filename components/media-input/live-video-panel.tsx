@@ -10,6 +10,13 @@ import type { ProgressProps } from "@/components/progress"
 
 const CAPTURE_MAX_WIDTH = 800;
 
+/** Format seconds as m:ss */
+function formatTime(seconds: number): string {
+  const m = Math.floor(seconds / 60);
+  const s = Math.floor(seconds % 60);
+  return `${m}:${s.toString().padStart(2, "0")}`;
+}
+
 interface LiveVideoPanelProps {
   isSidebarOpen: boolean;
   setIsSidebarOpen: (open: boolean) => void;
@@ -49,6 +56,9 @@ export function LiveVideoPanel({
   const [isVideoReady, setIsVideoReady] = useState(false);
 
   const isProcessingRef = useRef(false);
+  const frameCountRef = useRef(0);
+  const [frameCount, setFrameCount] = useState(0);
+  const [videoTimeInfo, setVideoTimeInfo] = useState<{ current: number; total: number } | null>(null);
   const anyModelReady = Object.values(modelLoadState).includes("ready");
 
   const selectedModelObj = MODELS.find((m) => m.id === selectedModel);
@@ -221,6 +231,17 @@ export function LiveVideoPanel({
       return;
     }
 
+    frameCountRef.current += 1;
+    setFrameCount(frameCountRef.current);
+
+    // Capture time progress for video files
+    const video = videoRef.current;
+    if (sourceMode === "file" && video && isFinite(video.duration) && video.duration > 0) {
+      setVideoTimeInfo({ current: video.currentTime, total: video.duration });
+    } else {
+      setVideoTimeInfo(null);
+    }
+
     setResponse("");
     workerRef.current?.postMessage({
       type: "generate",
@@ -247,6 +268,8 @@ export function LiveVideoPanel({
     }
 
     isProcessingRef.current = true;
+    frameCountRef.current = 0;
+    setFrameCount(0);
     setIsProcessing(true);
     setResponse("Processing started...");
     captureAndInfer();
@@ -366,7 +389,10 @@ export function LiveVideoPanel({
           {isPrefilling && (
             <div className="absolute top-2.5 right-2.5 z-10 flex items-center gap-1.5 px-2.5 py-1.5 bg-black/60 text-white text-[11px] font-semibold rounded-full backdrop-blur-sm">
               <Loader2 className="h-3 w-3 animate-spin" />
-              Processing image
+              Processing frame{frameCount > 0 ? ` ${frameCount}` : ""}
+              {videoTimeInfo && (
+                <span className="opacity-75">· {formatTime(videoTimeInfo.current)} / {formatTime(videoTimeInfo.total)}</span>
+              )}
             </div>
           )}
 
