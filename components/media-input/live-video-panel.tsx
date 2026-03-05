@@ -3,7 +3,7 @@
 import React, { useRef, useState, useEffect, useCallback } from "react"
 import { Button } from "@/components/ui/button"
 import { Textarea } from "@/components/ui/textarea"
-import { Play, Square, Video, Upload, Loader2, Menu, X, AlertCircle } from "lucide-react"
+import { Play, Square, Video, Upload, Loader2, Menu, X, AlertCircle, MessageSquare } from "lucide-react"
 import type { ModelType, BackendType } from "@/lib/types"
 import { MODELS, BACKENDS } from "@/lib/constants"
 import type { ProgressProps } from "@/components/progress"
@@ -18,6 +18,10 @@ interface LiveVideoPanelProps {
   workerRef: React.RefObject<Worker | null>;
   modelLoadState: Record<string, "not_loaded" | "loading" | "warm" | "loaded" | "ready">;
   setProgressItems?: React.Dispatch<React.SetStateAction<ProgressProps[]>>;
+  /** Whether the current model supports live video mode */
+  supportsLive?: boolean;
+  /** Callback to switch between chat and live mode */
+  onModeChange?: (live: boolean) => void;
 }
 
 export function LiveVideoPanel({
@@ -28,6 +32,8 @@ export function LiveVideoPanel({
   workerRef,
   modelLoadState,
   setProgressItems,
+  supportsLive = false,
+  onModeChange,
 }: LiveVideoPanelProps) {
   const videoRef = useRef<HTMLVideoElement>(null);
   const canvasRef = useRef<HTMLCanvasElement>(null);
@@ -307,8 +313,31 @@ export function LiveVideoPanel({
         <div className="w-9 md:w-10 flex-shrink-0" />
       </div>
 
+      {/* Mode switcher */}
+      {supportsLive && onModeChange && (
+        <div className="flex items-center justify-center px-3 py-1.5 border-b border-gray-200/60 bg-white">
+          <div className="inline-flex items-center bg-gray-100/80 rounded-lg p-0.5 gap-0.5">
+            <button
+              type="button"
+              onClick={() => onModeChange(false)}
+              className="flex items-center gap-1.5 px-3 py-1.5 rounded-md text-xs font-semibold transition-all text-gray-400 hover:text-gray-600 hover:bg-white/50 hover:cursor-pointer"
+            >
+              <MessageSquare className="h-3 w-3" />
+              Chat
+            </button>
+            <button
+              type="button"
+              className="flex items-center gap-1.5 px-3 py-1.5 rounded-md text-xs font-semibold transition-all bg-white shadow-sm text-gray-800 hover:cursor-default"
+            >
+              <Video className="h-3 w-3" />
+              Live
+            </button>
+          </div>
+        </div>
+      )}
+
       {/* Main content */}
-      <div className="flex-1 overflow-y-auto p-3 md:p-6 flex flex-col items-center gap-4 bg-gradient-to-b from-gray-50 to-white">
+      <div className="flex-1 overflow-y-auto p-3 md:p-6 flex flex-col items-center justify-center gap-4 bg-gradient-to-b from-gray-50 to-white">
         {/* Video container */}
         <div className="relative w-full max-w-[640px] aspect-video bg-black rounded-xl overflow-hidden border border-gray-200 shadow-lg group">
           <video

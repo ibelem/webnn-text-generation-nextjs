@@ -150,6 +150,18 @@ export default function Page({ params }: { params: Promise<{ model: string; back
   const currentModelObj = MODELS.find((m) => m.id === selectedModel);
   const supportsLive = currentModelObj?.capabilities?.includes("video") ?? false;
 
+  const handleModeChange = (live: boolean) => {
+    const params = new URLSearchParams(searchParams.toString());
+    if (live) {
+      params.set("mode", "live");
+    } else {
+      params.delete("mode");
+    }
+    const newSearch = params.toString();
+    const path = `/${selectedModel}/${selectedBackend}`;
+    router.replace(newSearch ? `${path}?${newSearch}` : path);
+  };
+
   return (
     <div className="flex flex-col md:flex-row min-h-screen md:h-screen bg-gray-50">
       {isSidebarOpen && (
@@ -191,6 +203,8 @@ export default function Page({ params }: { params: Promise<{ model: string; back
             workerRef={workerRef}
             modelLoadState={modelLoadState}
             setProgressItems={setProgressItems}
+            supportsLive={supportsLive}
+            onModeChange={handleModeChange}
           />
         ) : (
           <ChatInterface
@@ -205,6 +219,8 @@ export default function Page({ params }: { params: Promise<{ model: string; back
             systemPromptEnabled={systemPromptEnabled}
             systemPromptText={systemPromptText}
             modelLoadState={modelLoadState}
+            supportsLive={supportsLive}
+            onModeChange={handleModeChange}
           />
         )}
       </div>

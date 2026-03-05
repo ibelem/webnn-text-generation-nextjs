@@ -330,7 +330,7 @@ export function AttachmentBar({
             size="sm"
             disabled={disabled}
             onClick={() => fileInputRef.current?.click()}
-            className="h-8 px-2.5 text-gray-400 hover:text-blue-500 hover:bg-blue-50/50 rounded-md transition-colors"
+            className="h-8 px-2.5 text-gray-400 hover:text-blue-500 hover:bg-blue-50/50 hover:cursor-pointer rounded-md transition-colors"
             title="Attach image"
           >
             <ImagePlus className="h-4 w-4" />
@@ -344,7 +344,7 @@ export function AttachmentBar({
             size="sm"
             disabled={disabled}
             onClick={handleWebcamCapture}
-            className="h-8 px-2.5 text-gray-400 hover:text-blue-500 hover:bg-blue-50/50 rounded-md transition-colors"
+            className="h-8 px-2.5 text-gray-400 hover:text-blue-500 hover:bg-blue-50/50 hover:cursor-pointer rounded-md transition-colors"
             title="Take photo from camera"
           >
             <Camera className="h-4 w-4" />
@@ -358,7 +358,7 @@ export function AttachmentBar({
             size="sm"
             disabled={disabled}
             onClick={() => videoFileInputRef.current?.click()}
-            className="h-8 px-2.5 text-gray-400 hover:text-blue-500 hover:bg-blue-50/50 rounded-md transition-colors"
+            className="h-8 px-2.5 text-gray-400 hover:text-blue-500 hover:bg-blue-50/50 hover:cursor-pointer rounded-md transition-colors"
             title="Upload video and capture a frame"
           >
             <Film className="h-4 w-4" />
@@ -371,7 +371,7 @@ export function AttachmentBar({
           size="sm"
           disabled={disabled}
           onClick={() => textFileInputRef.current?.click()}
-          className="h-8 px-2.5 text-gray-400 hover:text-blue-500 hover:bg-blue-50/50 rounded-md transition-colors"
+          className="h-8 px-2.5 text-gray-400 hover:text-blue-500 hover:bg-blue-50/50 hover:cursor-pointer rounded-md transition-colors"
           title="Attach text file (.md, .json, .txt, .py, etc.)"
         >
           <FileText className="h-4 w-4" />

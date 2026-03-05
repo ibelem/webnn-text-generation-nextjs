@@ -13,7 +13,7 @@ import { motion, AnimatePresence } from "framer-motion"
 import type { ModelType, BackendType, Message, MessageContentPart } from "../lib/types"
 import { Button } from "@/components/ui/button"
 import { Textarea } from "@/components/ui/textarea"
-import { ArrowUp, Menu, X, User, Bot, Sparkles, Loader2, Copy, Check } from "lucide-react"
+import { ArrowUp, Menu, X, User, Bot, Sparkles, Loader2, Copy, Check, Video, MessageSquare } from "lucide-react"
 import { MODELS, BACKENDS } from "../lib/constants"
 import { v4 as uuidv4 } from "uuid"
 import packageJson from "../package.json"
@@ -43,6 +43,10 @@ interface ChatInterfaceProps {
   systemPromptEnabled: boolean;
   systemPromptText: string;
   modelLoadState: Record<string, "not_loaded" | "loading" | "warm" | "loaded" | "ready">;
+  /** Whether the current model supports live video mode */
+  supportsLive?: boolean;
+  /** Callback to switch between chat and live mode */
+  onModeChange?: (live: boolean) => void;
 }
 
 export function ChatInterface({
@@ -57,6 +61,8 @@ export function ChatInterface({
   systemPromptEnabled,
   systemPromptText,
   modelLoadState,
+  supportsLive = false,
+  onModeChange,
 }: ChatInterfaceProps) {
   const [input, setInput] = useState("");
   const [messages, setMessages] = useState<Message[]>([]);
@@ -240,6 +246,29 @@ export function ChatInterface({
         </div>
         <div className="w-9 md:w-10 flex-shrink-0" />
       </div>
+
+      {/* Mode switcher — only for models with video capability */}
+      {supportsLive && onModeChange && (
+        <div className="flex items-center justify-center px-3 py-1.5 border-b border-gray-200/60 bg-white">
+          <div className="inline-flex items-center bg-gray-100/80 rounded-lg p-0.5 gap-0.5">
+            <button
+              type="button"
+              className="flex items-center gap-1.5 px-3 py-1.5 rounded-md text-xs font-semibold transition-all bg-white shadow-sm text-gray-800 hover:cursor-default"
+            >
+              <MessageSquare className="h-3 w-3" />
+              Chat
+            </button>
+            <button
+              type="button"
+              onClick={() => onModeChange(true)}
+              className="flex items-center gap-1.5 px-3 py-1.5 rounded-md text-xs font-semibold transition-all text-gray-400 hover:text-gray-600 hover:bg-white/50 hover:cursor-pointer"
+            >
+              <Video className="h-3 w-3" />
+              Live
+            </button>
+          </div>
+        </div>
+      )}
 
       {/* Chat messages */}
       <div className="flex-1 overflow-y-auto p-3 md:p-6 space-y-3 md:space-y-4 bg-gradient-to-b from-gray-50 to-white">
