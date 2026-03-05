@@ -5,6 +5,9 @@ import { Button } from "@/components/ui/button"
 import { ImagePlus, Camera, Film, Aperture, FileText, X } from "lucide-react"
 import type { ModelCapability } from "@/lib/types"
 
+/** Maximum dimension (width or height) for images sent to VLM models */
+const IMAGE_MAX_DIM = 800;
+
 /** A text-based file attachment */
 export interface AttachedFile {
   name: string;
@@ -62,7 +65,8 @@ export function AttachmentBar({
     for (const file of Array.from(files)) {
       if (!file.type.startsWith("image/")) continue;
       const dataUrl = await fileToDataUrl(file);
-      dataUrls.push(dataUrl);
+      const resized = await resizeImageDataUrl(dataUrl, IMAGE_MAX_DIM);
+      dataUrls.push(resized);
     }
     if (dataUrls.length > 0) {
       onImagesAdded(dataUrls);
@@ -162,7 +166,10 @@ export function AttachmentBar({
       }
     }
     if (dataUrls.length > 0) {
-      Promise.all(dataUrls).then((urls) => onImagesAdded(urls));
+      Promise.all(dataUrls).then(async (urls) => {
+        const resized = await Promise.all(urls.map((u) => resizeImageDataUrl(u, IMAGE_MAX_DIM)));
+        onImagesAdded(resized);
+      });
     }
   };
 
@@ -388,6 +395,34 @@ function fileToDataUrl(file: File): Promise<string> {
     reader.onload = () => resolve(reader.result as string);
     reader.onerror = reject;
     reader.readAsDataURL(file);
+  });
+}
+
+/**
+ * Resize an image data URL so its largest dimension is at most `maxDim` pixels.
+ * Returns the original data URL unchanged if already within limits.
+ */
+function resizeImageDataUrl(dataUrl: string, maxDim: number): Promise<string> {
+  return new Promise((resolve) => {
+    const img = new Image();
+    img.onload = () => {
+      const { naturalWidth: w, naturalHeight: h } = img;
+      if (w <= maxDim && h <= maxDim) {
+        resolve(dataUrl);
+        return;
+      }
+      const scale = Math.min(maxDim / w, maxDim / h);
+      const canvas = document.createElement("canvas");
+      canvas.width = Math.round(w * scale);
+      canvas.height = Math.round(h * scale);
+      const ctx = canvas.getContext("2d");
+      if (ctx) {
+        ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
+      }
+      resolve(canvas.toDataURL("image/jpeg", 0.85));
+    };
+    img.onerror = () => resolve(dataUrl); // fallback to original on error
+    img.src = dataUrl;
   });
 }
 
