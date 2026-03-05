@@ -256,7 +256,7 @@ export const MODELS: Array<{
       producer: "Ali",
       desc: "VLM",
       parameter: "4B",
-      size: "8.60GB",
+      size: "3.52GB",
       useExternalDataFormat: {
         vision_encoder: 1,
         embed_tokens: 1,
