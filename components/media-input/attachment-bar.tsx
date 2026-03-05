@@ -2,8 +2,16 @@
 
 import React, { useRef, useState } from "react"
 import { Button } from "@/components/ui/button"
-import { ImagePlus, Camera, Film, Aperture, X } from "lucide-react"
+import { ImagePlus, Camera, Film, Aperture, FileText, X } from "lucide-react"
 import type { ModelCapability } from "@/lib/types"
+
+/** A text-based file attachment */
+export interface AttachedFile {
+  name: string;
+  content: string;
+  /** size in bytes */
+  size: number;
+}
 
 interface AttachmentBarProps {
   /** Model capabilities — controls which buttons are shown */
@@ -14,18 +22,31 @@ interface AttachmentBarProps {
   onImagesAdded: (dataUrls: string[]) => void;
   /** Callback to remove an attached image by index */
   onImageRemoved: (index: number) => void;
+  /** Currently attached text files */
+  attachedFiles?: AttachedFile[];
+  /** Callback when text files are added */
+  onFilesAdded?: (files: AttachedFile[]) => void;
+  /** Callback to remove an attached file by index */
+  onFileRemoved?: (index: number) => void;
   /** Whether the model is ready for input */
   disabled?: boolean;
 }
+
+/** Accepted text file extensions */
+const TEXT_FILE_ACCEPT = ".txt,.md,.markdown,.json,.jsonl,.csv,.tsv,.xml,.yaml,.yml,.toml,.html,.htm,.css,.js,.ts,.jsx,.tsx,.py,.java,.c,.cpp,.h,.hpp,.rs,.go,.rb,.sh,.bat,.ps1,.log,.env,.ini,.cfg,.conf,.sql,.graphql,.proto,.r,.swift,.kt,.scala,.lua,.pl,.php,.ex,.exs,.hs,.clj,.edn,.lisp,.dart,.diff,.patch";
 
 export function AttachmentBar({
   capabilities,
   attachedImages,
   onImagesAdded,
   onImageRemoved,
+  attachedFiles = [],
+  onFilesAdded,
+  onFileRemoved,
   disabled = false,
 }: AttachmentBarProps) {
   const fileInputRef = useRef<HTMLInputElement>(null);
+  const textFileInputRef = useRef<HTMLInputElement>(null);
   const videoFileInputRef = useRef<HTMLInputElement>(null);
   const videoPreviewRef = useRef<HTMLVideoElement>(null);
   const hasVision = capabilities.includes("vision") || capabilities.includes("video");
@@ -145,6 +166,25 @@ export function AttachmentBar({
     }
   };
 
+  const handleTextFileSelect = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const files = e.target.files;
+    if (!files || files.length === 0) return;
+
+    const attached: AttachedFile[] = [];
+    for (const file of Array.from(files)) {
+      try {
+        const content = await file.text();
+        attached.push({ name: file.name, content, size: file.size });
+      } catch (err) {
+        console.error(`Failed to read file ${file.name}:`, err);
+      }
+    }
+    if (attached.length > 0) {
+      onFilesAdded?.(attached);
+    }
+    e.target.value = "";
+  };
+
   // Listen for paste events on the document
   React.useEffect(() => {
     if (!hasVision) return;
@@ -163,7 +203,7 @@ export function AttachmentBar({
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
-  if (!hasVision) return null;
+  if (!hasVision && !onFilesAdded) return null;
 
   return (
     <div className="flex flex-col gap-2">
@@ -184,6 +224,34 @@ export function AttachmentBar({
                 aria-label={`Remove image ${i + 1}`}
               >
                 <X className="h-3 w-3" />
+              </button>
+            </div>
+          ))}
+        </div>
+      )}
+
+      {/* Text file previews */}
+      {attachedFiles.length > 0 && (
+        <div className="flex flex-wrap gap-1.5 px-1">
+          {attachedFiles.map((file, i) => (
+            <div
+              key={i}
+              className="relative group flex items-center gap-1.5 bg-gray-50 border border-gray-200 rounded-md px-2.5 py-1.5 shadow-sm"
+            >
+              <FileText className="h-3.5 w-3.5 text-gray-400 flex-shrink-0" />
+              <div className="flex flex-col min-w-0">
+                <span className="text-[11px] font-medium text-gray-600 truncate max-w-[140px]" title={file.name}>
+                  {file.name}
+                </span>
+                <span className="text-[9px] text-gray-400">{formatFileSize(file.size)}</span>
+              </div>
+              <button
+                type="button"
+                onClick={() => onFileRemoved?.(i)}
+                className="ml-1 bg-gray-800 text-white rounded-full p-0.5 opacity-0 group-hover:opacity-100 transition-opacity shadow-sm flex-shrink-0"
+                aria-label={`Remove ${file.name}`}
+              >
+                <X className="h-2.5 w-2.5" />
               </button>
             </div>
           ))}
@@ -247,30 +315,42 @@ export function AttachmentBar({
           className="hidden"
           onChange={handleVideoFileSelect}
         />
-        <Button
-          type="button"
-          variant="ghost"
-          size="sm"
-          disabled={disabled}
-          onClick={() => fileInputRef.current?.click()}
-          className="h-8 px-2.5 text-gray-400 hover:text-blue-500 hover:bg-blue-50/50 rounded-md transition-colors"
-          title="Attach image"
-        >
-          <ImagePlus className="h-4 w-4" />
-          <span className="text-xs ml-1 hidden sm:inline">Image</span>
-        </Button>
-        <Button
-          type="button"
-          variant="ghost"
-          size="sm"
-          disabled={disabled}
-          onClick={handleWebcamCapture}
-          className="h-8 px-2.5 text-gray-400 hover:text-blue-500 hover:bg-blue-50/50 rounded-md transition-colors"
-          title="Take photo from camera"
-        >
-          <Camera className="h-4 w-4" />
-          <span className="text-xs ml-1 hidden sm:inline">Camera</span>
-        </Button>
+        <input
+          ref={textFileInputRef}
+          type="file"
+          accept={TEXT_FILE_ACCEPT}
+          multiple
+          className="hidden"
+          onChange={handleTextFileSelect}
+        />
+        {hasVision && (
+          <Button
+            type="button"
+            variant="ghost"
+            size="sm"
+            disabled={disabled}
+            onClick={() => fileInputRef.current?.click()}
+            className="h-8 px-2.5 text-gray-400 hover:text-blue-500 hover:bg-blue-50/50 rounded-md transition-colors"
+            title="Attach image"
+          >
+            <ImagePlus className="h-4 w-4" />
+            <span className="text-xs ml-1 hidden sm:inline">Image</span>
+          </Button>
+        )}
+        {hasVision && (
+          <Button
+            type="button"
+            variant="ghost"
+            size="sm"
+            disabled={disabled}
+            onClick={handleWebcamCapture}
+            className="h-8 px-2.5 text-gray-400 hover:text-blue-500 hover:bg-blue-50/50 rounded-md transition-colors"
+            title="Take photo from camera"
+          >
+            <Camera className="h-4 w-4" />
+            <span className="text-xs ml-1 hidden sm:inline">Camera</span>
+          </Button>
+        )}
         {hasVideo && (
           <Button
             type="button"
@@ -285,6 +365,18 @@ export function AttachmentBar({
             <span className="text-xs ml-1 hidden sm:inline">Video</span>
           </Button>
         )}
+        <Button
+          type="button"
+          variant="ghost"
+          size="sm"
+          disabled={disabled}
+          onClick={() => textFileInputRef.current?.click()}
+          className="h-8 px-2.5 text-gray-400 hover:text-blue-500 hover:bg-blue-50/50 rounded-md transition-colors"
+          title="Attach text file (.md, .json, .txt, .py, etc.)"
+        >
+          <FileText className="h-4 w-4" />
+          <span className="text-xs ml-1 hidden sm:inline">File</span>
+        </Button>
       </div>
     </div>
   );
@@ -297,4 +389,10 @@ function fileToDataUrl(file: File): Promise<string> {
     reader.onerror = reject;
     reader.readAsDataURL(file);
   });
+}
+
+function formatFileSize(bytes: number): string {
+  if (bytes < 1024) return `${bytes} B`;
+  if (bytes < 1024 * 1024) return `${(bytes / 1024).toFixed(1)} KB`;
+  return `${(bytes / (1024 * 1024)).toFixed(1)} MB`;
 }

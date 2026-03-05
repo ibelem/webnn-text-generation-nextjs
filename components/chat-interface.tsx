@@ -18,6 +18,7 @@ import { MODELS, BACKENDS } from "../lib/constants"
 import { v4 as uuidv4 } from "uuid"
 import packageJson from "../package.json"
 import { AttachmentBar } from "@/components/media-input/attachment-bar"
+import type { AttachedFile } from "@/components/media-input/attachment-bar"
 
 /** Extract plain text from a Message's content (string or multimodal parts array) */
 function getMessageText(content: string | MessageContentPart[]): string {
@@ -61,6 +62,7 @@ export function ChatInterface({
   const [messages, setMessages] = useState<Message[]>([]);
   const [isTyping, setIsTyping] = useState(false);
   const [attachedImages, setAttachedImages] = useState<string[]>([]);
+  const [attachedFiles, setAttachedFiles] = useState<AttachedFile[]>([]);
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const anyModelReady = Object.values(modelLoadState).includes("ready");
   const selectedModelObj = MODELS.find((m) => m.id === selectedModel);
@@ -159,14 +161,27 @@ export function ChatInterface({
     if (!input.trim() || isTyping) return;
 
     const hasImages = attachedImages.length > 0;
+    const hasFiles = attachedFiles.length > 0;
+
+    // Build the text portion — prepend file contents as fenced code blocks
+    let textContent = input.trim();
+    if (hasFiles) {
+      const fileBlocks = attachedFiles
+        .map((f) => {
+          const ext = f.name.split(".").pop() || "";
+          return `<file name="${f.name}">\n\`\`\`${ext}\n${f.content}\n\`\`\`\n</file>`;
+        })
+        .join("\n\n");
+      textContent = `${fileBlocks}\n\n${textContent}`;
+    }
 
     // Build content: multimodal array if images attached, plain string otherwise
     const content: string | MessageContentPart[] = hasImages
       ? [
           ...attachedImages.map((img) => ({ type: "image" as const, image: img })),
-          { type: "text" as const, text: input.trim() },
+          { type: "text" as const, text: textContent },
         ]
-      : input.trim();
+      : textContent;
 
     const userMessage: Message = {
       id: uuidv4(),
@@ -192,6 +207,7 @@ export function ChatInterface({
     setIsTyping(true);
     setInput("");
     setAttachedImages([]);
+    setAttachedFiles([]);
   };
 
   const backendName = BACKENDS.find(b => b.id === selectedBackend)?.name || selectedBackend;
@@ -304,6 +320,9 @@ export function ChatInterface({
           attachedImages={attachedImages}
           onImagesAdded={(urls) => setAttachedImages((prev) => [...prev, ...urls])}
           onImageRemoved={(index) => setAttachedImages((prev) => prev.filter((_, i) => i !== index))}
+          attachedFiles={attachedFiles}
+          onFilesAdded={(files) => setAttachedFiles((prev) => [...prev, ...files])}
+          onFileRemoved={(index) => setAttachedFiles((prev) => prev.filter((_, i) => i !== index))}
           disabled={!anyModelReady}
         />
         <form onSubmit={handleSubmit} className="relative mt-1">
@@ -321,6 +340,7 @@ export function ChatInterface({
                 setMessages([]);
                 setInput("");
                 setAttachedImages([]);
+                setAttachedFiles([]);
                 setIsTyping(false);
                 return;
               }
@@ -384,11 +404,11 @@ function MessageBubble({ message }: MessageBubbleProps) {
   const handleCopy = async () => {
     try {
       const parts: string[] = []
-      if (message.ttft) parts.push(`TTFT ${message.ttft.toFixed(2)}ms`)
-      if (message.tps) parts.push(`TPS ${message.tps.toFixed(2)} tok/s`)
-      if (message.numTokens && message.tps) parts.push(`${message.numTokens} tokens / ${(message.numTokens / message.tps).toFixed(2)}s`)
-      if (message.tpot) parts.push(`TPOT ${message.tpot.toFixed(2)}ms`)
-      if (message.e2e) parts.push(`E2E ${(message.e2e / 1000).toFixed(2)}s`)
+      if (message.ttft) parts.push(`TTFT: ${message.ttft.toFixed(2)}ms`)
+      if (message.tps) parts.push(`TPS: ${message.tps.toFixed(2)} tok/s`)
+      if (message.numTokens && message.tps) parts.push(`Throughput: ${message.numTokens} tokens / ${(message.numTokens / message.tps).toFixed(2)}s`)
+      if (message.tpot) parts.push(`TPOT: ${message.tpot.toFixed(2)}ms`)
+      if (message.e2e) parts.push(`E2E: ${(message.e2e / 1000).toFixed(2)}s`)
       const text = parts.length > 0 ? parts.join('; ') : 'No performance data'
       await navigator.clipboard.writeText(text)
       setCopied(true)
@@ -464,7 +484,7 @@ function MessageBubble({ message }: MessageBubbleProps) {
                 )}
                 {message.tps && (
                   <span className="bg-emerald-50 text-emerald-600 text-[10px] rounded-md px-1.5 py-0.5 font-medium tabular-nums" title={"Tokens Per Second (TPS)\nThe rate at which output tokens are produced during the decode phase (excluding the time to first token). A higher value means faster, smoother streaming.\nCalculation: (Total output tokens − 1) / (Total generation time − TTFT)."}>
-                    TPS: {message.tps.toFixed(2)}
+                    TPS: {message.tps.toFixed(2)} tok/s
                   </span>
                 )}
                 {message.numTokens && message.tps && (
