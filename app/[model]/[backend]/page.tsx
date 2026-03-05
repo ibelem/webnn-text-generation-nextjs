@@ -100,6 +100,13 @@ export default function Page({ params }: { params: Promise<{ model: string; back
       params.delete("system_prompt");
     }
 
+    // Strip ?mode=live when switching to a model that doesn't support video
+    const modelObj = MODELS.find((m) => m.id === selectedModel);
+    const modelSupportsVideo = modelObj?.capabilities?.includes("video") ?? false;
+    if (params.get("mode") === "live" && !modelSupportsVideo) {
+      params.delete("mode");
+    }
+
     const currentPath = `/${selectedModel}/${selectedBackend}`;
     const newSearch = params.toString();
     const newUrl = newSearch ? `${currentPath}?${newSearch}` : currentPath;

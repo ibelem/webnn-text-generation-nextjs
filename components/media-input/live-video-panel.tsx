@@ -56,6 +56,7 @@ export function LiveVideoPanel({
   const [isVideoReady, setIsVideoReady] = useState(false);
 
   const isProcessingRef = useRef(false);
+  const streamRef = useRef<MediaStream | null>(null);
   const frameCountRef = useRef(0);
   const [frameCount, setFrameCount] = useState(0);
   const [videoTimeInfo, setVideoTimeInfo] = useState<{ current: number; total: number } | null>(null);
@@ -67,17 +68,22 @@ export function LiveVideoPanel({
     : selectedModel;
   const backendName = BACKENDS.find((b) => b.id === selectedBackend)?.name || selectedBackend;
 
-  // Cleanup streams on unmount
+  // Keep streamRef in sync with state so cleanup can access the latest value
+  useEffect(() => {
+    streamRef.current = stream;
+  }, [stream]);
+
+  // Cleanup streams and stop processing on unmount
   useEffect(() => {
     return () => {
-      if (stream) {
-        stream.getTracks().forEach((t) => t.stop());
-      }
-      if (fileObjectUrl) {
-        URL.revokeObjectURL(fileObjectUrl);
+      // Stop any active processing
+      isProcessingRef.current = false;
+
+      // Stop camera via ref (avoids stale closure)
+      if (streamRef.current) {
+        streamRef.current.getTracks().forEach((t) => t.stop());
       }
     };
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   const initCamera = useCallback(async () => {
@@ -101,6 +107,7 @@ export function LiveVideoPanel({
         video.srcObject = mediaStream;
       }
       setStreamState(mediaStream);
+      streamRef.current = mediaStream;
       setSourceMode("webcam");
       setResponse(anyModelReady ? "Camera ready. Click Start to begin." : "Camera ready. Load a model from the sidebar to start.");
       return true;
