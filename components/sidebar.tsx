@@ -173,15 +173,6 @@ export function Sidebar({
           height={32}
           className="mb-[-6px]"
         />
-        <Image
-          src="/webnn-logo.svg"
-          alt="WebNN Logo"
-          width={140}
-          height={40}
-          className="justify-self-end"
-          style={{ width: '140px', height: '40px' }}
-          priority
-        />
       </div>
 
       <Tabs defaultValue="models" className="flex-1 gap-0">
@@ -196,7 +187,7 @@ export function Sidebar({
           </TabsTrigger>
         </TabsList>
 
-        <TabsContent value="models" className="max-h-[60vh] overflow-y-auto overflow-x-hidden rounded-md border border-gray-200/60">
+        <TabsContent value="models" className="max-h-[14vh] overflow-y-auto overflow-x-hidden rounded-md border border-gray-200/60">
           {MODELS.map((model) => (
             <ModelOption
               key={model.id}
