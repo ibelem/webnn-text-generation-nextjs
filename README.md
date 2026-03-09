@@ -22,7 +22,7 @@ Run large language models and vision-language models directly in the browser usi
 | Phi-4 Mini | 3.8B | 2.34 GB | q4f16 |
 | Llama 3.2 | 1B | 1.01 GB | q4f16, KV cache |
 | Qwen3 | 0.6B / 4B | 543 MB / 2.63 GB | Thinking tags |
-| Qwen3.5 (VLM) | 0.8B / 4B | — | Text, image, and video |
+| Qwen3.5 (VLM) | 0.8B / 4B | 814 MB / 3.52 GB | Text, image, and video |
 | DeepSeek R1 Distill | 1.5B | 1.27 GB | Thinking tags |
 | GPT-OSS | 20B MoE | 11.8 GB | Harmony streaming |
 | LFM2 / LFM2.5 | 1.2B | 1.13 GB / 850 MB | LFM2.5 supports thinking |
