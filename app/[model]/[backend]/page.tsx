@@ -173,7 +173,7 @@ export default function Page({ params }: { params: Promise<{ model: string; back
     <div className="flex flex-col md:flex-row min-h-screen md:h-screen bg-gray-50">
       {isSidebarOpen && (
         workerReady ? (
-          <div className="w-full md:w-80 border-b md:border-b-0 md:border-r border-gray-200/60 bg-white md:h-full md:overflow-y-auto flex-shrink-0 sidebar-enter">
+          <div className="w-full md:w-80 border-b md:border-b-0 md:border-r border-gray-200/60 bg-white max-h-[85dvh] overflow-y-auto md:max-h-none md:h-full md:overflow-y-auto flex-shrink-0 sidebar-enter">
             <Sidebar
               selectedModel={selectedModel}
               setSelectedModel={setSelectedModel}

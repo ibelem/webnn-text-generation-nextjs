@@ -165,7 +165,7 @@ export function Sidebar({
   // Pass modelLoadState and handler to ModelOption
   return (
     <div className="h-full flex flex-col bg-white p-3 md:p-4 sidebar-enter">
-      <div className="grid grid-cols-2 items-center mb-4 md:mb-5 px-1">
+      <div className="grid grid-cols-2 items-center mb-3 md:mb-4 px-1">
         <Image
           src="/webgpu-logo-h.svg"
           alt="WebGPU Logo"
@@ -184,7 +184,7 @@ export function Sidebar({
         />
       </div>
 
-      <Tabs defaultValue="models" className="flex-1 gap-0">
+      <Tabs defaultValue="models" className="gap-0">
         <TabsList className="grid grid-cols-2 p-1 gap-1 mb-3 h-[auto] w-full rounded-md bg-gray-100/80 border border-gray-200/60">
           <TabsTrigger className="flex-1 px-3 py-2.5 rounded-md text-xs md:text-sm font-medium transition-all data-[state=active]:bg-white data-[state=active]:shadow-sm border-none hover:cursor-pointer data-[state=inactive]:text-gray-400 hover:bg-white/60 focus:outline-none"
             value="models"> 
@@ -196,7 +196,7 @@ export function Sidebar({
           </TabsTrigger>
         </TabsList>
 
-        <TabsContent value="models" className="flex-1 outline-none">
+        <TabsContent value="models" className="outline-none">
           <Tabs
             defaultValue={
               MODELS.find((m) => m.id === selectedModel)?.capabilities?.some((c) => c !== "text")
@@ -221,7 +221,7 @@ export function Sidebar({
                 Multimodal
               </TabsTrigger>
             </TabsList>
-            <TabsContent value="text" className="max-h-[60vh] overflow-y-auto overflow-x-hidden rounded-bl-md rounded-br-md border border-gray-200/60">
+            <TabsContent value="text" className="max-h-[45vh] overflow-y-auto overflow-x-hidden rounded-bl-md rounded-br-md border border-gray-200/60">
               {MODELS.filter((m) => !m.capabilities || m.capabilities.length === 0 || (m.capabilities.length === 1 && m.capabilities[0] === "text")).map((model) => (
                 <ModelOption
                   key={model.id}
@@ -233,7 +233,7 @@ export function Sidebar({
                 />
               ))}
             </TabsContent>
-            <TabsContent value="multimodal" className="max-h-[60vh] overflow-y-auto overflow-x-hidden rounded-bl-md rounded-br-md border border-gray-200/60">
+            <TabsContent value="multimodal" className="max-h-[45vh] overflow-y-auto overflow-x-hidden rounded-bl-md rounded-br-md border border-gray-200/60">
               {MODELS.filter((m) => m.capabilities && m.capabilities.some((c) => c !== "text")).map((model) => (
                 <ModelOption
                   key={model.id}
@@ -260,7 +260,7 @@ export function Sidebar({
         </TabsContent>
       </Tabs>
 
-      <div className="mt-auto pt-3">
+      <div className="pt-4">
         {loadError && (
           <div className="mb-3 rounded-md bg-red-50 border border-red-200 p-3 text-xs text-red-700 break-words flex items-start gap-2">
             <X className="h-3.5 w-3.5 mt-0.5 flex-shrink-0 text-red-500" />
@@ -268,9 +268,9 @@ export function Sidebar({
           </div>
         )}
         <div className="flex items-center justify-between mb-2 px-1">
-          <div className="text-[10px] md:text-xs font-medium text-gray-400 uppercase tracking-wider">Configuration</div>
-          <div id="compilation-time" className="text-[10px] md:text-xs font-medium text-blue-500">
-            {compilationTime !== null ? `${compilationTime.toFixed(0)}ms compile` : ""}
+          <div className="text-xs font-medium text-gray-400 uppercase tracking-wider">Configuration</div>
+          <div id="compilation-time" className="text-xs font-medium text-blue-500">
+            {compilationTime !== null ? `${compilationTime.toFixed(0)}ms warm-up` : ""}
           </div>
         </div>
         <div className="bg-gray-50/80 rounded-md p-3 md:p-3.5 text-xs md:text-sm mb-2 md:max-h-[40vh] md:overflow-y-auto border border-gray-100 space-y-2.5">
@@ -280,25 +280,25 @@ export function Sidebar({
               href={`https://huggingface.co/${MODELS.find((m) => m.id === selectedModel)?.model || selectedModel}`}
               target="_blank"
               rel="noopener noreferrer"
-              className="text-xs text-blue-500 font-medium text-right hover:text-blue-600 hover:underline transition-colors max-w-[60%] truncate"
+              className="text-xs text-blue-500 font-semibold text-right hover:text-blue-600 hover:underline transition-colors max-w-[60%] truncate"
             >
               {MODELS.find((m) => m.id === selectedModel)?.model || selectedModel}
             </a>
           </div>
           <div className="flex items-center justify-between">
-            <span className="text-gray-400 text-xs">Backend</span>
-            <span className="font-medium text-xs">{BACKENDS.find(b => b.id === selectedBackend)?.name || selectedBackend}</span>
+            <span className="text-gray-400 text-xs">Hardware</span>
+            <span className="font-semibold text-xs">{BACKENDS.find(b => b.id === selectedBackend)?.name || selectedBackend}</span>
           </div>
           <div className="flex items-center justify-between">
-            <span className="text-gray-400 text-xs">Model Host</span>
-            <span className="font-medium text-xs">{remoteHost}</span>
+            <span className="text-gray-400 text-xs">Downloaded from</span>
+            <span className="font-semibold text-xs">{remoteHost}</span>
           </div>
           {/* Reasoning toggle UI: only show if thinkingTagSupport is true */}
           {MODELS.find((m) => m.id === selectedModel)?.thinkingTagSupport && (
             <div className="flex items-center justify-between">
               <span className="text-gray-400 text-xs">Reasoning</span>
               <label className="flex items-center gap-2 cursor-pointer select-none">
-                <span className="text-xs font-medium text-gray-600">{reasonEnabled ? "On" : "Off"}</span>
+                <span className="text-xs font-semibold text-gray-700">{reasonEnabled ? "On" : "Off"}</span>
                 <input
                   type="checkbox"
                   checked={reasonEnabled}
@@ -312,7 +312,7 @@ export function Sidebar({
           <div className="flex items-center justify-between">
             <span className="text-gray-400 text-xs">System Prompt</span>
             <label className="flex items-center gap-2 cursor-pointer select-none">
-              <span className="text-xs font-medium text-gray-600">{systemPromptEnabled ? "On" : "Off"}</span>
+              <span className="text-xs font-semibold text-gray-700">{systemPromptEnabled ? "On" : "Off"}</span>
               <input
                 type="checkbox"
                 checked={systemPromptEnabled}
@@ -327,7 +327,7 @@ export function Sidebar({
                 value={systemPromptText}
                 onChange={(e) => setSystemPromptText(e.target.value)}
                 className="text-xs min-h-[50px] bg-white max-h-[10vh] overflow-y-auto rounded-md border-gray-200 focus:border-blue-300"
-                placeholder="Enter a system prompt to guide the model's behavior..."
+                placeholder="Instructions for the model (e.g. 'Reply only in French')"
               />
             </div>
           )}
@@ -361,13 +361,13 @@ interface ModelOptionProps {
 function ModelOption({ model, isSelected, onClick, loadState, onLoad }: ModelOptionProps) {
   return (
     <motion.div
-      whileHover={{ scale: 1.005 }}
-      whileTap={{ scale: 0.995 }}
-      className={`flex items-center py-2 px-3 md:px-3 cursor-pointer transition-all duration-200 ${isSelected ? "bg-blue-50/50 border-l-1 border-l-blue-400" : "hover:bg-gray-50/80 border-l-transparent"}`}
+      whileHover={{ }}
+      whileTap={{ }}
+      className={`flex items-center py-3 px-3 md:py-2 md:px-3 cursor-pointer transition-colors duration-150 ${isSelected ? "bg-blue-50/50 border-l-2 border-l-blue-400" : "hover:bg-gray-50/80 border-l-2 border-l-transparent"}`}
       onClick={onClick}
     >
       <div className="flex-1 min-w-0">
-        <div className="flex font-medium text-sm md:text-md items-center text-gray-700 truncate">
+        <div className="flex font-medium text-sm md:text-base items-center text-gray-700 truncate">
           <Sparkles className={`h-3 w-3 mr-1.5 flex-shrink-0 ${isSelected ? 'text-blue-500' : 'text-gray-300'}`} />
           {model.name}
         </div>
@@ -389,19 +389,19 @@ function ModelOption({ model, isSelected, onClick, loadState, onLoad }: ModelOpt
         {loadState === "loading" ? (
           <div className="flex flex-col items-center gap-0.5 w-10">
             <Loader2 className="h-4 w-4 animate-spin text-blue-500" />
-            <span className="text-[9px] text-gray-400">Loading</span>
+            <span className="text-[10px] text-gray-400">Loading</span>
           </div>
         ) : loadState === "warm" ? (
           <div className="flex flex-col items-center gap-0.5 w-10">
             <Cog className="h-4 w-4 animate-spin text-amber-500" />
-            <span className="text-[9px] text-gray-400">Warm up</span>
+            <span className="text-[10px] text-gray-400">Warming up</span>
           </div>
         ) : (
           <Button
-            title={loadState === "not_loaded" ? "Download model and configuration files" : "Re-download model files (files already downloaded)"}
+            title={loadState === "not_loaded" ? "Download model weights to run locally" : "Re-download model weights"}
             variant="ghost"
             size="sm"
-            className="h-8 w-8 p-0 rounded-md hover:bg-blue-50 hover:cursor-pointer border-none shadow-none bg-transparent hover:bg-blue-50/80 transition-colors"
+            className="h-10 w-10 md:h-8 md:w-8 p-0 rounded-md hover:bg-blue-50 hover:cursor-pointer border-none shadow-none bg-transparent hover:bg-blue-50/80 transition-colors"
             onClick={(e) => {
               e.stopPropagation();
               onLoad();
@@ -430,9 +430,9 @@ function BackendOption({ backend, isSelected, onClick }: BackendOptionProps) {
   if (backend.id === "webnn-npu") Icon = Microchip;
   return (
     <motion.div
-      whileHover={{ scale: 1.005 }}
-      whileTap={{ scale: 0.995 }}
-      className={`flex items-center p-3 md:p-3.5 rounded-md cursor-pointer transition-all duration-200 ${isSelected ? "bg-blue-50/60 border border-blue-200/60 shadow-sm" : "hover:bg-gray-50 border border-transparent"}`}
+      whileHover={{ }}
+      whileTap={{ }}
+      className={`flex items-center p-3 md:p-3.5 rounded-md cursor-pointer transition-colors duration-150 ${isSelected ? "bg-blue-50/60 border border-blue-200/60 shadow-sm" : "hover:bg-gray-50 border border-transparent"}`}
       onClick={onClick}
     >
       <div className={`p-2.5 rounded-md mr-3 flex-shrink-0 transition-colors ${isSelected ? "bg-white shadow-sm text-blue-500" : "bg-gray-100 text-gray-400"}`}>

@@ -228,7 +228,7 @@ export function ChatInterface({
           variant="ghost" 
           size="icon" 
           onClick={() => setIsSidebarOpen(!isSidebarOpen)}
-          className="h-9 w-9 md:h-10 md:w-10 flex-shrink-0 rounded-md hover:bg-gray-100 hover:cursor-pointer transition-colors"
+          className="h-11 w-11 md:h-10 md:w-10 flex-shrink-0 rounded-md hover:bg-gray-100 hover:cursor-pointer transition-colors"
           aria-label={isSidebarOpen ? "Close sidebar" : "Open sidebar"}
         >
           {isSidebarOpen ? <X className="h-4 w-4" /> : <Menu className="h-4 w-4" />}
@@ -272,7 +272,7 @@ export function ChatInterface({
       )}
 
       {/* Chat messages */}
-      <div className="flex-1 overflow-y-auto p-3 md:p-6 space-y-3 md:space-y-4 bg-gradient-to-b from-gray-50 to-white">
+      <div className="flex-1 overflow-y-auto p-3 md:p-6 space-y-4 md:space-y-5 bg-gray-50/50">
         <AnimatePresence>
           {messages.length === 0 ? (
             <motion.div
@@ -282,17 +282,17 @@ export function ChatInterface({
               transition={{ duration: 0.5, ease: "easeOut" }}
               className="flex flex-col items-center justify-center h-full text-center text-gray-400"
             >
-              <div className="rounded-2xl h-16 w-16 bg-gradient-to-br from-blue-500 to-indigo-500 flex items-center justify-center mb-5 shadow-lg shadow-blue-500/20">
+              <div className="rounded-xl h-14 w-14 bg-blue-500 flex items-center justify-center mb-5 shadow-sm">
                 <Sparkles className="h-8 w-8 text-white" />
               </div>
               <h3 className="text-xl md:text-2xl font-semibold mb-2 text-gray-700">
-                How can I help you today?
+                Run AI entirely in your browser
               </h3>
               <p className="max-w-md text-xs md:text-sm px-2 text-gray-400 mb-6">
-                {anyModelReady ? "Ask me anything or try one of these examples:" : "Load a model from the sidebar to get started"}
+                {anyModelReady ? "Model ready — ask anything or try an example below:" : "Select a model in the sidebar, then click the download button to load it"}
               </p>
-              <div className="grid grid-cols-1 gap-2.5 w-full max-w-md px-3">
-                {["What are your model name and parameter count?", "A triangle has three sides with lengths in the ratio 2:3:4. Find the length of each side If the perimeter is 36cm.", "Explain the concept of 'inflation' in economics in just two sentences, using a simple analogy involving a pizza."].map((example, i) => (
+              <div className="grid grid-cols-1 gap-3 w-full max-w-md px-3">
+                {["What model are you, and how many parameters do you have?", "A triangle has sides in the ratio 2:3:4. Find each side length if the perimeter is 36 cm.", "Explain inflation in two sentences using a pizza analogy."].map((example, i) => (
                   <motion.div
                     key={example}
                     initial={{ opacity: 0, y: 8 }}
@@ -328,12 +328,12 @@ export function ChatInterface({
                 {(() => {
                   const lastAssistant = messages.slice().reverse().find(m => m.role === "assistant");
                   if (lastAssistant?.state === "thinking") {
-                    return reasonEnabled ? "Reasoning..." : "Thinking...";
+                    return reasonEnabled ? "Reasoning step by step..." : "Processing...";
                   }
                   if (lastAssistant?.state === "answering") {
-                    return "Generating response...";
+                    return "Generating...";
                   }
-                  return reasonEnabled ? "Reasoning..." : "Thinking...";
+                  return reasonEnabled ? "Reasoning step by step..." : "Processing...";
                 })()}
               </span>
             </motion.div>
@@ -343,7 +343,7 @@ export function ChatInterface({
       </div>
 
       {/* Input area */}
-      <div className="px-3 pb-3 pt-1 md:px-4 md:pb-4 md:pb-4 md:pt-1 border-t border-gray-200/60 bg-white">
+      <div className="px-3 pb-3 pt-2.5 md:px-4 md:pb-4 md:pb-4 md:pt-2.5 border-t border-gray-200/60 bg-white">
         {/* Attachment bar — shown only for models with vision/video capabilities */}
         <AttachmentBar
           capabilities={modelCapabilities}
@@ -360,9 +360,9 @@ export function ChatInterface({
             id="chat-input"
             value={input}
             onChange={(e) => setInput(e.target.value)}
-            placeholder={anyModelReady ? "Type your message..." : "Load a model to start chatting..."}
+            placeholder={anyModelReady ? "Message the model..." : "Load a model first to start chatting"}
             disabled={!anyModelReady}
-            className="w-full border border-gray-200 px-4 py-3 pr-14 text-sm md:text-sm placeholder:text-gray-300 disabled:opacity-40 min-h-[80px] md:min-h-[80px] max-h-[calc(30dvh)] overflow-auto resize-none rounded-md bg-gray-50/50 focus:bg-white focus:border-blue-300 transition-all"
+            className="w-full border border-gray-200 px-4 py-3 pr-14 text-sm md:text-sm placeholder:text-gray-300 disabled:opacity-40 min-h-[68px] md:min-h-[80px] max-h-[calc(30dvh)] overflow-auto resize-none rounded-md bg-gray-50/50 focus:bg-white focus:border-blue-300 transition-all"
             onKeyDown={(e) => {
               if (e.key === 'Enter' && (e.ctrlKey || e.metaKey)) {
                 e.preventDefault();
@@ -387,9 +387,9 @@ export function ChatInterface({
               id="chat-send-btn"
               type="submit"
               disabled={!input.trim() || isTyping}
-              className={`flex-shrink-0 w-8 h-8 md:w-9 md:h-9 rounded-md flex items-center justify-center transition-all hover:cursor-pointer ${
+              className={`flex-shrink-0 w-11 h-11 md:w-9 md:h-9 rounded-md flex items-center justify-center transition-all hover:cursor-pointer ${
                 input.trim() && !isTyping
-                  ? "bg-gradient-to-br from-blue-500 to-indigo-500 text-white shadow-md shadow-blue-500/25 hover:shadow-lg hover:shadow-blue-500/30"
+                  ? "bg-blue-500 hover:bg-blue-600 text-white shadow-sm"
                   : "bg-gray-100 text-gray-300 border border-gray-200"
               }`}
             >
@@ -397,7 +397,7 @@ export function ChatInterface({
             </Button>
           </div>
         </form>
-        <div className="mt-2.5 mb-1">
+        <div className="mt-3 mb-2">
           <div className="text-[11px] md:text-xs flex flex-col sm:flex-row items-center justify-center text-gray-400 gap-1.5 sm:gap-0">
             <div className="flex items-center sm:mr-3">
               <kbd className="text-[10px] md:text-[11px] border border-gray-200 bg-gray-50 rounded-md px-1.5 py-0.5 font-mono text-gray-400">Enter</kbd>
@@ -457,12 +457,12 @@ function MessageBubble({ message }: MessageBubbleProps) {
       transition={{ duration: 0.25 }}
       className={`flex message-group ${isUser ? "justify-end" : "justify-start"}`}
     >
-      <div className={`flex items-start max-w-[90%] sm:max-w-[85%] md:max-w-[75%] gap-2 md:gap-3 ${isUser ? "flex-row-reverse" : ""}`}>
+      <div className={`flex items-start max-w-[90%] sm:max-w-[85%] md:max-w-[75%] xl:max-w-[65%] gap-2 md:gap-3 ${isUser ? "flex-row-reverse" : ""}`}>
         <div
           className={`flex-shrink-0 w-7 h-7 md:w-8 md:h-8 rounded-md flex items-center justify-center ${
             isUser 
-              ? "bg-gradient-to-br from-gray-100 to-gray-200" 
-              : "bg-gradient-to-br from-blue-500 to-indigo-500"
+              ? "bg-gray-100" 
+              : "bg-blue-500"
           }`}
         >
           {isUser 
@@ -471,10 +471,10 @@ function MessageBubble({ message }: MessageBubbleProps) {
           }
         </div>
 
-        <div className="flex flex-col gap-1">
+        <div className="flex flex-col gap-2">
           <div
             className={`px-3.5 py-3 md:px-4 md:py-3.5 text-sm md:text-base ${isUser
-              ? "bg-gradient-to-br from-blue-500 to-indigo-500 text-white rounded-bl-md"
+              ? "bg-blue-500 text-white rounded-bl-md"
               : "bg-white border border-gray-100 shadow-sm rounded-tr-md"
             }`}
           >
@@ -504,43 +504,43 @@ function MessageBubble({ message }: MessageBubbleProps) {
           </div>
 
           <div className={`flex flex-wrap items-center gap-1.5 px-1 ${isUser ? "justify-end" : "justify-start"}`}>
-            <span className="text-[10px] text-gray-300">
+            <span className="text-xs text-gray-300">
               {new Date(message.timestamp).toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })}
             </span>
             {!isUser && (
               <>
                 {message.ttft && (
-                  <span className="bg-blue-50 text-blue-500 text-[10px] rounded-md px-1.5 py-0.5 font-medium tabular-nums" title={"Time to First Token (TTFT)\nMeasures the time from when a request is submitted to when the very first output token appears. A low TTFT is crucial for a responsive feel, as it covers the prefill phase (processing the entire input prompt).\nCalculation: T_first_token − T_request_start"}>
+                  <span className="bg-blue-50 text-blue-500 text-xs rounded-md px-1.5 py-0.5 font-medium tabular-nums" title={"Time to First Token (TTFT)\nMeasures the time from when a request is submitted to when the very first output token appears. A low TTFT is crucial for a responsive feel, as it covers the prefill phase (processing the entire input prompt).\nCalculation: T_first_token − T_request_start"}>
                     TTFT: {message.ttft.toFixed(2)}ms
                   </span>
                 )}
                 {message.tps && (
-                  <span className="bg-emerald-50 text-emerald-600 text-[10px] rounded-md px-1.5 py-0.5 font-medium tabular-nums" title={"Tokens Per Second (TPS) — Decode Throughput\nThe rate at which output tokens are produced during the decode phase only (excluding TTFT). A higher value means faster, smoother streaming.\nCalculation: (N_tokens − 1) / (T_now − T_first_token) × 1000"}>
+                  <span className="bg-emerald-50 text-emerald-600 text-xs rounded-md px-1.5 py-0.5 font-medium tabular-nums" title={"Tokens Per Second (TPS) — Decode Throughput\nThe rate at which output tokens are produced during the decode phase only (excluding TTFT). A higher value means faster, smoother streaming.\nCalculation: (N_tokens − 1) / (T_now − T_first_token) × 1000"}>
                     TPS: {message.tps.toFixed(2)} tok/s
                   </span>
                 )}
                 {message.numTokens && message.e2e && (
-                  <span className="bg-indigo-50 text-indigo-500 text-[10px] rounded-md px-1.5 py-0.5 font-medium tabular-nums" title={"Throughput — End-to-End Throughput\nThe overall token generation rate including both prefill and decode phases. Represents the true system throughput as experienced by the user.\nCalculation: N_tokens / (E2E / 1000)"}>
+                  <span className="bg-indigo-50 text-indigo-500 text-xs rounded-md px-1.5 py-0.5 font-medium tabular-nums" title={"Throughput — End-to-End Throughput\nThe overall token generation rate including both prefill and decode phases. Represents the true system throughput as experienced by the user.\nCalculation: N_tokens / (E2E / 1000)"}>
                     Throughput: {(message.numTokens / (message.e2e / 1000)).toFixed(2)} tok/s
                   </span>
                 )}
                 {message.tpot && (
-                  <span className="bg-violet-100 text-violet-700 text-[10px] rounded-md px-1.5 py-0.5 font-medium tabular-nums" title={"Time Per Output Token (TPOT) — Inter-Token Latency (ITL)\nThe average time to generate each subsequent token after the first one. This determines the smoothness and speed of the streaming response. Inverse of TPS: TPOT = 1000 / TPS.\nCalculation: (E2E − TTFT) / (N_tokens − 1)"}>
+                  <span className="bg-violet-50 text-violet-600 text-xs rounded-md px-1.5 py-0.5 font-medium tabular-nums" title={"Time Per Output Token (TPOT) — Inter-Token Latency (ITL)\nThe average time to generate each subsequent token after the first one. This determines the smoothness and speed of the streaming response. Inverse of TPS: TPOT = 1000 / TPS.\nCalculation: (E2E − TTFT) / (N_tokens − 1)"}>
                     TPOT: {message.tpot.toFixed(2)}ms
                   </span>
                 )}
                 {message.decodeTime && (
-                  <span className="bg-cyan-50 text-cyan-600 text-[10px] rounded-md px-1.5 py-0.5 font-medium tabular-nums" title={"Decode Time\nThe total time spent in the autoregressive decode phase, excluding the prefill (prompt processing) phase. This isolates the pure token generation time.\nCalculation: E2E − TTFT"}>
+                  <span className="bg-cyan-50 text-cyan-600 text-xs rounded-md px-1.5 py-0.5 font-medium tabular-nums" title={"Decode Time\nThe total time spent in the autoregressive decode phase, excluding the prefill (prompt processing) phase. This isolates the pure token generation time.\nCalculation: E2E − TTFT"}>
                     Decode: {message.decodeTime >= 1000 ? `${(message.decodeTime / 1000).toFixed(2)}s` : `${message.decodeTime.toFixed(2)}ms`}
                   </span>
                 )}
                 {message.e2e && (
-                  <span className="bg-amber-100 text-amber-700 text-[10px] rounded-md px-1.5 py-0.5 font-medium tabular-nums" title={"End-to-End Latency (E2E) — Total Latency\nThe total wall-clock time from sending the request to receiving the final token. This is the time the user waits for the complete answer.\nCalculation: T_completion − T_request_start"}>
+                  <span className="bg-amber-50 text-amber-600 text-xs rounded-md px-1.5 py-0.5 font-medium tabular-nums" title={"End-to-End Latency (E2E) — Total Latency\nThe total wall-clock time from sending the request to receiving the final token. This is the time the user waits for the complete answer.\nCalculation: T_completion − T_request_start"}>
                     E2E: {message.e2e >= 1000 ? `${(message.e2e / 1000).toFixed(2)}s` : `${message.e2e.toFixed(2)}ms`}
                   </span>
                 )}
                 {message.numTokens && (
-                  <span className="bg-gray-100 text-gray-600 text-[10px] rounded-md px-1.5 py-0.5 font-medium tabular-nums" title={"Total Tokens\nThe total number of output tokens generated by the model for this response."}>
+                  <span className="bg-gray-100 text-gray-600 text-xs rounded-md px-1.5 py-0.5 font-medium tabular-nums" title={"Total Tokens\nThe total number of output tokens generated by the model for this response."}>
                     Tokens: {message.numTokens}
                   </span>
                 )}
