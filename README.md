@@ -18,7 +18,7 @@ Run large language models and vision-language models directly in the browser usi
 | Model | Producer | Type | Parameters | Size | Quantization | Features |
 |-------|----------|------|-----------|------|-------------|----------|
 | Gemma 3 | Google | SLM | 1B | 983 MB | q4f16 | — |
-| Gemma 4 | Google | VLM | E2B | ~2 GB | q4f16 | Vision, thinking |
+| Gemma 4 | Google | VLM | E2B | 3.76 GB | q4f16 | Vision, thinking |
 | Phi-3.5 Mini | Microsoft | SLM | 3.8B | 2.15 GB | q4f16 | — |
 | Phi-4 Mini | Microsoft | SLM | 3.8B | 2.34 GB | q4f16 | — |
 | Llama 3.2 | Meta | LLM | 1B / 3B | 1.01 / 2.29 GB | q4f16 | KV cache |
@@ -95,18 +95,19 @@ Metrics are displayed as badges below each assistant message during and after ge
 
 | Indicator | Full Name | Unit | Description | Formula |
 |-----------|-----------|------|-------------|---------|
-| **TTFT** | Time to First Token | ms | Time from request start to first output token. Covers the prefill phase (processing the entire input prompt). | $T_{\text{first\_token}} - T_{\text{request\_start}}$ |
-| **TPS** | Tokens Per Second — Decode Throughput | tok/s | Token generation rate during the decode phase only, excluding TTFT. The first token is excluded from both count and time window. | $(N_{\text{tokens}} - 1) \;/\; (T_{\text{now}} - T_{\text{first\_token}}) \times 1000$ |
-| **Decode Time** | Decode Latency | ms | Total time in the autoregressive decode phase, excluding the prefill phase. | $E2E - TTFT$ |
-| **Throughput** | End-to-End Throughput | tok/s | Overall token generation rate including both prefill and decode. This is the standard industry definition (vLLM, TGI, llmperf). | $N_{\text{tokens}} \;/\; (E2E \;/\; 1000)$ |
-| **TPOT** | Time Per Output Token — Inter-Token Latency (ITL) | ms | Average time per token after the first. Inverse of TPS: `TPOT = 1000 / TPS`. | $(E2E - TTFT) \;/\; (N_{\text{tokens}} - 1)$ |
-| **E2E** | End-to-End Latency — Total Latency | ms | Wall-clock time from request start to final token. | $T_{\text{completion}} - T_{\text{request\_start}}$ |
+| **TTFT** | Time to First Token | ms | Time from request start to first output token. Covers the prefill phase (processing the entire input prompt). | $T_\text{first token} - T_\text{request start}$ |
+| **TPS** | Tokens Per Second — Decode Throughput | tok/s | Token generation rate during the decode phase only, excluding TTFT. The first token is excluded from both count and time window. | $(N_\text{tokens} - 1) \;/\; (T_\text{now} - T_\text{first token}) \times 1000$ |
+| **Throughput** | End-to-End Throughput | tok/s | Overall token generation rate including both prefill and decode. This is the standard industry definition (vLLM, TGI, llmperf). | $N_\text{tokens} \;/\; (E2E \;/\; 1000)$ |
+| **TPOT** | Time Per Output Token — Inter-Token Latency (ITL) | ms | Average time per token after the first. Inverse of TPS: `TPOT = 1000 / TPS`. | $(E2E - TTFT) \;/\; (N_\text{tokens} - 1)$ |
+| **Decode** | Decode Latency | ms | Total time in the autoregressive decode phase, excluding the prefill phase. | $E2E - TTFT$ |
+| **E2E** | End-to-End Latency — Total Latency | ms | Wall-clock time from request start to final token. | $T_\text{completion} - T_\text{request start}$ |
+| **Tokens** | Total Output Tokens | — | Total number of output tokens generated for the response. | $N_\text{tokens}$ |
 
 ### Model loading metric
 
 | Indicator | Full Name | Unit | Description | Formula |
 |-----------|-----------|------|-------------|---------|
-| **Compilation Time** | Model Warm-up / Compile Time | ms | Time to warm up the model after loading weights, including a single-token inference to trigger JIT compilation. Measured once per model load. Displayed in the sidebar. | $T_{\text{end\_warmup}} - T_{\text{start\_warmup}}$ |
+| **Compilation Time** | Model Warm-up / Compile Time | ms | Time to warm up the model after loading weights, including a single-token inference to trigger JIT compilation. Measured once per model load. Displayed in the sidebar. | $T_\text{end warmup} - T_\text{start warmup}$ |
 
 ### Key relationships
 
