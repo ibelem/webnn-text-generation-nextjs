@@ -122,10 +122,10 @@ Metrics are displayed as badges below each assistant message during and after ge
 
 | Symbol | Meaning |
 |--------|---------|
-| $N_{\text{tokens}}$ | Total output tokens generated (including the first token) |
-| $T_{\text{request\_start}}$ | Timestamp when generation begins (`performance.now()` at start) |
-| $T_{\text{first\_token}}$ | Timestamp when the first output token is produced |
-| $T_{\text{completion}}$ | Timestamp when the final output token is produced |
+| $N_\text{tokens}$ | Total output tokens generated (including the first token) |
+| $T_\text{request start}$ | Timestamp when generation begins (`performance.now()` at start) |
+| $T_\text{first token}$ | Timestamp when the first output token is produced |
+| $T_\text{completion}$ | Timestamp when the final output token is produced |
 
 > **Note:** The `× 1000` factor in the TPS formula converts milliseconds (`performance.now()`) to seconds for the tok/s unit.
 
