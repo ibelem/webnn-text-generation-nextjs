@@ -131,7 +131,7 @@ export function ChatInterface({
           break;
         }
         case "complete": {
-          const { e2e, tpot, numTokens: finalNumTokens, tps: finalTps } = e.data;
+          const { e2e, decodeTime, tpot, numTokens: finalNumTokens, tps: finalTps } = e.data;
           setIsTyping(false);
           setMessages((prev) => {
             const cloned = [...prev];
@@ -140,6 +140,7 @@ export function ChatInterface({
               cloned[cloned.length - 1] = {
                 ...last,
                 e2e,
+                decodeTime,
                 tpot,
                 ...(finalNumTokens !== undefined && { numTokens: finalNumTokens }),
                 ...(finalTps !== undefined && { tps: finalTps }),
@@ -435,7 +436,8 @@ function MessageBubble({ message }: MessageBubbleProps) {
       const parts: string[] = []
       if (message.ttft) parts.push(`TTFT: ${message.ttft.toFixed(2)}ms`)
       if (message.tps) parts.push(`TPS: ${message.tps.toFixed(2)} tok/s`)
-      if (message.numTokens && message.tps) parts.push(`Throughput: ${message.numTokens} tokens / ${(message.numTokens / message.tps).toFixed(2)}s`)
+      if (message.decodeTime) parts.push(`Decode Time: ${message.decodeTime >= 1000 ? `${(message.decodeTime / 1000).toFixed(2)}s` : `${message.decodeTime.toFixed(2)}ms`}`)
+      if (message.numTokens && message.e2e) parts.push(`Throughput: ${(message.numTokens / (message.e2e / 1000)).toFixed(2)} tok/s`)
       if (message.tpot) parts.push(`TPOT: ${message.tpot.toFixed(2)}ms`)
       if (message.e2e) parts.push(`E2E: ${(message.e2e / 1000).toFixed(2)}s`)
       const text = parts.length > 0 ? parts.join('; ') : 'No performance data'
@@ -507,27 +509,32 @@ function MessageBubble({ message }: MessageBubbleProps) {
             {!isUser && (
               <>
                 {message.ttft && (
-                  <span className="bg-blue-50 text-blue-500 text-[10px] rounded-md px-1.5 py-0.5 font-medium tabular-nums" title={"Time to First Token (TTFT)\nMeasures the time from when a request is submitted to when the very first output token appears. A low TTFT (ideally under 500ms) is crucial for a responsive feel, as it minimizes the initial perceived delay.\nCalculation: Time at arrival of first output token − Time at request submission."}>
+                  <span className="bg-blue-50 text-blue-500 text-[10px] rounded-md px-1.5 py-0.5 font-medium tabular-nums" title={"Time to First Token (TTFT)\nMeasures the time from when a request is submitted to when the very first output token appears. A low TTFT is crucial for a responsive feel, as it covers the prefill phase (processing the entire input prompt).\nCalculation: T_first_token − T_request_start"}>
                     TTFT: {message.ttft.toFixed(2)}ms
                   </span>
                 )}
                 {message.tps && (
-                  <span className="bg-emerald-50 text-emerald-600 text-[10px] rounded-md px-1.5 py-0.5 font-medium tabular-nums" title={"Tokens Per Second (TPS)\nThe rate at which output tokens are produced during the decode phase (excluding the time to first token). A higher value means faster, smoother streaming.\nCalculation: (Total output tokens − 1) / (Total generation time − TTFT)."}>
+                  <span className="bg-emerald-50 text-emerald-600 text-[10px] rounded-md px-1.5 py-0.5 font-medium tabular-nums" title={"Tokens Per Second (TPS) — Decode Throughput\nThe rate at which output tokens are produced during the decode phase only (excluding TTFT). A higher value means faster, smoother streaming.\nCalculation: (N_tokens − 1) / (T_now − T_first_token) × 1000"}>
                     TPS: {message.tps.toFixed(2)} tok/s
                   </span>
                 )}
-                {message.numTokens && message.tps && (
-                  <span className="bg-indigo-50 text-indigo-500 text-[10px] rounded-md px-1.5 py-0.5 font-medium tabular-nums" title={"Throughput\nMeasures the overall system capacity in tokens per second. Higher throughput means the model generates text faster and can handle more requests efficiently.\nCalculation: Total number of output tokens generated / Total generation time."}>
-                    Throughput: {message.numTokens} tokens / {(message.numTokens / message.tps).toFixed(2)}s
+                {message.decodeTime && (
+                  <span className="bg-cyan-50 text-cyan-600 text-[10px] rounded-md px-1.5 py-0.5 font-medium tabular-nums" title={"Decode Time\nThe total time spent in the autoregressive decode phase, excluding the prefill (prompt processing) phase. This isolates the pure token generation time.\nCalculation: E2E − TTFT"}>
+                    Decode: {message.decodeTime >= 1000 ? `${(message.decodeTime / 1000).toFixed(2)}s` : `${message.decodeTime.toFixed(2)}ms`}
+                  </span>
+                )}
+                {message.numTokens && message.e2e && (
+                  <span className="bg-indigo-50 text-indigo-500 text-[10px] rounded-md px-1.5 py-0.5 font-medium tabular-nums" title={"Throughput — End-to-End Throughput\nThe overall token generation rate including both prefill and decode phases. Represents the true system throughput as experienced by the user.\nCalculation: N_tokens / (E2E / 1000)"}>
+                    Throughput: {(message.numTokens / (message.e2e / 1000)).toFixed(2)} tok/s
                   </span>
                 )}
                 {message.tpot && (
-                  <span className="bg-violet-100 text-violet-700 text-[10px] rounded-md px-1.5 py-0.5 font-medium tabular-nums" title={"Time Per Output Token (TPOT) aka. Inter-Token Latency (ITL)\nMeasures the average time it takes to generate each subsequent token after the first one. This determines the smoothness and speed of the streaming response.\nCalculation: (Total Latency − TTFT) / (Total Output Tokens − 1)."}>
+                  <span className="bg-violet-100 text-violet-700 text-[10px] rounded-md px-1.5 py-0.5 font-medium tabular-nums" title={"Time Per Output Token (TPOT) — Inter-Token Latency (ITL)\nThe average time to generate each subsequent token after the first one. This determines the smoothness and speed of the streaming response. Inverse of TPS: TPOT = 1000 / TPS.\nCalculation: (E2E − TTFT) / (N_tokens − 1)"}>
                     TPOT: {message.tpot.toFixed(2)}ms
                   </span>
                 )}
                 {message.e2e && (
-                  <span className="bg-amber-100 text-amber-700 text-[10px] rounded-md px-1.5 py-0.5 font-medium tabular-nums" title={"End-to-End Latency (E2E) aka. Total Latency\nThe total time from sending the request to receiving the final token of the complete response. This is the wall-clock time the user waits for the full answer.\nCalculation: Time at completion of request − Time at request submission."}>
+                  <span className="bg-amber-100 text-amber-700 text-[10px] rounded-md px-1.5 py-0.5 font-medium tabular-nums" title={"End-to-End Latency (E2E) — Total Latency\nThe total wall-clock time from sending the request to receiving the final token. This is the time the user waits for the complete answer.\nCalculation: T_completion − T_request_start"}>
                     E2E: {message.e2e >= 1000 ? `${(message.e2e / 1000).toFixed(2)}s` : `${message.e2e.toFixed(2)}ms`}
                   </span>
                 )}

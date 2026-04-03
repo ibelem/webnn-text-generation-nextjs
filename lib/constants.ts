@@ -263,6 +263,33 @@ export const MODELS: Array<{
       modelClass: "conditional-generation",
     },
     {
+      id: "gemma4-e2b" as ModelType,
+      model: "onnx-community/gemma-4-E2B-it-ONNX",
+      dataType: {
+        audio_encoder: "fp16",
+        vision_encoder: "fp16",
+        embed_tokens: "q4f16",
+        decoder_model_merged: "q4f16",
+      },
+      name: "Gemma 4",
+      producer: "Google",
+      desc: "VLM",
+      parameter: "E2B",
+      size: "3.76GB",
+      useExternalDataFormat: {
+        audio_encoder: 1,
+        vision_encoder: 1,
+        embed_tokens: 1,
+        decoder_model_merged: 1,
+      },
+      maxNewTokens: 2048,
+      doSample: false,
+      systemPrompt: "",
+      thinkingTagSupport: true,
+      capabilities: ["text", "vision"],
+      modelClass: "conditional-generation",
+    },
+    {
       id: "qwen3_5-4b" as ModelType,
       model: "onnx-community/Qwen3.5-4B-ONNX",
       dataType: {

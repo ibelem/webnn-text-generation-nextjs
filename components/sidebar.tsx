@@ -7,7 +7,7 @@ import Image from 'next/image';
 import { Button } from "@/components/ui/button"
 import { Textarea } from "@/components/ui/textarea"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
-import { Sparkles, Gpu, Microchip, Loader2, Download, Cog, RefreshCcw, X } from "lucide-react"
+import { Sparkles, Gpu, Microchip, Loader2, Download, Cog, RefreshCcw, X, Eye } from "lucide-react"
 import { MODELS, BACKENDS } from "../lib/constants"
 import { Progress } from "@/components/progress"
 import type { ProgressProps } from "@/components/progress"
@@ -196,17 +196,56 @@ export function Sidebar({
           </TabsTrigger>
         </TabsList>
 
-        <TabsContent value="models" className="max-h-[60vh] overflow-y-auto overflow-x-hidden rounded-md border border-gray-200/60">
-          {MODELS.map((model) => (
-            <ModelOption
-              key={model.id}
-              model={model}
-              isSelected={selectedModel === model.id}
-              onClick={() => setSelectedModel(model.id)}
-              loadState={modelLoadState[model.id] || "not_loaded"}
-              onLoad={() => handleLoadModel(model.id)}
-            />
-          ))}
+        <TabsContent value="models" className="flex-1 outline-none">
+          <Tabs
+            defaultValue={
+              MODELS.find((m) => m.id === selectedModel)?.capabilities?.some((c) => c !== "text")
+                ? "multimodal"
+                : "text"
+            }
+            className="flex flex-col gap-0"
+          >
+            <TabsList className="grid grid-cols-2 p-0.5 gap-0.5 h-[auto] w-full rounded-tl-md rounded-tr-md rounded-bl-none rounded-br-none bg-gray-100/60 border border-gray-200/40">
+              <TabsTrigger
+                className="flex items-center justify-center gap-1 px-2 py-1.5 rounded-tl-md rounded-tr-none rounded-bl-none rounded-br-none font-medium transition-all data-[state=active]:bg-white data-[state=active]:shadow-sm border-none hover:cursor-pointer data-[state=inactive]:text-gray-400 hover:bg-white/60 focus:outline-none"
+                value="text"
+              >
+                <Sparkles className="h-3 w-3" />
+                Text
+              </TabsTrigger>
+              <TabsTrigger
+                className="flex items-center justify-center gap-1 px-2 py-1.5 rounded-tl-none rounded-tr-md rounded-bl-none rounded-br-none font-medium transition-all data-[state=active]:bg-white data-[state=active]:shadow-sm border-none hover:cursor-pointer data-[state=inactive]:text-gray-400 hover:bg-white/60 focus:outline-none"
+                value="multimodal"
+              >
+                <Eye className="h-3 w-3" />
+                Multimodal
+              </TabsTrigger>
+            </TabsList>
+            <TabsContent value="text" className="max-h-[60vh] overflow-y-auto overflow-x-hidden rounded-bl-md rounded-br-md border border-gray-200/60">
+              {MODELS.filter((m) => !m.capabilities || m.capabilities.length === 0 || (m.capabilities.length === 1 && m.capabilities[0] === "text")).map((model) => (
+                <ModelOption
+                  key={model.id}
+                  model={model}
+                  isSelected={selectedModel === model.id}
+                  onClick={() => setSelectedModel(model.id)}
+                  loadState={modelLoadState[model.id] || "not_loaded"}
+                  onLoad={() => handleLoadModel(model.id)}
+                />
+              ))}
+            </TabsContent>
+            <TabsContent value="multimodal" className="max-h-[60vh] overflow-y-auto overflow-x-hidden rounded-bl-md rounded-br-md border border-gray-200/60">
+              {MODELS.filter((m) => m.capabilities && m.capabilities.some((c) => c !== "text")).map((model) => (
+                <ModelOption
+                  key={model.id}
+                  model={model}
+                  isSelected={selectedModel === model.id}
+                  onClick={() => setSelectedModel(model.id)}
+                  loadState={modelLoadState[model.id] || "not_loaded"}
+                  onLoad={() => handleLoadModel(model.id)}
+                />
+              ))}
+            </TabsContent>
+          </Tabs>
         </TabsContent>
 
         <TabsContent value="backends" className="space-y-2">
