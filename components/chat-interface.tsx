@@ -8,17 +8,17 @@ declare global {
   }
 }
 
-import React, { useState, useRef, useEffect } from "react"
+import React, { useState, useRef, useEffect, useMemo } from "react"
 import { motion, AnimatePresence } from "framer-motion"
-import type { ModelType, BackendType, Message, MessageContentPart } from "../lib/types"
+import type { ModelType, BackendType, Message, MessageContentPart, ModelCapability } from "../lib/types"
 import { Button } from "@/components/ui/button"
 import { Textarea } from "@/components/ui/textarea"
-import { ArrowUp, Menu, X, User, Bot, Sparkles, Loader2, Copy, Check, Video, MessageSquare } from "lucide-react"
+import { ArrowUp, Menu, X, User, Bot, Sparkles, Loader2, Copy, Check, Video, MessageSquare, Music } from "lucide-react"
 import { MODELS, BACKENDS } from "../lib/constants"
 import { v4 as uuidv4 } from "uuid"
 import packageJson from "../package.json"
 import { AttachmentBar } from "@/components/media-input/attachment-bar"
-import type { AttachedFile } from "@/components/media-input/attachment-bar"
+import type { AttachedFile, AttachedAudio } from "@/components/media-input/attachment-bar"
 
 /** Extract plain text from a Message's content (string or multimodal parts array) */
 function getMessageText(content: string | MessageContentPart[]): string {
@@ -69,10 +69,11 @@ export function ChatInterface({
   const [isTyping, setIsTyping] = useState(false);
   const [attachedImages, setAttachedImages] = useState<string[]>([]);
   const [attachedFiles, setAttachedFiles] = useState<AttachedFile[]>([]);
+  const [attachedAudio, setAttachedAudio] = useState<AttachedAudio | null>(null);
   const messagesEndRef = useRef<HTMLDivElement>(null);
-  const anyModelReady = Object.values(modelLoadState).includes("ready");
-  const selectedModelObj = MODELS.find((m) => m.id === selectedModel);
-  const modelCapabilities = selectedModelObj?.capabilities ?? ["text"];
+  const anyModelReady = useMemo(() => Object.values(modelLoadState).includes("ready"), [modelLoadState]);
+  const selectedModelObj = useMemo(() => MODELS.find((m) => m.id === selectedModel), [selectedModel]);
+  const modelCapabilities = useMemo(() => (selectedModelObj?.capabilities ?? ["text"]) as ModelCapability[], [selectedModelObj]);
 
   // Expose workerRef and setProgressItems globally for Sidebar reset
   useEffect(() => {
@@ -169,6 +170,7 @@ export function ChatInterface({
 
     const hasImages = attachedImages.length > 0;
     const hasFiles = attachedFiles.length > 0;
+    const hasAudio = !!attachedAudio;
 
     // Build the text portion — prepend file contents as fenced code blocks
     let textContent = input.trim();
@@ -182,10 +184,11 @@ export function ChatInterface({
       textContent = `${fileBlocks}\n\n${textContent}`;
     }
 
-    // Build content: multimodal array if images attached, plain string otherwise
-    const content: string | MessageContentPart[] = hasImages
+    // Build content: multimodal array if images or audio attached, plain string otherwise
+    const content: string | MessageContentPart[] = (hasImages || hasAudio)
       ? [
           ...attachedImages.map((img) => ({ type: "image" as const, image: img })),
+          ...(hasAudio ? [{ type: "audio" as const, audioLabel: `${attachedAudio!.name === "microphone-recording" ? "Microphone recording" : attachedAudio!.name} (${attachedAudio!.duration.toFixed(1)}s)` }] : []),
           { type: "text" as const, text: textContent },
         ]
       : textContent;
@@ -209,16 +212,18 @@ export function ChatInterface({
         systemPromptEnabled,
         systemPromptText,
         images: hasImages ? attachedImages : undefined,
+        audio: hasAudio ? Array.from(attachedAudio!.data) : undefined,
       },
     });
     setIsTyping(true);
     setInput("");
     setAttachedImages([]);
     setAttachedFiles([]);
+    setAttachedAudio(null);
   };
 
-  const backendName = BACKENDS.find(b => b.id === selectedBackend)?.name || selectedBackend;
-  const selectedModelName = selectedModelObj ? `${selectedModelObj.name} ${selectedModelObj.parameter}` : selectedModel;
+  const backendName = useMemo(() => BACKENDS.find(b => b.id === selectedBackend)?.name || selectedBackend, [selectedBackend]);
+  const selectedModelName = useMemo(() => selectedModelObj ? `${selectedModelObj.name} ${selectedModelObj.parameter}` : selectedModel, [selectedModelObj, selectedModel]);
 
   return (
     <>
@@ -343,7 +348,7 @@ export function ChatInterface({
       </div>
 
       {/* Input area */}
-      <div className="px-3 pb-3 pt-2.5 md:px-4 md:pb-4 md:pb-4 md:pt-2.5 border-t border-gray-200/60 bg-white">
+      <div className="px-3 pb-3 pt-2.5 md:px-4 md:pb-4 md:pt-2.5 border-t border-gray-200/60 bg-white">
         {/* Attachment bar — shown only for models with vision/video capabilities */}
         <AttachmentBar
           capabilities={modelCapabilities}
@@ -353,6 +358,9 @@ export function ChatInterface({
           attachedFiles={attachedFiles}
           onFilesAdded={(files) => setAttachedFiles((prev) => [...prev, ...files])}
           onFileRemoved={(index) => setAttachedFiles((prev) => prev.filter((_, i) => i !== index))}
+          attachedAudio={attachedAudio}
+          onAudioAdded={setAttachedAudio}
+          onAudioRemoved={() => setAttachedAudio(null)}
           disabled={!anyModelReady}
         />
         <form onSubmit={handleSubmit} className="relative mt-1">
@@ -371,6 +379,7 @@ export function ChatInterface({
                 setInput("");
                 setAttachedImages([]);
                 setAttachedFiles([]);
+                setAttachedAudio(null);
                 setIsTyping(false);
                 return;
               }
@@ -422,12 +431,14 @@ export function ChatInterface({
   )
 }
 
-// MessageBubble component unchanged
+// MessageBubble component — memoized to prevent re-renders on unrelated parent state changes
+// (e.g. typing in the input box changes `input` state, which would otherwise re-render
+// every message bubble in the list on every keystroke)
 interface MessageBubbleProps {
   message: Message
 }
 
-function MessageBubble({ message }: MessageBubbleProps) {
+const MessageBubble = React.memo(function MessageBubble({ message }: MessageBubbleProps) {
   const isUser = message.role === "user"
   const [copied, setCopied] = React.useState(false)
 
@@ -493,11 +504,22 @@ function MessageBubble({ message }: MessageBubbleProps) {
                     ))}
                   </div>
                 )}
+                {/* Render audio chip for attached audio */}
+                {Array.isArray(message.content) && message.content.some(p => p.type === "audio") && (
+                  <div className="flex flex-wrap gap-1.5">
+                    {message.content.filter(p => p.type === "audio").map((p, i) => (
+                      <div key={i} className="flex items-center gap-1.5 bg-blue-400/20 rounded-md px-2 py-1">
+                        <Music className="h-3.5 w-3.5 text-white/80 flex-shrink-0" />
+                        <span className="text-[11px] text-white/90">{p.audioLabel}</span>
+                      </div>
+                    ))}
+                  </div>
+                )}
                 <div className="text-sm md:text-sm whitespace-pre-wrap break-words leading-relaxed">{getMessageText(message.content)}</div>
               </div>
             ) : (
               <div
-                className="text-sm md:text-sm whitespace-pre-wrap break-words leading-relaxed text-gray-700"
+                className="text-sm whitespace-pre-wrap break-words leading-relaxed text-gray-700"
                 dangerouslySetInnerHTML={{ __html: getMessageText(message.content) }}
               />
             )}
@@ -562,4 +584,4 @@ function MessageBubble({ message }: MessageBubbleProps) {
       </div>
     </motion.div>
   )
-}
+})

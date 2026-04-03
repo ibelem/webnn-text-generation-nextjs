@@ -1,7 +1,7 @@
 "use client"
 
 import React from "react"
-import { motion } from "framer-motion"
+import { flushSync } from "react-dom"
 import type { ModelType, BackendType } from "@/lib/types"
 import Image from 'next/image';
 import { Button } from "@/components/ui/button"
@@ -11,6 +11,17 @@ import { Sparkles, Gpu, Microchip, Loader2, Download, Cog, RefreshCcw, X, Eye } 
 import { MODELS, BACKENDS } from "../lib/constants"
 import { Progress } from "@/components/progress"
 import type { ProgressProps } from "@/components/progress"
+
+/** Progressive enhancement: run a state mutation inside a View Transition if the API is available. */
+function withViewTransition(fn: () => void): void {
+  if (typeof document !== "undefined" && "startViewTransition" in document) {
+    (document as Document & { startViewTransition(cb: () => void): void }).startViewTransition(
+      () => flushSync(fn)
+    );
+  } else {
+    fn();
+  }
+}
 
 interface SidebarProps {
   selectedModel: ModelType;
@@ -64,9 +75,11 @@ export function Sidebar({
 
       if (status === "error") {
         console.error(`[Worker] Model load error (${model_id}):`, data);
-        setLoadError(data ?? "Unknown error");
-        setModelLoadState((prev) => ({ ...prev, [model_id]: "not_loaded" }));
-        setProgressItems?.([]);
+        withViewTransition(() => {
+          setLoadError(data ?? "Unknown error");
+          setModelLoadState((prev) => ({ ...prev, [model_id]: "not_loaded" }));
+          setProgressItems?.([]);
+        });
         return;
       }
 
@@ -75,8 +88,10 @@ export function Sidebar({
         return;
       }
       if (status === "loading") {
-        setLoadError(null); // clear any previous error
-        setModelLoadState((prev) => ({ ...prev, [model_id]: "loading" }));
+        withViewTransition(() => {
+          setLoadError(null); // clear any previous error
+          setModelLoadState((prev) => ({ ...prev, [model_id]: "loading" }));
+        });
         if (data) {
           setProgressItems?.([{ text: data, progress: 0 }]);
         }
@@ -113,18 +128,26 @@ export function Sidebar({
           )
         );
       } else if (status === "warm") {
-        setModelLoadState((prev) => ({ ...prev, [model_id]: "warm" }));
-        if (typeof compilationTime === "number") {
-          setCompilationTime(compilationTime);
-        }
+        withViewTransition(() => {
+          setModelLoadState((prev) => ({ ...prev, [model_id]: "warm" }));
+          if (typeof compilationTime === "number") {
+            setCompilationTime(compilationTime);
+          }
+        });
       } else if (status === "loaded") {
-        setModelLoadState((prev) => ({ ...prev, [model_id]: "loaded" }));
+        withViewTransition(() => {
+          setModelLoadState((prev) => ({ ...prev, [model_id]: "loaded" }));
+        });
       } else if (status === "ready") {
-        setModelLoadState((prev) => ({ ...prev, [model_id]: "ready" }));
-        setProgressItems?.([]); // Clear all progress when model is ready
+        withViewTransition(() => {
+          setModelLoadState((prev) => ({ ...prev, [model_id]: "ready" }));
+          setProgressItems?.([]); // Clear all progress when model is ready
+        });
       } else if (status === "reset") {
-        setModelLoadState((prev) => ({ ...prev, [model_id]: "not_loaded" }));
-        setProgressItems?.([]);
+        withViewTransition(() => {
+          setModelLoadState((prev) => ({ ...prev, [model_id]: "not_loaded" }));
+          setProgressItems?.([]);
+        });
       }
     }
 
@@ -149,7 +172,7 @@ export function Sidebar({
     }
 
     // Same model — worker is alive, send directly.
-    setModelLoadState((prev) => ({ ...prev, [modelId]: "loading" }));
+    withViewTransition(() => setModelLoadState((prev) => ({ ...prev, [modelId]: "loading" })));
     const selectedModelObj = MODELS.find((m) => m.id === modelId);
     if (selectedModelObj) {
       workerRef.current?.postMessage({
@@ -186,11 +209,11 @@ export function Sidebar({
 
       <Tabs defaultValue="models" className="gap-0">
         <TabsList className="grid grid-cols-2 p-1 gap-1 mb-3 h-[auto] w-full rounded-md bg-gray-100/80 border border-gray-200/60">
-          <TabsTrigger className="flex-1 px-3 py-2.5 rounded-md text-xs md:text-sm font-medium transition-all data-[state=active]:bg-white data-[state=active]:shadow-sm border-none hover:cursor-pointer data-[state=inactive]:text-gray-400 hover:bg-white/60 focus:outline-none"
+          <TabsTrigger className="flex-1 px-3 py-2.5 rounded-md text-xs md:text-sm font-medium transition-all data-[state=active]:bg-white data-[state=active]:shadow-sm border-none hover:cursor-pointer data-[state=inactive]:text-gray-400 hover:bg-white/60 focus:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 focus-visible:ring-offset-1"
             value="models"> 
             Models
           </TabsTrigger>
-          <TabsTrigger className="flex-1 px-3 py-2.5 rounded-md text-xs md:text-sm font-medium transition-all data-[state=active]:bg-white data-[state=active]:shadow-sm border-none hover:cursor-pointer data-[state=inactive]:text-gray-400 hover:bg-white/60 focus:outline-none"
+          <TabsTrigger className="flex-1 px-3 py-2.5 rounded-md text-xs md:text-sm font-medium transition-all data-[state=active]:bg-white data-[state=active]:shadow-sm border-none hover:cursor-pointer data-[state=inactive]:text-gray-400 hover:bg-white/60 focus:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 focus-visible:ring-offset-1"
             value="backends">
             Backends
           </TabsTrigger>
@@ -207,14 +230,14 @@ export function Sidebar({
           >
             <TabsList className="grid grid-cols-2 p-0.5 gap-0.5 h-[auto] w-full rounded-tl-md rounded-tr-md rounded-bl-none rounded-br-none bg-gray-100/60 border border-gray-200/40">
               <TabsTrigger
-                className="flex items-center justify-center gap-1 px-2 py-1.5 rounded-tl-md rounded-tr-none rounded-bl-none rounded-br-none font-medium transition-all data-[state=active]:bg-white data-[state=active]:shadow-sm border-none hover:cursor-pointer data-[state=inactive]:text-gray-400 hover:bg-white/60 focus:outline-none"
+                className="flex items-center justify-center gap-1 px-2 py-1.5 rounded-tl-md rounded-tr-none rounded-bl-none rounded-br-none font-medium transition-all data-[state=active]:bg-white data-[state=active]:shadow-sm border-none hover:cursor-pointer data-[state=inactive]:text-gray-400 hover:bg-white/60 focus:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 focus-visible:ring-offset-1"
                 value="text"
               >
                 <Sparkles className="h-3 w-3" />
                 Text
               </TabsTrigger>
               <TabsTrigger
-                className="flex items-center justify-center gap-1 px-2 py-1.5 rounded-tl-none rounded-tr-md rounded-bl-none rounded-br-none font-medium transition-all data-[state=active]:bg-white data-[state=active]:shadow-sm border-none hover:cursor-pointer data-[state=inactive]:text-gray-400 hover:bg-white/60 focus:outline-none"
+                className="flex items-center justify-center gap-1 px-2 py-1.5 rounded-tl-none rounded-tr-md rounded-bl-none rounded-br-none font-medium transition-all data-[state=active]:bg-white data-[state=active]:shadow-sm border-none hover:cursor-pointer data-[state=inactive]:text-gray-400 hover:bg-white/60 focus:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 focus-visible:ring-offset-1"
                 value="multimodal"
               >
                 <Eye className="h-3 w-3" />
@@ -360,10 +383,12 @@ interface ModelOptionProps {
 
 function ModelOption({ model, isSelected, onClick, loadState, onLoad }: ModelOptionProps) {
   return (
-    <motion.div
-      whileHover={{ }}
-      whileTap={{ }}
-      className={`flex items-center py-3 px-3 md:py-2 md:px-3 cursor-pointer transition-colors duration-150 ${isSelected ? "bg-blue-50/50 border-l-2 border-l-blue-400" : "hover:bg-gray-50/80 border-l-2 border-l-transparent"}`}
+    <div
+      role="option"
+      aria-selected={isSelected}
+      tabIndex={0}
+      onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); onClick(); } }}
+      className={`flex items-center py-3 px-3 md:py-2 md:px-3 cursor-pointer transition-colors duration-150 focus:outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-blue-400 ${isSelected ? "bg-blue-50/50 border-l-2 border-l-blue-400" : "hover:bg-gray-50/80 border-l-2 border-l-transparent"}`}
       onClick={onClick}
     >
       <div className="flex-1 min-w-0">
@@ -385,7 +410,7 @@ function ModelOption({ model, isSelected, onClick, loadState, onLoad }: ModelOpt
         </div>
       </div>
       {/* Load/Reload Button */}
-      <div className="ml-2 flex-shrink-0">
+      <div className="ml-2 flex-shrink-0" style={{ viewTransitionName: `download-${model.id.replace(/[^a-zA-Z0-9]/g, '-')}` } as React.CSSProperties}>
         {loadState === "loading" ? (
           <div className="flex flex-col items-center gap-0.5 w-10">
             <Loader2 className="h-4 w-4 animate-spin text-blue-500" />
@@ -415,7 +440,7 @@ function ModelOption({ model, isSelected, onClick, loadState, onLoad }: ModelOpt
           </Button>
         )}
       </div>
-    </motion.div>
+    </div>
   );
 }
 
@@ -429,10 +454,12 @@ function BackendOption({ backend, isSelected, onClick }: BackendOptionProps) {
   let Icon = Gpu;
   if (backend.id === "webnn-npu") Icon = Microchip;
   return (
-    <motion.div
-      whileHover={{ }}
-      whileTap={{ }}
-      className={`flex items-center p-3 md:p-3.5 rounded-md cursor-pointer transition-colors duration-150 ${isSelected ? "bg-blue-50/60 border border-blue-200/60 shadow-sm" : "hover:bg-gray-50 border border-transparent"}`}
+    <div
+      role="radio"
+      aria-checked={isSelected}
+      tabIndex={0}
+      onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); onClick(); } }}
+      className={`flex items-center p-3 md:p-3.5 rounded-md cursor-pointer transition-colors duration-150 focus:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 focus-visible:ring-offset-1 ${isSelected ? "bg-blue-50/60 border border-blue-200/60 shadow-sm" : "hover:bg-gray-50 border border-transparent"}`}
       onClick={onClick}
     >
       <div className={`p-2.5 rounded-md mr-3 flex-shrink-0 transition-colors ${isSelected ? "bg-white shadow-sm text-blue-500" : "bg-gray-100 text-gray-400"}`}>
@@ -445,6 +472,6 @@ function BackendOption({ backend, isSelected, onClick }: BackendOptionProps) {
       {isSelected && (
         <div className="w-2 h-2 rounded-full bg-blue-400 flex-shrink-0" />
       )}
-    </motion.div>
+    </div>
   );
 }

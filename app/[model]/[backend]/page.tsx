@@ -171,6 +171,13 @@ export default function Page({ params }: { params: Promise<{ model: string; back
 
   return (
     <div className="flex flex-col md:flex-row min-h-screen md:h-screen bg-gray-50">
+      {/* Skip link — keyboard users can jump past the sidebar */}
+      <a
+        href="#main-content"
+        className="sr-only focus:not-sr-only focus:fixed focus:top-2 focus:left-2 focus:z-50 focus:px-3 focus:py-2 focus:text-xs focus:font-medium focus:bg-white focus:text-blue-600 focus:rounded-md focus:shadow-md focus:border focus:border-blue-200"
+      >
+        Skip to main content
+      </a>
       {isSidebarOpen && (
         workerReady ? (
           <div className="w-full md:w-80 border-b md:border-b-0 md:border-r border-gray-200/60 bg-white max-h-[85dvh] overflow-y-auto md:max-h-none md:h-full md:overflow-y-auto flex-shrink-0 sidebar-enter">
@@ -200,7 +207,7 @@ export default function Page({ params }: { params: Promise<{ model: string; back
           </div>
         )
       )}
-      <div className="flex-1 flex flex-col min-h-screen md:min-h-0 min-w-0">
+      <div id="main-content" className="flex-1 flex flex-col min-h-screen md:min-h-0 min-w-0">
         {isLiveMode && supportsLive ? (
           <LiveVideoPanel
             isSidebarOpen={isSidebarOpen}

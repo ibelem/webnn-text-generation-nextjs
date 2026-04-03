@@ -286,7 +286,7 @@ export const MODELS: Array<{
       doSample: false,
       systemPrompt: "",
       thinkingTagSupport: true,
-      capabilities: ["text", "vision"],
+      capabilities: ["text", "vision", "audio"],
       modelClass: "conditional-generation",
     },
     {

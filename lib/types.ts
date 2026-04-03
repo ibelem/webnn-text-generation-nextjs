@@ -2,17 +2,19 @@ export type ModelType = "gemma_3_1b_it_gqa" | "phi-3_5-mini" | "phi-4-mini-instr
 export type BackendType = "webgpu" | "webnn-gpu" | "webnn-npu"
 
 /** What input modalities a model supports */
-export type ModelCapability = "text" | "vision" | "video";
+export type ModelCapability = "text" | "vision" | "video" | "audio";
 
 /** Which transformers.js model class to use for loading */
 export type ModelClass = "causal-lm" | "conditional-generation";
 
 /** A single part of a multimodal message */
 export interface MessageContentPart {
-  type: "text" | "image";
+  type: "text" | "image" | "audio";
   text?: string;
   /** Data URL or object URL for image content */
   image?: string;
+  /** Human-readable label for an attached audio clip, e.g. "recording.wav (5.3s)" */
+  audioLabel?: string;
 }
 
 export interface Message {

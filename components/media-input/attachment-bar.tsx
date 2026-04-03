@@ -2,7 +2,7 @@
 
 import React, { useRef, useState } from "react"
 import { Button } from "@/components/ui/button"
-import { ImagePlus, Camera, Film, Aperture, FileText, X } from "lucide-react"
+import { ImagePlus, Camera, Film, Aperture, FileText, X, Mic, MicOff, Music } from "lucide-react"
 import type { ModelCapability } from "@/lib/types"
 
 /** Maximum dimension (width or height) for images sent to VLM models */
@@ -14,6 +14,17 @@ export interface AttachedFile {
   content: string;
   /** size in bytes */
   size: number;
+}
+
+/** A decoded audio clip ready for model input */
+export interface AttachedAudio {
+  name: string;
+  /** Duration in seconds */
+  duration: number;
+  /** Always 16000 — models expect 16kHz mono PCM */
+  sampleRate: 16000;
+  /** Raw mono PCM samples resampled to 16kHz */
+  data: Float32Array;
 }
 
 interface AttachmentBarProps {
@@ -31,6 +42,12 @@ interface AttachmentBarProps {
   onFilesAdded?: (files: AttachedFile[]) => void;
   /** Callback to remove an attached file by index */
   onFileRemoved?: (index: number) => void;
+  /** Currently attached audio clip */
+  attachedAudio?: AttachedAudio | null;
+  /** Callback when an audio clip is attached */
+  onAudioAdded?: (audio: AttachedAudio) => void;
+  /** Callback to remove the attached audio clip */
+  onAudioRemoved?: () => void;
   /** Whether the model is ready for input */
   disabled?: boolean;
 }
@@ -46,16 +63,24 @@ export function AttachmentBar({
   attachedFiles = [],
   onFilesAdded,
   onFileRemoved,
+  attachedAudio,
+  onAudioAdded,
+  onAudioRemoved,
   disabled = false,
 }: AttachmentBarProps) {
   const fileInputRef = useRef<HTMLInputElement>(null);
   const textFileInputRef = useRef<HTMLInputElement>(null);
   const videoFileInputRef = useRef<HTMLInputElement>(null);
+  const audioFileInputRef = useRef<HTMLInputElement>(null);
   const videoPreviewRef = useRef<HTMLVideoElement>(null);
+  const mediaRecorderRef = useRef<MediaRecorder | null>(null);
+  const audioChunksRef = useRef<Blob[]>([]);
   const hasVision = capabilities.includes("vision") || capabilities.includes("video");
   const hasVideo = capabilities.includes("video");
+  const hasAudio = capabilities.includes("audio");
 
   const [videoPreview, setVideoPreview] = useState<{ url: string; name: string } | null>(null);
+  const [isRecording, setIsRecording] = useState(false);
 
   const handleFileSelect = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const files = e.target.files;
@@ -192,6 +217,81 @@ export function AttachmentBar({
     e.target.value = "";
   };
 
+  // ── Audio helpers ────────────────────────────────────────────────────────
+
+  /** Decode any audio file/blob to a mono Float32Array at 16 kHz using the Web Audio API. */
+  async function decodeAudioToFloat32(blob: Blob): Promise<{ data: Float32Array; duration: number }> {
+    const arrayBuffer = await blob.arrayBuffer();
+    const AudioCtx = window.AudioContext || (window as unknown as { webkitAudioContext: typeof AudioContext }).webkitAudioContext;
+    const decodeCtx = new AudioCtx();
+    const audioBuffer = await decodeCtx.decodeAudioData(arrayBuffer);
+    await decodeCtx.close();
+
+    const TARGET_SAMPLE_RATE = 16000;
+    const duration = audioBuffer.duration;
+    const offlineCtx = new OfflineAudioContext(
+      1,
+      Math.ceil(duration * TARGET_SAMPLE_RATE),
+      TARGET_SAMPLE_RATE
+    );
+    const source = offlineCtx.createBufferSource();
+    source.buffer = audioBuffer;
+    // Mix down to mono by connecting all channels to a single channel merger
+    const merger = offlineCtx.createChannelMerger(1);
+    source.connect(merger);
+    merger.connect(offlineCtx.destination);
+    source.start(0);
+    const resampled = await offlineCtx.startRendering();
+    return { data: resampled.getChannelData(0), duration };
+  }
+
+  const handleAudioFileSelect = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    e.target.value = "";
+    try {
+      const { data, duration } = await decodeAudioToFloat32(file);
+      onAudioAdded?.({ name: file.name, duration, sampleRate: 16000, data });
+    } catch (err) {
+      console.error("Failed to decode audio file:", err);
+    }
+  };
+
+  const startRecording = async () => {
+    try {
+      const stream = await navigator.mediaDevices.getUserMedia({ audio: true, video: false });
+      audioChunksRef.current = [];
+      const recorder = new MediaRecorder(stream);
+      mediaRecorderRef.current = recorder;
+
+      recorder.ondataavailable = (e) => {
+        if (e.data.size > 0) audioChunksRef.current.push(e.data);
+      };
+
+      recorder.onstop = async () => {
+        stream.getTracks().forEach((t) => t.stop());
+        const blob = new Blob(audioChunksRef.current, { type: recorder.mimeType || "audio/webm" });
+        try {
+          const { data, duration } = await decodeAudioToFloat32(blob);
+          onAudioAdded?.({ name: "microphone-recording", duration, sampleRate: 16000, data });
+        } catch (err) {
+          console.error("Failed to decode microphone recording:", err);
+        }
+      };
+
+      recorder.start();
+      setIsRecording(true);
+    } catch (err) {
+      console.error("Microphone access denied or unavailable:", err);
+    }
+  };
+
+  const stopRecording = () => {
+    mediaRecorderRef.current?.stop();
+    mediaRecorderRef.current = null;
+    setIsRecording(false);
+  };
+
   // Listen for paste events on the document
   React.useEffect(() => {
     if (!hasVision) return;
@@ -210,7 +310,17 @@ export function AttachmentBar({
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
-  if (!hasVision && !onFilesAdded) return null;
+  // Stop mic stream if component unmounts while recording
+  React.useEffect(() => {
+    return () => {
+      if (mediaRecorderRef.current && mediaRecorderRef.current.state !== "inactive") {
+        mediaRecorderRef.current.stop();
+        mediaRecorderRef.current = null;
+      }
+    };
+  }, []);
+
+  if (!hasVision && !hasAudio && !onFilesAdded) return null;
 
   return (
     <div className="flex flex-col gap-2">
@@ -305,6 +415,29 @@ export function AttachmentBar({
         </div>
       )}
 
+      {/* Audio clip chip */}
+      {attachedAudio && (
+        <div className="flex flex-wrap gap-1.5 px-1">
+          <div className="relative group flex items-center gap-1.5 bg-blue-50 border border-blue-200 rounded-md px-2.5 py-1.5 shadow-sm">
+            <Music className="h-3.5 w-3.5 text-blue-500 flex-shrink-0" />
+            <div className="flex flex-col min-w-0">
+              <span className="text-[11px] font-medium text-blue-700 truncate max-w-[160px]" title={attachedAudio.name}>
+                {attachedAudio.name === "microphone-recording" ? "Microphone recording" : attachedAudio.name}
+              </span>
+              <span className="text-[9px] text-blue-400">{attachedAudio.duration.toFixed(1)}s · 16kHz mono</span>
+            </div>
+            <button
+              type="button"
+              onClick={onAudioRemoved}
+              className="ml-1 bg-blue-700 text-white rounded-full p-0.5 opacity-0 group-hover:opacity-100 transition-opacity shadow-sm flex-shrink-0"
+              aria-label="Remove audio clip"
+            >
+              <X className="h-2.5 w-2.5" />
+            </button>
+          </div>
+        </div>
+      )}
+
       {/* Action buttons */}
       <div className="flex items-center gap-1.5">
         <input
@@ -330,6 +463,15 @@ export function AttachmentBar({
           className="hidden"
           onChange={handleTextFileSelect}
         />
+        {hasAudio && (
+          <input
+            ref={audioFileInputRef}
+            type="file"
+            accept=".mp3,.wav,.ogg,.m4a,.aac,.flac,.opus,.webm"
+            className="hidden"
+            onChange={handleAudioFileSelect}
+          />
+        )}
         {hasVision && (
           <Button
             type="button"
@@ -384,6 +526,38 @@ export function AttachmentBar({
           <FileText className="h-4 w-4" />
           <span className="text-xs ml-1 hidden sm:inline">File</span>
         </Button>
+        {hasAudio && (
+          <Button
+            type="button"
+            variant="ghost"
+            size="sm"
+            disabled={disabled || !!attachedAudio}
+            onClick={() => audioFileInputRef.current?.click()}
+            className="h-8 px-2.5 text-gray-400 hover:text-blue-500 hover:bg-blue-50/50 hover:cursor-pointer rounded-md transition-colors"
+            title="Attach audio file (.mp3, .wav, .ogg, etc.)"
+          >
+            <Music className="h-4 w-4" />
+            <span className="text-xs ml-1 hidden sm:inline">Audio</span>
+          </Button>
+        )}
+        {hasAudio && (
+          <Button
+            type="button"
+            variant="ghost"
+            size="sm"
+            disabled={disabled || !!attachedAudio}
+            onClick={isRecording ? stopRecording : startRecording}
+            className={`h-8 px-2.5 hover:cursor-pointer rounded-md transition-colors ${
+              isRecording
+                ? "text-red-500 hover:text-red-600 hover:bg-red-50/50 animate-pulse"
+                : "text-gray-400 hover:text-blue-500 hover:bg-blue-50/50"
+            }`}
+            title={isRecording ? "Stop recording" : "Record audio from microphone"}
+          >
+            {isRecording ? <MicOff className="h-4 w-4" /> : <Mic className="h-4 w-4" />}
+            <span className="text-xs ml-1 hidden sm:inline">{isRecording ? "Stop" : "Record"}</span>
+          </Button>
+        )}
       </div>
     </div>
   );
