@@ -42,6 +42,8 @@ interface ChatInterfaceProps {
   setReasonEnabled: (enabled: boolean) => void;
   systemPromptEnabled: boolean;
   systemPromptText: string;
+  maxOutputTokens: number;
+  maxInputTokens: number;
   modelLoadState: Record<string, "not_loaded" | "loading" | "warm" | "loaded" | "ready">;
   /** Whether the current model supports live video mode */
   supportsLive?: boolean;
@@ -60,6 +62,8 @@ export function ChatInterface({
   setReasonEnabled,
   systemPromptEnabled,
   systemPromptText,
+  maxOutputTokens,
+  maxInputTokens,
   modelLoadState,
   supportsLive = false,
   onModeChange,
@@ -213,6 +217,8 @@ export function ChatInterface({
         systemPromptText,
         images: hasImages ? attachedImages : undefined,
         audio: hasAudio ? Array.from(attachedAudio!.data) : undefined,
+        maxOutputTokens: maxOutputTokens > 0 ? maxOutputTokens : undefined,
+        maxInputTokens: maxInputTokens > 0 ? maxInputTokens : undefined,
       },
     });
     setIsTyping(true);

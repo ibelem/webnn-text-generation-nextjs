@@ -52,6 +52,15 @@ export default function Page({ params }: { params: Promise<{ model: string; back
   // System Prompt text
   const [systemPromptText, setSystemPromptText] = useState(DEFAULT_SYSTEM_PROMPT);
 
+  // Token length parameters (similar to benchmark -l and -g flags)
+  const VALID_TOKEN_OPTIONS = [0, 64, 128, 256, 512, 1024, 2048, 4096, 8192, 16384, 32768];
+  const parseTokenParam = (value: string | null) => {
+    const n = parseInt(value ?? "", 10);
+    return VALID_TOKEN_OPTIONS.includes(n) ? n : 0;
+  };
+  const [maxOutputTokens, setMaxOutputTokens] = useState<number>(() => parseTokenParam(searchParams.get("max_output_tokens")));
+  const [maxInputTokens, setMaxInputTokens] = useState<number>(() => parseTokenParam(searchParams.get("max_input_tokens")));
+
   // Model load state
   const [modelLoadState, setModelLoadState] = useState<Record<string, "not_loaded" | "loading" | "warm" | "loaded" | "ready">>({});
 
@@ -87,6 +96,14 @@ export default function Page({ params }: { params: Promise<{ model: string; back
     if (urlValue !== systemPromptEnabled) {
       setSystemPromptEnabled(urlValue);
     }
+    const urlMaxOutput = parseTokenParam(searchParams.get("max_output_tokens"));
+    if (urlMaxOutput !== maxOutputTokens) {
+      setMaxOutputTokens(urlMaxOutput);
+    }
+    const urlMaxInput = parseTokenParam(searchParams.get("max_input_tokens"));
+    if (urlMaxInput !== maxInputTokens) {
+      setMaxInputTokens(urlMaxInput);
+    }
     // Only react to URL changes, not state changes
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [searchParams]);
@@ -98,6 +115,18 @@ export default function Page({ params }: { params: Promise<{ model: string; back
       params.set("system_prompt", "true");
     } else {
       params.delete("system_prompt");
+    }
+
+    if (maxOutputTokens > 0) {
+      params.set("max_output_tokens", String(maxOutputTokens));
+    } else {
+      params.delete("max_output_tokens");
+    }
+
+    if (maxInputTokens > 0) {
+      params.set("max_input_tokens", String(maxInputTokens));
+    } else {
+      params.delete("max_input_tokens");
     }
 
     // Strip ?mode=live when switching to a model that doesn't support video
@@ -116,7 +145,7 @@ export default function Page({ params }: { params: Promise<{ model: string; back
     if (newUrl !== currentUrl) {
       router.replace(newUrl);
     }
-  }, [selectedModel, selectedBackend, model, backend, systemPromptEnabled, searchParams, router]);
+  }, [selectedModel, selectedBackend, model, backend, systemPromptEnabled, maxOutputTokens, maxInputTokens, searchParams, router]);
 
   // After a cross-model navigation the sidebar stores the target model id in
   // sessionStorage. Pick it up here once the fresh worker is ready and fire the load.
@@ -195,6 +224,10 @@ export default function Page({ params }: { params: Promise<{ model: string; back
               setSystemPromptEnabled={setSystemPromptEnabled}
               systemPromptText={systemPromptText}
               setSystemPromptText={setSystemPromptText}
+              maxOutputTokens={maxOutputTokens}
+              setMaxOutputTokens={setMaxOutputTokens}
+              maxInputTokens={maxInputTokens}
+              setMaxInputTokens={setMaxInputTokens}
               modelLoadState={modelLoadState}
               setModelLoadState={setModelLoadState}
               setIsSidebarOpen={setIsSidebarOpen}
@@ -232,6 +265,8 @@ export default function Page({ params }: { params: Promise<{ model: string; back
             setReasonEnabled={setReasonEnabled}
             systemPromptEnabled={systemPromptEnabled}
             systemPromptText={systemPromptText}
+            maxOutputTokens={maxOutputTokens}
+            maxInputTokens={maxInputTokens}
             modelLoadState={modelLoadState}
             supportsLive={supportsLive}
             onModeChange={handleModeChange}

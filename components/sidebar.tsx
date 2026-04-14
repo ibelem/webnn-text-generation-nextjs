@@ -37,6 +37,10 @@ interface SidebarProps {
   setSystemPromptEnabled: (enabled: boolean) => void;
   systemPromptText: string;
   setSystemPromptText: (text: string) => void;
+  maxOutputTokens: number;
+  setMaxOutputTokens: (tokens: number) => void;
+  maxInputTokens: number;
+  setMaxInputTokens: (tokens: number) => void;
   modelLoadState: Record<string, "not_loaded" | "loading" | "warm" | "loaded" | "ready">;
   setModelLoadState: React.Dispatch<React.SetStateAction<Record<string, "not_loaded" | "loading" | "warm" | "loaded" | "ready" >>>;
   setIsSidebarOpen?: (open: boolean) => void;
@@ -56,6 +60,10 @@ export function Sidebar({
   setSystemPromptEnabled,
   systemPromptText,
   setSystemPromptText,
+  maxOutputTokens,
+  setMaxOutputTokens,
+  maxInputTokens,
+  setMaxInputTokens,
   modelLoadState,
   setModelLoadState,
   setIsSidebarOpen,
@@ -354,6 +362,33 @@ export function Sidebar({
               />
             </div>
           )}
+          {/* Token length parameters */}
+          <div className="flex items-center justify-between">
+            <span className="text-gray-400 text-xs">Max Input Tokens</span>
+            <select
+              value={maxInputTokens}
+              onChange={(e) => setMaxInputTokens(parseInt(e.target.value))}
+              className="w-24 text-xs font-semibold text-right bg-white border border-gray-200 rounded-md px-2 py-1 focus:border-blue-300 focus:outline-none cursor-pointer"
+              title="Max input/context tokens (default = unlimited)"
+            >
+              {[0, 64, 128, 256, 512, 1024, 2048, 4096, 8192, 16384, 32768].map((v) => (
+                <option key={v} value={v}>{v === 0 ? "default" : v}</option>
+              ))}
+            </select>
+          </div>
+          <div className="flex items-center justify-between">
+            <span className="text-gray-400 text-xs">Max Output Tokens</span>
+            <select
+              value={maxOutputTokens}
+              onChange={(e) => setMaxOutputTokens(parseInt(e.target.value))}
+              className="w-24 text-xs font-semibold text-right bg-white border border-gray-200 rounded-md px-2 py-1 focus:border-blue-300 focus:outline-none cursor-pointer"
+              title="Max tokens to generate (default = model default)"
+            >
+              {[0, 64, 128, 256, 512, 1024, 2048, 4096, 8192, 16384, 32768].map((v) => (
+                <option key={v} value={v}>{v === 0 ? "default" : v}</option>
+              ))}
+            </select>
+          </div>
         </div>
         {/* Progress bar UI (show only if loading/progress is needed) */}
         {progressItems && progressItems.length > 0 && (
