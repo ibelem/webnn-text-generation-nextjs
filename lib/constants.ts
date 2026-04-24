@@ -241,7 +241,7 @@ export const MODELS: Array<{
     // ── Multimodal (Vision-Language) Models ──────────────────────────────
     {
       id: "qwen3_5-0_8b" as ModelType,
-      model: "onnx-community/Qwen3.5-0.8B-ONNX",
+      model: "onnx-community/Qwen3.5-0.8B-ONNX-OPT",
       dataType: {
         embed_tokens: "q4",
         vision_encoder: "fp16",
@@ -291,7 +291,7 @@ export const MODELS: Array<{
     },
     {
       id: "qwen3_5-4b" as ModelType,
-      model: "onnx-community/Qwen3.5-4B-ONNX",
+      model: "onnx-community/Qwen3.5-4B-ONNX-OPT",
       dataType: {
         embed_tokens: "q4",
         vision_encoder: "fp16",
