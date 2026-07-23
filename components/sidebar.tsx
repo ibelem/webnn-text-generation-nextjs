@@ -41,6 +41,8 @@ interface SidebarProps {
   setMaxOutputTokens: (tokens: number) => void;
   maxInputTokens: number;
   setMaxInputTokens: (tokens: number) => void;
+  temperature: number;
+  setTemperature: (temperature: number) => void;
   modelLoadState: Record<string, "not_loaded" | "loading" | "warm" | "loaded" | "ready">;
   setModelLoadState: React.Dispatch<React.SetStateAction<Record<string, "not_loaded" | "loading" | "warm" | "loaded" | "ready" >>>;
   setIsSidebarOpen?: (open: boolean) => void;
@@ -64,6 +66,8 @@ export function Sidebar({
   setMaxOutputTokens,
   maxInputTokens,
   setMaxInputTokens,
+  temperature,
+  setTemperature,
   modelLoadState,
   setModelLoadState,
   setIsSidebarOpen,
@@ -105,15 +109,26 @@ export function Sidebar({
         }
       } else if (status === "initiate") {
         // File download started
-        setProgressItems?.((prev) => [
-          ...(prev || []),
-          {
-            file,
-            progress: 0,
-            total,
-            text: file,
+        setProgressItems?.((prev) => {
+          const list = prev || [];
+          // Some files (e.g. preprocessor_config.json) are requested by multiple
+          // model components. Reuse the existing entry instead of appending a
+          // duplicate, which would create non-unique React keys.
+          if (list.some((item) => item.file === file)) {
+            return list.map((item) =>
+              item.file === file ? { ...item, progress: 0, total, text: file } : item
+            );
           }
-        ]);
+          return [
+            ...list,
+            {
+              file,
+              progress: 0,
+              total,
+              text: file,
+            },
+          ];
+        });
       } else if (status === "progress") {
         setProgressItems?.((prev) =>
           (prev || []).map((item) =>
@@ -165,21 +180,29 @@ export function Sidebar({
     };
   }, [setProgressItems, setModelLoadState, workerRef]);
 
+  // Selecting a model (from the list or via the download icon) also resets the
+  // temperature to that model's default from constants.ts, so the correct value
+  // is applied when the model loads.
+  const handleSelectModel = (modelId: ModelType) => {
+    setTemperature(MODELS.find((m) => m.id === modelId)?.temperature ?? 0.6);
+    setSelectedModel(modelId);
+  };
+
   // Handler for load/reload button
   const handleLoadModel = (modelId: string) => {
     setCompilationTime(null);
 
     if (modelId !== selectedModel) {
-      // Navigating to a different model causes router.replace → full page remount →
-      // the current worker is terminated and a new one is created. Any messages sent
-      // here would go to the dead worker. Instead, store the intent in sessionStorage
-      // so the new page instance picks it up once its worker is ready.
+      handleSelectModel(modelId as ModelType);
+      // Store as fallback for full page remounts (when the URL path change
+      // terminates the current worker and a new one is created). Not needed for
+      // same-model reloads — the direct postMessage below handles those.
       sessionStorage.setItem("pendingAutoLoad", modelId);
-      setSelectedModel(modelId as ModelType);
-      return;
     }
 
-    // Same model — worker is alive, send directly.
+    // Send setConfig + load directly to the current worker for both same-model
+    // and cross-model cases. The worker clears its state on setConfig, so the
+    // same Worker instance can load any model without needing a page remount.
     withViewTransition(() => setModelLoadState((prev) => ({ ...prev, [modelId]: "loading" })));
     const selectedModelObj = MODELS.find((m) => m.id === modelId);
     if (selectedModelObj) {
@@ -258,7 +281,7 @@ export function Sidebar({
                   key={model.id}
                   model={model}
                   isSelected={selectedModel === model.id}
-                  onClick={() => setSelectedModel(model.id)}
+                  onClick={() => handleSelectModel(model.id)}
                   loadState={modelLoadState[model.id] || "not_loaded"}
                   onLoad={() => handleLoadModel(model.id)}
                 />
@@ -270,7 +293,7 @@ export function Sidebar({
                   key={model.id}
                   model={model}
                   isSelected={selectedModel === model.id}
-                  onClick={() => setSelectedModel(model.id)}
+                  onClick={() => handleSelectModel(model.id)}
                   loadState={modelLoadState[model.id] || "not_loaded"}
                   onLoad={() => handleLoadModel(model.id)}
                 />
@@ -362,6 +385,25 @@ export function Sidebar({
               />
             </div>
           )}
+          {/* Temperature (0..1) — applied when the model is loaded */}
+          <div className="flex items-center justify-between gap-3">
+            <span className="text-gray-400 text-xs whitespace-nowrap">Temperature</span>
+            <div className="flex items-center gap-2 flex-1 justify-end">
+              <input
+                type="range"
+                min={0}
+                max={1}
+                step={0.1}
+                value={temperature}
+                onChange={(e) => setTemperature(parseFloat(e.target.value))}
+                className="w-28 accent-blue-500 cursor-pointer"
+                title="Sampling temperature: 0 = deterministic, 1 = most random (applied on each generation)"
+              />
+              <span className="text-xs font-semibold text-gray-700 w-7 text-right tabular-nums">
+                {temperature.toFixed(1)}
+              </span>
+            </div>
+          </div>
           {/* Token length parameters */}
           <div className="flex items-center justify-between">
             <span className="text-gray-400 text-xs">Max Input Tokens</span>
