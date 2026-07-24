@@ -61,6 +61,11 @@ export default function Page({ params }: { params: Promise<{ model: string; back
   const [maxOutputTokens, setMaxOutputTokens] = useState<number>(() => parseTokenParam(searchParams.get("max_output_tokens")));
   const [maxInputTokens, setMaxInputTokens] = useState<number>(() => parseTokenParam(searchParams.get("max_input_tokens")));
 
+  // Sampling temperature (0..1). 0 = deterministic/greedy, 1 = most random.
+  // Initialized from the selected model's `temperature` in constants.ts (or 0.6).
+  // Sent per-generate like maxOutputTokens — no model reload needed when changed.
+  const modelDefaultTemperature = (id: string) => MODELS.find((m) => m.id === id)?.temperature ?? 0.6;
+  const [temperature, setTemperature] = useState<number>(() => modelDefaultTemperature(selectedModel));
   // Model load state
   const [modelLoadState, setModelLoadState] = useState<Record<string, "not_loaded" | "loading" | "warm" | "loaded" | "ready">>({});
 
@@ -86,7 +91,13 @@ export default function Page({ params }: { params: Promise<{ model: string; back
   }, [])
   
   useEffect(() => {
-    if (validModel && selectedModel !== model) setSelectedModel(model as ModelType);
+    if (validModel && selectedModel !== model) {
+      setSelectedModel(model as ModelType);
+      // Also reset the temperature slider to the new model's default so it is
+      // always in sync when navigating via URL. If the URL has an explicit
+      // ?temperature= param the URL→state sync effect will override this value.
+      setTemperature(modelDefaultTemperature(model));
+    }
     if (validBackend && selectedBackend !== backend) setSelectedBackend(backend as BackendType);
   }, [model, backend, validModel, selectedModel, validBackend, selectedBackend]);
 
@@ -103,6 +114,12 @@ export default function Page({ params }: { params: Promise<{ model: string; back
     const urlMaxInput = parseTokenParam(searchParams.get("max_input_tokens"));
     if (urlMaxInput !== maxInputTokens) {
       setMaxInputTokens(urlMaxInput);
+    }
+    const urlTempStr = searchParams.get("temperature");
+    if (urlTempStr !== null) {
+      const n = parseFloat(urlTempStr);
+      const urlTemp = Number.isFinite(n) ? Math.min(1, Math.max(0, n)) : temperature;
+      if (urlTemp !== temperature) setTemperature(urlTemp);
     }
     // Only react to URL changes, not state changes
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -129,6 +146,15 @@ export default function Page({ params }: { params: Promise<{ model: string; back
       params.delete("max_input_tokens");
     }
 
+    // Only write ?temperature= when it differs from the model's default in
+    // constants.ts. This keeps URLs clean for default usage while persisting
+    // user overrides, matching the max_output_tokens behaviour.
+    if (temperature !== modelDefaultTemperature(selectedModel)) {
+      params.set("temperature", String(temperature));
+    } else {
+      params.delete("temperature");
+    }
+
     // Strip ?mode=live when switching to a model that doesn't support video
     const modelObj = MODELS.find((m) => m.id === selectedModel);
     const modelSupportsVideo = modelObj?.capabilities?.includes("video") ?? false;
@@ -145,10 +171,11 @@ export default function Page({ params }: { params: Promise<{ model: string; back
     if (newUrl !== currentUrl) {
       router.replace(newUrl);
     }
-  }, [selectedModel, selectedBackend, model, backend, systemPromptEnabled, maxOutputTokens, maxInputTokens, searchParams, router]);
+  }, [selectedModel, selectedBackend, model, backend, systemPromptEnabled, maxOutputTokens, maxInputTokens, temperature, searchParams, router]);
 
   // After a cross-model navigation the sidebar stores the target model id in
   // sessionStorage. Pick it up here once the fresh worker is ready and fire the load.
+  // This is the fallback for full page remounts (new Worker instance).
   useEffect(() => {
     if (!workerReady) return;
     const pendingModelId = sessionStorage.getItem("pendingAutoLoad");
@@ -228,6 +255,8 @@ export default function Page({ params }: { params: Promise<{ model: string; back
               setMaxOutputTokens={setMaxOutputTokens}
               maxInputTokens={maxInputTokens}
               setMaxInputTokens={setMaxInputTokens}
+              temperature={temperature}
+              setTemperature={setTemperature}
               modelLoadState={modelLoadState}
               setModelLoadState={setModelLoadState}
               setIsSidebarOpen={setIsSidebarOpen}
@@ -267,6 +296,7 @@ export default function Page({ params }: { params: Promise<{ model: string; back
             systemPromptText={systemPromptText}
             maxOutputTokens={maxOutputTokens}
             maxInputTokens={maxInputTokens}
+            temperature={temperature}
             modelLoadState={modelLoadState}
             supportsLive={supportsLive}
             onModeChange={handleModeChange}
