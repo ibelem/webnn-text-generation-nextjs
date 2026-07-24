@@ -44,7 +44,6 @@ interface ChatInterfaceProps {
   systemPromptText: string;
   maxOutputTokens: number;
   maxInputTokens: number;
-  temperature: number;
   modelLoadState: Record<string, "not_loaded" | "loading" | "warm" | "loaded" | "ready">;
   /** Whether the current model supports live video mode */
   supportsLive?: boolean;
@@ -65,7 +64,6 @@ export function ChatInterface({
   systemPromptText,
   maxOutputTokens,
   maxInputTokens,
-  temperature,
   modelLoadState,
   supportsLive = false,
   onModeChange,
@@ -221,7 +219,6 @@ export function ChatInterface({
         audio: hasAudio ? Array.from(attachedAudio!.data) : undefined,
         maxOutputTokens: maxOutputTokens > 0 ? maxOutputTokens : undefined,
         maxInputTokens: maxInputTokens > 0 ? maxInputTokens : undefined,
-        temperature,
       },
     });
     setIsTyping(true);
