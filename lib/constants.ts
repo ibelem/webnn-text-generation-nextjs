@@ -80,6 +80,23 @@ export const MODELS: Array<{
       thinkingTagSupport: false,
     },
     {
+      id: "phi-4-mini-instruct_intc_opt" as ModelType,
+      model: "jianhui42/Phi-4-mini-instruct-ONNX-webgpu",
+      dataType: "q4f16",
+      name: "Phi-4 Mini INTC OPT",
+      producer: "MS",
+      desc: "SLM",
+      parameter: "3.8B",
+      size: "2.42GB",
+      useExternalDataFormat: 2,
+      maxNewTokens: 1024,
+      doSample: true,
+      topK: 3,
+      temperature: 0.2,
+      systemPrompt: "",
+      thinkingTagSupport: false,
+    },
+    {
       id: "llama_3-2_1b" as ModelType,
       model: "onnx-community/Llama-3.2-1B-Instruct-ONNX",
       dataType: "q4f16",
@@ -148,7 +165,7 @@ export const MODELS: Array<{
       topK: 20,
       temperature: 0.7,
       systemPrompt: "",
-      thinkingTagSupport: true,
+      thinkingTagSupport: false,
       useKVCache: true,
     },
     {
@@ -318,7 +335,7 @@ export const MODELS: Array<{
     },
     {
       id: "qwen3_5-4b_intc_opt" as ModelType,
-      model: "jianhui42/Qwen3.5-4B-ONNX-webgpu",
+      model: "webgpu/Qwen3.5-4B-ONNX",
       dataType: {
         embed_tokens: "q4f16",
         vision_encoder: "q4f16",
@@ -342,7 +359,7 @@ export const MODELS: Array<{
       thinkingTagSupport: false,
       capabilities: ["text", "vision", "video"],
       modelClass: "conditional-generation",
-    },
+    }
   ];
 
 export const BACKENDS: Array<{
