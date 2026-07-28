@@ -9,6 +9,7 @@ import { Textarea } from "@/components/ui/textarea"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { Sparkles, Gpu, Microchip, Loader2, Download, Cog, RefreshCcw, X, Eye } from "lucide-react"
 import { MODELS, BACKENDS } from "../lib/constants"
+import { Tooltip, TooltipTrigger, TooltipContent } from "@/components/ui/tooltip"
 import { Progress } from "@/components/progress"
 import type { ProgressProps } from "@/components/progress"
 
@@ -451,15 +452,57 @@ export function Sidebar({
 }
 
 interface ModelOptionProps {
-  model: { id: ModelType; name: string; producer:string, desc: string, parameter: string, size: string };
+  model: typeof MODELS[number];
   isSelected: boolean;
   onClick: () => void;
   loadState: "not_loaded" | "loading" | "warm" | "loaded" | "ready";
   onLoad: () => void;
 }
 
-function ModelOption({ model, isSelected, onClick, loadState, onLoad }: ModelOptionProps) {
+function ConfigRow({ label, value }: { label: string; value: unknown }) {
+  if (typeof value === "object" && value !== null && !Array.isArray(value)) {
+    return (
+      <div>
+        <span className="text-gray-400">{label}:</span>
+        <div className="pl-3 mt-0.5 space-y-0.5">
+          {Object.entries(value as Record<string, unknown>).map(([k, v]) => (
+            <div key={k} className="flex gap-1.5">
+              <span className="text-gray-400 shrink-0">{k}:</span>
+              <span>{typeof v === "string" ? `"${v}"` : String(v)}</span>
+            </div>
+          ))}
+        </div>
+      </div>
+    );
+  }
+  const displayValue = Array.isArray(value)
+    ? `[${(value as string[]).map((v) => `"${v}"`).join(", ")}]`
+    : typeof value === "string"
+    ? `"${value}"`
+    : String(value);
   return (
+    <div className="flex gap-1.5 flex-wrap">
+      <span className="text-gray-400 shrink-0">{label}:</span>
+      <span className="break-all">{displayValue}</span>
+    </div>
+  );
+}
+
+function ModelOption({ model, isSelected, onClick, loadState, onLoad }: ModelOptionProps) {
+  const configFields: Array<{ key: string; value: unknown }> = [
+    { key: "model", value: model.model },
+    { key: "dataType", value: model.dataType },
+    ...(model.useExternalDataFormat !== undefined ? [{ key: "useExternalDataFormat", value: model.useExternalDataFormat }] : []),
+    ...(model.maxNewTokens !== undefined ? [{ key: "maxNewTokens", value: model.maxNewTokens }] : []),
+    ...(model.doSample !== undefined ? [{ key: "doSample", value: model.doSample }] : []),
+    ...(model.topK !== undefined ? [{ key: "topK", value: model.topK }] : []),
+    ...(model.capabilities && model.capabilities.length > 0 ? [{ key: "capabilities", value: model.capabilities }] : []),
+    ...(model.modelClass ? [{ key: "modelClass", value: model.modelClass }] : []),
+  ];
+
+  return (
+    <Tooltip>
+      <TooltipTrigger asChild>
     <div
       role="option"
       aria-selected={isSelected}
@@ -518,6 +561,15 @@ function ModelOption({ model, isSelected, onClick, loadState, onLoad }: ModelOpt
         )}
       </div>
     </div>
+      </TooltipTrigger>
+      <TooltipContent side="right" sideOffset={8} className="max-w-[300px] p-3 font-mono">
+        <div className="space-y-1 text-[11px]">
+          {configFields.map(({ key, value }) => (
+            <ConfigRow key={key} label={key} value={value} />
+          ))}
+        </div>
+      </TooltipContent>
+    </Tooltip>
   );
 }
 
