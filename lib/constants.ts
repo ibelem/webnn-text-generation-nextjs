@@ -335,7 +335,7 @@ export const MODELS: Array<{
     },
     {
       id: "qwen3_5-4b_intc_opt" as ModelType,
-      model: "jianhui42/Qwen3.5-4B-ONNX-webgpu",
+      model: "webgpu/Qwen3.5-4B-ONNX",
       dataType: {
         embed_tokens: "q4f16",
         vision_encoder: "q4f16",
@@ -359,61 +359,7 @@ export const MODELS: Array<{
       thinkingTagSupport: false,
       capabilities: ["text", "vision", "video"],
       modelClass: "conditional-generation",
-    },
-    {
-      id: "qwen3_5-4b_intc_opt_t0" as ModelType,
-      model: "jianhui42/Qwen3.5-4B-ONNX-webgpu",
-      dataType: {
-        embed_tokens: "q4f16",
-        vision_encoder: "q4f16",
-        decoder_model_merged: "q4f16",
-      },
-      name: "Qwen3.5 INTC OPT T0",
-      producer: "Ali",
-      desc: "VLM",
-      parameter: "4B",
-      size: "2.72GB",
-      useExternalDataFormat: {
-        vision_encoder: 1,
-        embed_tokens: 1,
-        "decoder_model_merged_q4f16.onnx": 2,
-      },
-      maxNewTokens: 1024,
-      doSample: false,
-      topK: 20,
-      temperature: 0,
-      systemPrompt: "",
-      thinkingTagSupport: false,
-      capabilities: ["text", "vision", "video"],
-      modelClass: "conditional-generation",
-    },
-    {
-      id: "qwen3_5-4b_intc_opt_t1" as ModelType,
-      model: "jianhui42/Qwen3.5-4B-ONNX-webgpu",
-      dataType: {
-        embed_tokens: "q4f16",
-        vision_encoder: "q4f16",
-        decoder_model_merged: "q4f16",
-      },
-      name: "Qwen3.5 INTC OPT T1",
-      producer: "Ali",
-      desc: "VLM",
-      parameter: "4B",
-      size: "2.72GB",
-      useExternalDataFormat: {
-        vision_encoder: 1,
-        embed_tokens: 1,
-        "decoder_model_merged_q4f16.onnx": 2,
-      },
-      maxNewTokens: 1024,
-      doSample: false,
-      topK: 20,
-      temperature: 1,
-      systemPrompt: "",
-      thinkingTagSupport: false,
-      capabilities: ["text", "vision", "video"],
-      modelClass: "conditional-generation",
-    },
+    }
   ];
 
 export const BACKENDS: Array<{
