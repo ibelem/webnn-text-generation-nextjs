@@ -81,7 +81,7 @@ export const MODELS: Array<{
     },
     {
       id: "phi-4-mini-instruct_intc_opt" as ModelType,
-      model: "jianhui42/Phi-4-mini-instruct-ONNX-webgpu",
+      model: "webgpu/Phi-4-mini-instruct-ONNX-OPT",
       dataType: "q4f16",
       name: "Phi-4 Mini INTC OPT",
       producer: "MS",
