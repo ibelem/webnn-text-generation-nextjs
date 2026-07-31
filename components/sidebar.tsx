@@ -40,6 +40,8 @@ interface SidebarProps {
   setSystemPromptText: (text: string) => void;
   maxOutputTokens: number;
   setMaxOutputTokens: (tokens: number) => void;
+  minOutputTokens: number;
+  setMinOutputTokens: (tokens: number) => void;
   maxInputTokens: number;
   setMaxInputTokens: (tokens: number) => void;
   temperature: number;
@@ -65,6 +67,8 @@ export function Sidebar({
   setSystemPromptText,
   maxOutputTokens,
   setMaxOutputTokens,
+  minOutputTokens,
+  setMinOutputTokens,
   maxInputTokens,
   setMaxInputTokens,
   temperature,
@@ -413,6 +417,19 @@ export function Sidebar({
               onChange={(e) => setMaxInputTokens(parseInt(e.target.value))}
               className="w-24 text-xs font-semibold text-right bg-white border border-gray-200 rounded-md px-2 py-1 focus:border-blue-300 focus:outline-none cursor-pointer"
               title="Max input/context tokens (default = unlimited)"
+            >
+              {[0, 64, 128, 256, 512, 1024, 2048, 4096, 8192, 16384, 32768].map((v) => (
+                <option key={v} value={v}>{v === 0 ? "default" : v}</option>
+              ))}
+            </select>
+          </div>
+          <div className="flex items-center justify-between">
+            <span className="text-gray-400 text-xs">Min Output Tokens</span>
+            <select
+              value={minOutputTokens}
+              onChange={(e) => setMinOutputTokens(parseInt(e.target.value))}
+              className="w-24 text-xs font-semibold text-right bg-white border border-gray-200 rounded-md px-2 py-1 focus:border-blue-300 focus:outline-none cursor-pointer"
+              title="Min tokens to generate (default = no minimum)"
             >
               {[0, 64, 128, 256, 512, 1024, 2048, 4096, 8192, 16384, 32768].map((v) => (
                 <option key={v} value={v}>{v === 0 ? "default" : v}</option>

@@ -59,6 +59,7 @@ export default function Page({ params }: { params: Promise<{ model: string; back
     return VALID_TOKEN_OPTIONS.includes(n) ? n : 0;
   };
   const [maxOutputTokens, setMaxOutputTokens] = useState<number>(() => parseTokenParam(searchParams.get("max_output_tokens")));
+  const [minOutputTokens, setMinOutputTokens] = useState<number>(() => parseTokenParam(searchParams.get("min_output_tokens")));
   const [maxInputTokens, setMaxInputTokens] = useState<number>(() => parseTokenParam(searchParams.get("max_input_tokens")));
 
   // Sampling temperature (0..1). 0 = deterministic/greedy, 1 = most random.
@@ -111,6 +112,10 @@ export default function Page({ params }: { params: Promise<{ model: string; back
     if (urlMaxOutput !== maxOutputTokens) {
       setMaxOutputTokens(urlMaxOutput);
     }
+    const urlMinOutput = parseTokenParam(searchParams.get("min_output_tokens"));
+    if (urlMinOutput !== minOutputTokens) {
+      setMinOutputTokens(urlMinOutput);
+    }
     const urlMaxInput = parseTokenParam(searchParams.get("max_input_tokens"));
     if (urlMaxInput !== maxInputTokens) {
       setMaxInputTokens(urlMaxInput);
@@ -138,6 +143,12 @@ export default function Page({ params }: { params: Promise<{ model: string; back
       params.set("max_output_tokens", String(maxOutputTokens));
     } else {
       params.delete("max_output_tokens");
+    }
+
+    if (minOutputTokens > 0) {
+      params.set("min_output_tokens", String(minOutputTokens));
+    } else {
+      params.delete("min_output_tokens");
     }
 
     if (maxInputTokens > 0) {
@@ -171,7 +182,7 @@ export default function Page({ params }: { params: Promise<{ model: string; back
     if (newUrl !== currentUrl) {
       router.replace(newUrl);
     }
-  }, [selectedModel, selectedBackend, model, backend, systemPromptEnabled, maxOutputTokens, maxInputTokens, temperature, searchParams, router]);
+}, [selectedModel, selectedBackend, model, backend, systemPromptEnabled, maxOutputTokens, minOutputTokens, maxInputTokens, temperature, searchParams, router]);
 
   // After a cross-model navigation the sidebar stores the target model id in
   // sessionStorage. Pick it up here once the fresh worker is ready and fire the load.
@@ -253,6 +264,8 @@ export default function Page({ params }: { params: Promise<{ model: string; back
               setSystemPromptText={setSystemPromptText}
               maxOutputTokens={maxOutputTokens}
               setMaxOutputTokens={setMaxOutputTokens}
+              minOutputTokens={minOutputTokens}
+              setMinOutputTokens={setMinOutputTokens}
               maxInputTokens={maxInputTokens}
               setMaxInputTokens={setMaxInputTokens}
               temperature={temperature}
@@ -295,6 +308,7 @@ export default function Page({ params }: { params: Promise<{ model: string; back
             systemPromptEnabled={systemPromptEnabled}
             systemPromptText={systemPromptText}
             maxOutputTokens={maxOutputTokens}
+            minOutputTokens={minOutputTokens}
             maxInputTokens={maxInputTokens}
             temperature={temperature}
             modelLoadState={modelLoadState}
