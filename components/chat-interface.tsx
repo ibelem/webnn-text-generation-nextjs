@@ -43,6 +43,7 @@ interface ChatInterfaceProps {
   systemPromptEnabled: boolean;
   systemPromptText: string;
   maxOutputTokens: number;
+  minOutputTokens: number;
   maxInputTokens: number;
   temperature: number;
   modelLoadState: Record<string, "not_loaded" | "loading" | "warm" | "loaded" | "ready">;
@@ -64,6 +65,7 @@ export function ChatInterface({
   systemPromptEnabled,
   systemPromptText,
   maxOutputTokens,
+  minOutputTokens,
   maxInputTokens,
   temperature,
   modelLoadState,
@@ -220,6 +222,7 @@ export function ChatInterface({
         images: hasImages ? attachedImages : undefined,
         audio: hasAudio ? Array.from(attachedAudio!.data) : undefined,
         maxOutputTokens: maxOutputTokens > 0 ? maxOutputTokens : undefined,
+        minOutputTokens: minOutputTokens > 0 ? minOutputTokens : undefined,
         maxInputTokens: maxInputTokens > 0 ? maxInputTokens : undefined,
         temperature,
       },
