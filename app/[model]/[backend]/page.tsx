@@ -41,8 +41,12 @@ export default function Page({ params }: { params: Promise<{ model: string; back
     }
   }, []);
 
-  // Reasoning feature toggle
-  const [reasonEnabled, setReasonEnabled] = useState(false);
+  // Reasoning feature toggle. Models without thinkingTagSupport never show the
+  // toggle at all (see sidebar.tsx), so reasonEnabled is simply unused there.
+  // Models with thinkingTagSupport: true default to reasoning OFF; the user can
+  // still turn it on via the toggle.
+  const modelDefaultReasonEnabled = (id: string) => false;
+  const [reasonEnabled, setReasonEnabled] = useState(() => modelDefaultReasonEnabled(selectedModel));
 
   // Writing Assistant feature toggle
   const [systemPromptEnabled, setSystemPromptEnabled] = useState(
@@ -98,11 +102,13 @@ export default function Page({ params }: { params: Promise<{ model: string; back
   useEffect(() => {
     if (validModel && selectedModel !== model) {
       setSelectedModel(model as ModelType);
-      // Also reset the temperature slider and max output tokens to the new
-      // model's defaults so they are always in sync when navigating via URL.
-      // If the URL has an explicit param the URL→state sync effect will override.
+      // Also reset the temperature slider, max output tokens, and reasoning
+      // toggle to the new model's defaults so they are always in sync when
+      // navigating via URL. If the URL has an explicit param the URL→state
+      // sync effect will override.
       setTemperature(modelDefaultTemperature(model));
       setMaxOutputTokens(modelDefaultMaxTokens(model));
+      setReasonEnabled(modelDefaultReasonEnabled(model));
     }
     if (validBackend && selectedBackend !== backend) setSelectedBackend(backend as BackendType);
   }, [model, backend, validModel, selectedModel, validBackend, selectedBackend]);
