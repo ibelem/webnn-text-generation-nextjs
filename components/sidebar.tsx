@@ -352,21 +352,19 @@ export function Sidebar({
             <span className="text-gray-400 text-xs">Downloaded from</span>
             <span className="font-semibold text-xs">{remoteHost}</span>
           </div>
-          {/* Reasoning toggle UI: only show if thinkingTagSupport is true */}
-          {MODELS.find((m) => m.id === selectedModel)?.thinkingTagSupport && (
-            <div className="flex items-center justify-between">
-              <span className="text-gray-400 text-xs">Reasoning</span>
-              <label className="flex items-center gap-2 cursor-pointer select-none">
-                <span className="text-xs font-semibold text-gray-700">{reasonEnabled ? "On" : "Off"}</span>
-                <input
-                  type="checkbox"
-                  checked={reasonEnabled}
-                  onChange={e => setReasonEnabled(e.target.checked)}
-                  className="toggle-switch"
-                />
-              </label>
-            </div>
-          )}
+          {/* Reasoning toggle UI */}
+          <div className="flex items-center justify-between">
+            <span className="text-gray-400 text-xs">Reasoning</span>
+            <label className="flex items-center gap-2 cursor-pointer select-none">
+              <span className="text-xs font-semibold text-gray-700">{reasonEnabled ? "On" : "Off"}</span>
+              <input
+                type="checkbox"
+                checked={reasonEnabled}
+                onChange={e => setReasonEnabled(e.target.checked)}
+                className="toggle-switch"
+              />
+            </label>
+          </div>
           {/* System Prompt toggle UI */}
           <div className="flex items-center justify-between">
             <span className="text-gray-400 text-xs">System Prompt</span>
