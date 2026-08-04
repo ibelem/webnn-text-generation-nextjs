@@ -41,7 +41,7 @@ export default function Page({ params }: { params: Promise<{ model: string; back
     }
   }, []);
 
-  // Reasoning feature toggle
+  // Reasoning feature toggle — defaults to off, user can enable via sidebar toggle.
   const [reasonEnabled, setReasonEnabled] = useState(false);
 
   // Writing Assistant feature toggle
@@ -58,7 +58,11 @@ export default function Page({ params }: { params: Promise<{ model: string; back
     const n = parseInt(value ?? "", 10);
     return VALID_TOKEN_OPTIONS.includes(n) ? n : 0;
   };
-  const [maxOutputTokens, setMaxOutputTokens] = useState<number>(() => parseTokenParam(searchParams.get("max_output_tokens")));
+  const modelDefaultMaxTokens = (id: string) => MODELS.find((m) => m.id === id)?.maxNewTokens ?? 1024;
+  const [maxOutputTokens, setMaxOutputTokens] = useState<number>(() => {
+    const urlVal = parseTokenParam(searchParams.get("max_output_tokens"));
+    return urlVal > 0 ? urlVal : modelDefaultMaxTokens(selectedModel);
+  });
   const [minOutputTokens, setMinOutputTokens] = useState<number>(() => parseTokenParam(searchParams.get("min_output_tokens")));
   const [maxInputTokens, setMaxInputTokens] = useState<number>(() => parseTokenParam(searchParams.get("max_input_tokens")));
 
@@ -94,10 +98,13 @@ export default function Page({ params }: { params: Promise<{ model: string; back
   useEffect(() => {
     if (validModel && selectedModel !== model) {
       setSelectedModel(model as ModelType);
-      // Also reset the temperature slider to the new model's default so it is
-      // always in sync when navigating via URL. If the URL has an explicit
-      // ?temperature= param the URL→state sync effect will override this value.
+      // Also reset the temperature slider, max output tokens, and reasoning
+      // toggle to the new model's defaults so they are always in sync when
+      // navigating via URL. If the URL has an explicit param the URL→state
+      // sync effect will override.
       setTemperature(modelDefaultTemperature(model));
+      setMaxOutputTokens(modelDefaultMaxTokens(model));
+      setReasonEnabled(false);
     }
     if (validBackend && selectedBackend !== backend) setSelectedBackend(backend as BackendType);
   }, [model, backend, validModel, selectedModel, validBackend, selectedBackend]);
@@ -109,8 +116,9 @@ export default function Page({ params }: { params: Promise<{ model: string; back
       setSystemPromptEnabled(urlValue);
     }
     const urlMaxOutput = parseTokenParam(searchParams.get("max_output_tokens"));
-    if (urlMaxOutput !== maxOutputTokens) {
-      setMaxOutputTokens(urlMaxOutput);
+    const resolvedMaxOutput = urlMaxOutput > 0 ? urlMaxOutput : modelDefaultMaxTokens(selectedModel);
+    if (resolvedMaxOutput !== maxOutputTokens) {
+      setMaxOutputTokens(resolvedMaxOutput);
     }
     const urlMinOutput = parseTokenParam(searchParams.get("min_output_tokens"));
     if (urlMinOutput !== minOutputTokens) {
@@ -139,7 +147,7 @@ export default function Page({ params }: { params: Promise<{ model: string; back
       params.delete("system_prompt");
     }
 
-    if (maxOutputTokens > 0) {
+    if (maxOutputTokens > 0 && maxOutputTokens !== modelDefaultMaxTokens(selectedModel)) {
       params.set("max_output_tokens", String(maxOutputTokens));
     } else {
       params.delete("max_output_tokens");
