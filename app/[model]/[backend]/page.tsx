@@ -41,12 +41,8 @@ export default function Page({ params }: { params: Promise<{ model: string; back
     }
   }, []);
 
-  // Reasoning feature toggle. Models without thinkingTagSupport never show the
-  // toggle at all (see sidebar.tsx), so reasonEnabled is simply unused there.
-  // Models with thinkingTagSupport: true default to reasoning OFF; the user can
-  // still turn it on via the toggle.
-  const modelDefaultReasonEnabled = (id: string) => false;
-  const [reasonEnabled, setReasonEnabled] = useState(() => modelDefaultReasonEnabled(selectedModel));
+  // Reasoning feature toggle — defaults to off, user can enable via sidebar toggle.
+  const [reasonEnabled, setReasonEnabled] = useState(false);
 
   // Writing Assistant feature toggle
   const [systemPromptEnabled, setSystemPromptEnabled] = useState(
@@ -108,7 +104,7 @@ export default function Page({ params }: { params: Promise<{ model: string; back
       // sync effect will override.
       setTemperature(modelDefaultTemperature(model));
       setMaxOutputTokens(modelDefaultMaxTokens(model));
-      setReasonEnabled(modelDefaultReasonEnabled(model));
+      setReasonEnabled(false);
     }
     if (validBackend && selectedBackend !== backend) setSelectedBackend(backend as BackendType);
   }, [model, backend, validModel, selectedModel, validBackend, selectedBackend]);
