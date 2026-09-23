@@ -29,6 +29,8 @@ interface LiveVideoPanelProps {
   supportsLive?: boolean;
   /** Callback to switch between chat and live mode */
   onModeChange?: (live: boolean) => void;
+  systemPromptEnabled?: boolean;
+  systemPromptText?: string;
 }
 
 export function LiveVideoPanel({
@@ -41,6 +43,8 @@ export function LiveVideoPanel({
   setProgressItems,
   supportsLive = false,
   onModeChange,
+  systemPromptEnabled = false,
+  systemPromptText = "",
 }: LiveVideoPanelProps) {
   const videoRef = useRef<HTMLVideoElement>(null);
   const canvasRef = useRef<HTMLCanvasElement>(null);
@@ -58,6 +62,9 @@ export function LiveVideoPanel({
   const isProcessingRef = useRef(false);
   const streamRef = useRef<MediaStream | null>(null);
   const frameCountRef = useRef(0);
+  // Always holds the latest captureAndInfer so the worker "complete" handler
+  // (registered once) doesn't call a stale closure with outdated system prompt state.
+  const captureAndInferRef = useRef<() => void>(() => {});
   const [frameCount, setFrameCount] = useState(0);
   const [videoTimeInfo, setVideoTimeInfo] = useState<{ current: number; total: number } | null>(null);
   const anyModelReady = Object.values(modelLoadState).includes("ready");
@@ -189,7 +196,7 @@ export function LiveVideoPanel({
         setIsPrefilling(false);
         // After completion, if still processing, trigger next frame
         if (isProcessingRef.current) {
-          captureAndInfer();
+          captureAndInferRef.current();
         }
       } else if (status === "error") {
         setIsPrefilling(false);
@@ -255,12 +262,16 @@ export function LiveVideoPanel({
       data: {
         messages: [{ role: "user", content: instruction }],
         reasonEnabled: false,
-        systemPromptEnabled: false,
-        systemPromptText: "",
+        systemPromptEnabled,
+        systemPromptText,
         images: [imageDataUrl],
       },
     });
-  }, [captureImage, instruction, workerRef]);
+  }, [captureImage, instruction, workerRef, systemPromptEnabled, systemPromptText]);
+
+  // Assigned directly during render (not in an effect) so it's always up to
+  // date before the worker's "complete" handler can fire.
+  captureAndInferRef.current = captureAndInfer;
 
   const handleStart = () => {
     if (!anyModelReady) {
