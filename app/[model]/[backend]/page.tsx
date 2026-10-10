@@ -302,6 +302,8 @@ export default function Page({ params }: { params: Promise<{ model: string; back
             setProgressItems={setProgressItems}
             supportsLive={supportsLive}
             onModeChange={handleModeChange}
+            systemPromptEnabled={systemPromptEnabled}
+            systemPromptText={systemPromptText}
           />
         ) : (
           <ChatInterface
