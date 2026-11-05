@@ -396,6 +396,7 @@ export function Sidebar({
           alt="WebGPU Logo"
           width={106}
           height={32}
+          style={{ height: "auto" }}
           className="mb-[-6px]"
         />
         <Image

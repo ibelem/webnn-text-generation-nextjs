@@ -7,6 +7,23 @@ export function cn(...inputs: ClassValue[]) {
 
 let cachedHfDomain: string | null = null;
 
+const CDN_ALLOWED_HOSTS = ["cdn.jsdelivr.net", "esm.sh", "unpkg.com"];
+
+/** Returns a normalized CDN URL if it is https on an allowlisted CDN (or http(s) on localhost), otherwise undefined. */
+export function parseCdnUrl(value?: string | null): string | undefined {
+  if (!value) return undefined;
+  try {
+    const url = new URL(value);
+    const isLocal = url.hostname === "localhost" || url.hostname === "127.0.0.1" || url.hostname === "[::1]";
+    if (isLocal && (url.protocol === "http:" || url.protocol === "https:")) return url.href;
+    if (url.protocol === "https:" && CDN_ALLOWED_HOSTS.includes(url.hostname)) return url.href;
+  } catch {
+    // fall through
+  }
+  console.warn(`Ignoring disallowed CDN URL: ${value.slice(0, 200)}`);
+  return undefined;
+}
+
 export const getHuggingFaceDomain = async () => {
     if (cachedHfDomain) {
         return cachedHfDomain;

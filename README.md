@@ -56,6 +56,23 @@ Open [https://localhost:3000](https://localhost:3000). The dev server uses HTTPS
 | `npm start` | Start production server |
 | `npm run lint` | Run ESLint |
 
+### Custom transformers.js / onnxruntime-web (CDN)
+
+By default the app uses the installed `@huggingface/transformers` package. To run a custom build, pass CDN URLs in the page URL (read at page load; reload after changing):
+
+| Parameter | Value | Description |
+|-----------|-------|-------------|
+| `transformers` | URL of an ESM build of transformers.js | Replaces the bundled package |
+| `ort` | Directory URL of onnxruntime-web `dist/` (WASM files) | Sets `env.backends.onnx.wasm.wasmPaths` |
+
+```
+/qwen3-4b/webgpu?transformers=https://cdn.jsdelivr.net/npm/@huggingface/transformers@4.3.2/dist/transformers.js&ort=https://cdn.jsdelivr.net/npm/onnxruntime-web@1.31.0-dev.20260914-8d85527a0/dist/
+```
+
+Only `https:` URLs on `cdn.jsdelivr.net`, `esm.sh` or `unpkg.com`, or `localhost` URLs, are accepted (edit `CDN_ALLOWED_HOSTS` in `lib/utils.ts` to change this). These URLs run remote code in the worker, so only open links you trust. The WASM files must match the onnxruntime-web version used by the transformers.js build.
+
+Use a self-contained build such as `dist/transformers.js` or `dist/transformers.min.js`. `dist/transformers.web*.js` imports `onnxruntime-web/webgpu` as a bare specifier, which a worker can't resolve without an import map.
+
 ## Architecture
 
 1. Select a model and backend (WebGPU / WebNN GPU / WebNN NPU) from the sidebar.
