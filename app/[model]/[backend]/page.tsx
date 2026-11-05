@@ -85,8 +85,9 @@ export default function Page({ params }: { params: Promise<{ model: string; back
 
       // Custom transformers.js / onnxruntime-web builds; read once at worker start (reload to change).
       const cdnConfig = {
-        transformersCDN: searchParams.get("transformers") ?? undefined,
-        ortCDN: searchParams.get("ort") ?? undefined,
+        transformers: searchParams.get("transformers") ?? undefined,
+        ort: searchParams.get("ort") ?? undefined,
+        customOrt: searchParams.get("custom_ort") ?? undefined,
       };
       workerRef.current = new Worker(workerPath, { type: "module", name: JSON.stringify(cdnConfig) })
       window.chatWorkerRef = workerRef
