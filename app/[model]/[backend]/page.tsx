@@ -83,7 +83,12 @@ export default function Page({ params }: { params: Promise<{ model: string; back
           ? new URL("../../../lib/model-worker.js", import.meta.url)
           : "/model-worker.bundle.js";
 
-      workerRef.current = new Worker(workerPath, { type: "module" })
+      // Custom transformers.js / onnxruntime-web builds; read once at worker start (reload to change).
+      const cdnConfig = {
+        transformersCDN: searchParams.get("transformers") ?? undefined,
+        ortCDN: searchParams.get("ort") ?? undefined,
+      };
+      workerRef.current = new Worker(workerPath, { type: "module", name: JSON.stringify(cdnConfig) })
       window.chatWorkerRef = workerRef
       setWorkerReady(true)
     }
@@ -93,6 +98,8 @@ export default function Page({ params }: { params: Promise<{ model: string; back
       workerRef.current = null
       setWorkerReady(false)
     }
+    // Worker is created once; CDN params are intentionally read only at mount.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [])
   
   useEffect(() => {
