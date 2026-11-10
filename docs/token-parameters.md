@@ -24,8 +24,8 @@ Both values are synced bidirectionally with URL query parameters:
 
 **Examples:**
 ```
-/qwen3-0_6b/webgpu?max_input_tokens=512&max_output_tokens=1024
-/qwen3-0_6b/webgpu?system_prompt=true&max_output_tokens=2048
+/qwen3-4b/webgpu?max_input_tokens=512&max_output_tokens=1024
+/qwen3-4b/webgpu?system_prompt=true&max_output_tokens=2048
 ```
 
 When set to **default** (`0`), the parameter is removed from the URL. Existing URL parameters (`system_prompt`, `mode`, etc.) are unaffected.

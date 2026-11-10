@@ -6,7 +6,7 @@ Run large language models and vision-language models directly in the browser usi
 
 - **On-device inference** — no server, full privacy
 - **Multiple backends** — WebGPU, WebNN GPU, WebNN NPU
-- **15 models** — Gemma 3/4, Phi-3.5/4, Llama 3.2, Qwen3/3.5, DeepSeek R1, GPT-OSS, LFM2/2.5, SmolLM3
+- **14 models** — Gemma 3/4, Phi-4, Llama 3.2, Qwen3/3.5, DeepSeek R1, GPT-OSS, LFM2.5, SmolLM3
 - **Vision-language models** — image input with Qwen3.5 and Gemma 4; video input with Qwen3.5
 - **Thinking/reasoning** — models with thinking support display reasoning traces in a collapsible section
 - **Real-time metrics** — TTFT, TPS, TPOT, throughput, decode time, E2E latency
@@ -19,14 +19,12 @@ Run large language models and vision-language models directly in the browser usi
 |-------|----------|------|-----------|------|-------------|----------|
 | Gemma 3 | Google | SLM | 1B | 983 MB | q4f16 | — |
 | Gemma 4 | Google | VLM | E2B | 3.76 GB | q4f16 | Vision, thinking |
-| Phi-3.5 Mini | Microsoft | SLM | 3.8B | 2.15 GB | q4f16 | — |
 | Phi-4 Mini | Microsoft | SLM | 3.8B | 2.34 GB | q4f16 | — |
 | Llama 3.2 | Meta | LLM | 1B / 3B | 1.01 / 2.29 GB | q4f16 | KV cache |
 | Qwen3 | Alibaba | LLM | 0.6B / 4B | 543 MB / 2.63 GB | q4f16 | Thinking (0.6B) |
-| Qwen3.5 | Alibaba | VLM | 0.8B / 4B | 814 MB / 3.52 GB | q4 | Vision, video, thinking |
+| Qwen3.5 | Alibaba | VLM | 4B | 3.52 GB | q4 | Vision, video, thinking |
 | DeepSeek R1 Distill | DeepSeek | LLM | 1.5B | 1.27 GB | q4f16 | Thinking |
 | GPT-OSS | OpenAI | MoE LLM | 20B | 11.8 GB | q4f16 | Thinking, Harmony streaming |
-| LFM2 | Liquid AI | LLM | 1.2B | 1.13 GB | q4 | — |
 | LFM2.5 | Liquid AI | LLM | 1.2B | 850 MB | q4 | Thinking |
 | SmolLM3 | Hugging Face | LLM | 3B | 1.97 GB | q4f16 | — |
 
