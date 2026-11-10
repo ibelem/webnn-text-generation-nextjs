@@ -58,20 +58,22 @@ Open [https://localhost:3000](https://localhost:3000). The dev server uses HTTPS
 
 ### Custom transformers.js / onnxruntime-web (CDN)
 
-By default the app uses the installed `@huggingface/transformers` package. To run a custom build, pass CDN URLs in the page URL (read at page load; reload after changing):
+By default the app uses the installed `@huggingface/transformers` package. To run a different build, pass versions in the page URL (read at page load; reload after changing):
 
 | Parameter | Value | Description |
 |-----------|-------|-------------|
-| `transformers` | URL of an ESM build of transformers.js | Replaces the bundled package |
-| `ort` | Directory URL of onnxruntime-web `dist/` (WASM files) | Sets `env.backends.onnx.wasm.wasmPaths` |
+| `transformers` | npm version or tag, e.g. `4.3.2` | Loads `@huggingface/transformers@<value>/dist/transformers.js` from jsDelivr instead of the bundled package |
+| `ort` | onnxruntime-web npm version, e.g. `1.31.0-dev.20260914-8d85527a0` | Loads the WASM files from `onnxruntime-web@<value>/dist/` on jsDelivr (sets `env.backends.onnx.wasm.wasmPaths`) |
+| `custom_ort` | Directory URL of a self-hosted onnxruntime-web `dist/` | Same as `ort` but from your own server; overrides `ort` |
 
 ```
-/qwen3-4b/webgpu?transformers=https://cdn.jsdelivr.net/npm/@huggingface/transformers@4.3.2/dist/transformers.js&ort=https://cdn.jsdelivr.net/npm/onnxruntime-web@1.31.0-dev.20260914-8d85527a0/dist/
+/qwen3-4b/webgpu?transformers=4.3.2&ort=1.31.0-dev.20260914-8d85527a0
+/qwen3-4b/webgpu?transformers=4.3.2&custom_ort=https://127.0.0.1:8080/onnxruntime-web/dist/
 ```
 
-Only `https:` URLs on `cdn.jsdelivr.net`, `esm.sh` or `unpkg.com`, or `localhost` URLs, are accepted (edit `CDN_ALLOWED_HOSTS` in `lib/utils.ts` to change this). These URLs run remote code in the worker, so only open links you trust. The WASM files must match the onnxruntime-web version used by the transformers.js build.
+If `ort` is omitted, the transformers.js build loads the WASM files for the onnxruntime-web version it was built with. When you set `ort` or `custom_ort`, the WASM files must match that version (they do not change the onnxruntime-web JS bundled in transformers.js). `custom_ort` accepts `https:` URLs, or `http:` on localhost; the server must allow CORS and serve `.wasm` as `application/wasm`. These URLs load code into the worker, so only open links you trust.
 
-Use a self-contained build such as `dist/transformers.js` or `dist/transformers.min.js`. `dist/transformers.web*.js` imports `onnxruntime-web/webgpu` as a bare specifier, which a worker can't resolve without an import map.
+The `transformers` build is always the self-contained `dist/transformers.js`; the `transformers.web*.js` builds import `onnxruntime-web/webgpu` as a bare specifier, which a worker can't resolve without an import map.
 
 ## Architecture
 
