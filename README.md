@@ -27,7 +27,7 @@ Run large language models and vision-language models directly in the browser usi
 | GPT-OSS | OpenAI | MoE LLM | 20B | 11.8 GB | q4f16 | Thinking, Harmony streaming |
 | LFM2.5 | Liquid AI | LLM | 1.2B | 850 MB | q4 | Thinking |
 | SmolLM3 | Hugging Face | LLM | 3B | 1.97 GB | q4f16 | — |
-| SmolVLM2 | Hugging Face | VLM | 256M | 190 MB | q4f16 | Vision, video (multi-frame clip in Live mode) |
+| SmolVLM2 | Hugging Face | VLM | 256M | 208 MB | q4 (fp16 embeddings) | Vision, video (multi-frame clip in Live mode) |
 
 ## Getting started
 

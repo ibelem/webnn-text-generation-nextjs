@@ -293,16 +293,18 @@ export const MODELS: Array<{
     {
       id: "smolvlm2-256m" as ModelType,
       model: "HuggingFaceTB/SmolVLM2-256M-Video-Instruct",
+      // q4f16 decoder gave empty (EOS-only) replies on WebGPU after the first frame set;
+      // fp16 embeddings + q4 weights match the upstream transformers.js SmolVLM WebGPU demo.
       dataType: {
-        embed_tokens: "q4f16",
-        vision_encoder: "q4f16",
-        decoder_model_merged: "q4f16",
+        embed_tokens: "fp16",
+        vision_encoder: "q4",
+        decoder_model_merged: "q4",
       },
       name: "SmolVLM2",
       producer: "Hugging Face",
       desc: "VLM",
       parameter: "256M",
-      size: "190MB",
+      size: "208MB",
       maxNewTokens: 128,
       doSample: false,
       systemPrompt: "",
