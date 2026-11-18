@@ -27,6 +27,7 @@ Run large language models and vision-language models directly in the browser usi
 | GPT-OSS | OpenAI | MoE LLM | 20B | 11.8 GB | q4f16 | Thinking, Harmony streaming |
 | LFM2.5 | Liquid AI | LLM | 1.2B | 850 MB | q4 | Thinking |
 | SmolLM3 | Hugging Face | LLM | 3B | 1.97 GB | q4f16 | — |
+| SmolVLM2 | Hugging Face | VLM | 256M | 190 MB | q4f16 | Vision, video (multi-frame clip in Live mode) |
 
 ## Getting started
 
@@ -101,7 +102,7 @@ The model worker uses three generation paths depending on the model type:
 | Path | Used by | Description |
 |------|---------|-------------|
 | `generatePipeline` | GPT-OSS | `pipeline("text-generation")` with Harmony stream parsing |
-| `generateVLM` | Qwen3.5, Gemma 4 | `AutoProcessor` + `AutoModelForImageTextToText` for multimodal input |
+| `generateVLM` | Qwen3.5, Gemma 4, SmolVLM2 | `AutoProcessor` + `AutoModelForImageTextToText` for multimodal input |
 | `generate` | All other models | `AutoTokenizer` + `AutoModelForCausalLM` for text-only inference |
 
 ## Performance indicators reference

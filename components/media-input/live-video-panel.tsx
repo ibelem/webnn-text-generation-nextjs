@@ -62,6 +62,7 @@ export function LiveVideoPanel({
   const isProcessingRef = useRef(false);
   const streamRef = useRef<MediaStream | null>(null);
   const frameCountRef = useRef(0);
+  const frameBufferRef = useRef<{ url: string; t: number }[]>([]);
   // Always holds the latest captureAndInfer so the worker "complete" handler
   // (registered once) doesn't call a stale closure with outdated system prompt state.
   const captureAndInferRef = useRef<() => void>(() => {});
@@ -248,6 +249,19 @@ export function LiveVideoPanel({
     frameCountRef.current += 1;
     setFrameCount(frameCountRef.current);
 
+    // Video-clip models: keep the last N frames and send them together with
+    // their capture times (seconds since the first buffered frame).
+    const clipFrames = MODELS.find((m) => m.id === selectedModel)?.videoFrames ?? 1;
+    let images = [imageDataUrl];
+    let frameTimes: number[] | undefined;
+    if (clipFrames > 1) {
+      const buf = frameBufferRef.current;
+      buf.push({ url: imageDataUrl, t: performance.now() / 1000 });
+      if (buf.length > clipFrames) buf.shift();
+      images = buf.map((f) => f.url);
+      frameTimes = buf.map((f) => f.t - buf[0].t);
+    }
+
     // Capture time progress for video files
     const video = videoRef.current;
     if (sourceMode === "file" && video && isFinite(video.duration) && video.duration > 0) {
@@ -264,10 +278,11 @@ export function LiveVideoPanel({
         reasonEnabled: false,
         systemPromptEnabled,
         systemPromptText,
-        images: [imageDataUrl],
+        images,
+        frameTimes,
       },
     });
-  }, [captureImage, instruction, workerRef, systemPromptEnabled, systemPromptText]);
+  }, [captureImage, instruction, workerRef, systemPromptEnabled, systemPromptText, selectedModel]);
 
   // Assigned directly during render (not in an effect) so it's always up to
   // date before the worker's "complete" handler can fire.
@@ -287,6 +302,7 @@ export function LiveVideoPanel({
 
     isProcessingRef.current = true;
     frameCountRef.current = 0;
+    frameBufferRef.current = [];
     setFrameCount(0);
     setIsProcessing(true);
     setResponse("Processing started...");

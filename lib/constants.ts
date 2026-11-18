@@ -21,6 +21,8 @@ export const MODELS: Array<{
   capabilities?: ModelCapability[];
   /** Which transformers.js model class to use (default: "causal-lm") */
   modelClass?: ModelClass;
+  /** Live mode: send the last N frames per request as a video clip (default: 1 = single frame) */
+  videoFrames?: number;
 }> = [
     {
       // https://github.com/huggingface/transformers.js/issues/1239
@@ -287,6 +289,26 @@ export const MODELS: Array<{
       systemPrompt: "",
       capabilities: ["text", "vision", "video"],
       modelClass: "conditional-generation",
+    },
+    {
+      id: "smolvlm2-256m" as ModelType,
+      model: "HuggingFaceTB/SmolVLM2-256M-Video-Instruct",
+      dataType: {
+        embed_tokens: "q4f16",
+        vision_encoder: "q4f16",
+        decoder_model_merged: "q4f16",
+      },
+      name: "SmolVLM2",
+      producer: "Hugging Face",
+      desc: "VLM",
+      parameter: "256M",
+      size: "190MB",
+      maxNewTokens: 128,
+      doSample: false,
+      systemPrompt: "",
+      capabilities: ["text", "vision", "video"],
+      modelClass: "conditional-generation",
+      videoFrames: 8,
     }
   ];
 
