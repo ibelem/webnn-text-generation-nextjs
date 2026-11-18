@@ -63,6 +63,7 @@ export function LiveVideoPanel({
   const streamRef = useRef<MediaStream | null>(null);
   const frameCountRef = useRef(0);
   const frameBufferRef = useRef<{ url: string; t: number }[]>([]);
+  const gotTokenRef = useRef(false);
   // Always holds the latest captureAndInfer so the worker "complete" handler
   // (registered once) doesn't call a stale closure with outdated system prompt state.
   const captureAndInferRef = useRef<() => void>(() => {});
@@ -189,9 +190,12 @@ export function LiveVideoPanel({
       const { status, output } = e.data;
       if (status === "update") {
         setIsPrefilling(false);
-        setResponse((prev) => prev + output);
+        // First token of a new frame replaces the previous answer; later tokens append.
+        const fresh = !gotTokenRef.current;
+        gotTokenRef.current = true;
+        setResponse((prev) => (fresh ? output : prev + output));
       } else if (status === "start") {
-        setResponse("");
+        gotTokenRef.current = false;
         setIsPrefilling(true);
       } else if (status === "complete") {
         setIsPrefilling(false);
@@ -270,7 +274,6 @@ export function LiveVideoPanel({
       setVideoTimeInfo(null);
     }
 
-    setResponse("");
     workerRef.current?.postMessage({
       type: "generate",
       data: {

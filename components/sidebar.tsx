@@ -16,9 +16,13 @@ import type { ProgressProps } from "@/components/progress"
 /** Progressive enhancement: run a state mutation inside a View Transition if the API is available. */
 function withViewTransition(fn: () => void): void {
   if (typeof document !== "undefined" && "startViewTransition" in document) {
-    (document as Document & { startViewTransition(cb: () => void): void }).startViewTransition(
+    const t = (document as Document & { startViewTransition(cb: () => void): ViewTransition }).startViewTransition(
       () => flushSync(fn)
     );
+    // A newer transition skips this one and rejects these with AbortError — expected, ignore.
+    t.ready.catch(() => {});
+    t.finished.catch(() => {});
+    t.updateCallbackDone.catch(() => {});
   } else {
     fn();
   }
