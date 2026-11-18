@@ -17,6 +17,27 @@ function formatTime(seconds: number): string {
   return `${m}:${s.toString().padStart(2, "0")}`;
 }
 
+interface LiveStats {
+  frames: number;
+  ttft?: number;
+  tps?: number;
+  numTokens?: number;
+  e2e?: number;
+  tpot?: number;
+  preprocessTime?: number;
+}
+
+const fmtMs = (ms: number) => (ms >= 1000 ? `${(ms / 1000).toFixed(2)}s` : `${ms.toFixed(0)}ms`);
+
+function StatChip({ label, value, className, title }: { label: string; value: string; className: string; title: string }) {
+  return (
+    <span className={`inline-flex items-baseline gap-1 text-xs rounded-md px-1.5 py-0.5 font-medium tabular-nums ${className}`} title={title}>
+      <span className="opacity-70">{label}</span>
+      {value}
+    </span>
+  );
+}
+
 interface LiveVideoPanelProps {
   isSidebarOpen: boolean;
   setIsSidebarOpen: (open: boolean) => void;
@@ -64,6 +85,7 @@ export function LiveVideoPanel({
   const frameCountRef = useRef(0);
   const frameBufferRef = useRef<{ url: string; t: number }[]>([]);
   const gotTokenRef = useRef(false);
+  const [stats, setStats] = useState<LiveStats | null>(null);
   // Always holds the latest captureAndInfer so the worker "complete" handler
   // (registered once) doesn't call a stale closure with outdated system prompt state.
   const captureAndInferRef = useRef<() => void>(() => {});
@@ -199,6 +221,8 @@ export function LiveVideoPanel({
         setIsPrefilling(true);
       } else if (status === "complete") {
         setIsPrefilling(false);
+        const { ttft, tps, numTokens, e2e, tpot, preprocessTime } = e.data;
+        setStats({ frames: Math.max(1, frameBufferRef.current.length), ttft, tps, numTokens, e2e, tpot, preprocessTime });
         // After completion, if still processing, trigger next frame
         if (isProcessingRef.current) {
           captureAndInferRef.current();
@@ -306,6 +330,7 @@ export function LiveVideoPanel({
     isProcessingRef.current = true;
     frameCountRef.current = 0;
     frameBufferRef.current = [];
+    setStats(null);
     setFrameCount(0);
     setIsProcessing(true);
     setResponse("Processing started...");
@@ -500,6 +525,37 @@ export function LiveVideoPanel({
             <div className="min-h-[60px] max-h-[150px] overflow-y-auto rounded-lg bg-gray-50 border border-gray-200 px-3 py-2.5 text-sm text-gray-700 whitespace-pre-wrap break-words">
               {response || <span className="text-gray-300">Response will appear here...</span>}
             </div>
+            {stats && (
+              <div className="flex flex-wrap items-center gap-1.5 pt-1.5" aria-label="Performance of the last frame">
+                <StatChip label="Frames" value={`${stats.frames}`} className="bg-rose-50 text-rose-500" title="Frames sent to the model in this request (video clip length)." />
+                {stats.preprocessTime !== undefined && (
+                  <StatChip label="Preprocess" value={fmtMs(stats.preprocessTime)} className="bg-gray-100 text-gray-600" title="Image resize + tokenization before the model runs." />
+                )}
+                {stats.ttft !== undefined && (
+                  <StatChip label="TTFT" value={fmtMs(stats.ttft)} className="bg-blue-50 text-blue-500" title="Time to First Token — prefill of the frames and prompt." />
+                )}
+                {stats.tps !== undefined && (
+                  <StatChip label="TPS" value={`${stats.tps.toFixed(1)} tok/s`} className="bg-emerald-50 text-emerald-600" title="Decode throughput, excluding TTFT." />
+                )}
+                {stats.tpot !== undefined && (
+                  <StatChip label="TPOT" value={fmtMs(stats.tpot)} className="bg-violet-50 text-violet-600" title="Average time per output token after the first." />
+                )}
+                {stats.numTokens !== undefined && (
+                  <StatChip label="Tokens" value={`${stats.numTokens}`} className="bg-gray-100 text-gray-600" title="Output tokens generated." />
+                )}
+                {stats.e2e !== undefined && (
+                  <StatChip label="E2E" value={fmtMs(stats.e2e)} className="bg-amber-50 text-amber-600" title="Generation time from request to final token (excludes preprocessing)." />
+                )}
+                {stats.e2e !== undefined && (
+                  <StatChip
+                    label="Loop"
+                    value={`${((stats.e2e + (stats.preprocessTime ?? 0)) / 1000).toFixed(2)}s/frame`}
+                    className="bg-indigo-50 text-indigo-500"
+                    title="Preprocess + generation: how often a new frame is answered in live mode."
+                  />
+                )}
+              </div>
+            )}
           </div>
         </div>
       </div>
